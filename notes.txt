@@ -1,0 +1,13 @@
+Funzionamento:
+chiama get_params in train.py che calcola eval_frequency.
+Stampa informazioni ogni volta che qyesta condizione è vera:
+step % self.eval_frequency == 0 or step == num_steps
+
+eval_frequency=7798 
+gt_dataset = 1559600
+batch_size=200
+epochs = 200
+
+python
+
+Tempo 7798 steps 20 minuti
