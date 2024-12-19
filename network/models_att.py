@@ -71,7 +71,7 @@ class base_model(object):
         config.gpu_options.allow_growth = True
         sess = tf.compat.v1.Session(graph=self.graph, config=config)
         shutil.rmtree(self._get_path('summaries'), ignore_errors=True)
-        writer = tf.compat.v1.summary.FileWriter(self._get_path('summaries'), self.graph)
+        #writer = tf.summary.create_file_writer(self._get_path('summaries'), self.graph)
         shutil.rmtree(self._get_path('checkpoints'), ignore_errors=True)
         os.makedirs(self._get_path('checkpoints'))
         path = os.path.join(self._get_path('checkpoints'),'final', 'model')
@@ -83,9 +83,9 @@ class base_model(object):
         indices = collections.deque()
         num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size)
         epoch_steps = int(train_data.shape[0] / self.batch_size)
+        print(f"Total steps: {num_steps}")
         min_loss = 10000
         for step in range(1, num_steps+1):
-
             if len(indices) < self.batch_size:
                 indices.extend(np.random.permutation(train_data.shape[0]))
             idx = [indices.popleft() for i in range(self.batch_size)]
@@ -110,7 +110,7 @@ class base_model(object):
                 summary = tf.compat.v1.Summary()
                 summary.ParseFromString(sess.run(self.op_summary, feed_dict))
                 summary.value.add(tag='validation/loss', simple_value=loss)
-                writer.add_summary(summary, step)
+                #writer.add_summary(summary, step)
                 
                 # Save model parameters (for evaluation).
                 self.op_saver.save(sess, path, global_step=step)
@@ -119,7 +119,7 @@ class base_model(object):
                     self.op_best_saver.save(sess, best_path, global_step=step)
 
         print('validation loss: trough = {:.4f}, mean = {:.2f}'.format(min_loss, np.mean(losses[-10:])))
-        writer.close()
+        #writer.close()
         sess.close()
         
         t_step = (time.time() - t_wall) / num_steps
@@ -134,7 +134,7 @@ class base_model(object):
             self.initialize_mask()
 
             # Inputs.
-            with tf.name_scope('inputs'):
+            with tf.compat.v1.name_scope('inputs'):
                 self.ph_data = tf.compat.v1.placeholder(tf.float32, (self.batch_size, M_0*in_F), 'data')
                 self.ph_labels = tf.compat.v1.placeholder(tf.float32, (self.batch_size, M_0*3), 'labels')
                 self.ph_dropout = tf.compat.v1.placeholder(tf.float32, (), 'dropout')
@@ -165,34 +165,34 @@ class base_model(object):
         return logits
     
     def probabilities(self, logits):
-        with tf.name_scope('probabilities'):
+        with tf.compat.v1.name_scope('probabilities'):
             probabilities = tf.nn.softmax(logits)
             return probabilities
 
     def prediction(self, logits):
-        with tf.name_scope('prediction'):
+        with tf.compat.v1.name_scope('prediction'):
             prediction = tf.compat.v1.identity(logits)
             return prediction
 
     def loss(self, logits, labels):
-        with tf.name_scope('loss'):
+        with tf.compat.v1.name_scope('loss'):
             loss = 0
-            with tf.name_scope('mse_loss'):
-                mse_loss = tf.reduce_mean(tf.square(logits - labels))
+            with tf.compat.v1.name_scope('mse_loss'):
+                mse_loss = tf.reduce_mean(input_tensor=tf.square(logits - labels))
                 # logits = tf.reshape(logits, [-1, self.out_joints, 3])
                 # labels = tf.reshape(labels, [-1, self.out_joints, 3])
                 # mse_loss = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(logits - labels), axis=2)))
             loss = loss + mse_loss
 
             if self.regularization != 0:
-                with tf.name_scope('reg_loss'):
+                with tf.compat.v1.name_scope('reg_loss'):
                     reg_loss = self.regularization * tf.add_n(self.regularizers)
                 loss += reg_loss
 
             # Summaries for TensorBoard.
             tf.compat.v1.summary.scalar('loss/mse_loss', mse_loss)
             tf.compat.v1.summary.scalar('loss/total', loss)
-            with tf.name_scope('averages'):
+            with tf.compat.v1.name_scope('averages'):
                 averages = tf.compat.v1.train.ExponentialMovingAverage(0.9)
                 loss_dict = {'mse': mse_loss, 'total': loss}
                 op_averages = averages.apply(list(loss_dict.values()))
@@ -204,7 +204,7 @@ class base_model(object):
 
     def training(self, loss, learning_rate, decay_type, decay_params):
         """Adds to the loss model the Ops required to generate and apply gradients."""
-        with tf.name_scope('training'):
+        with tf.compat.v1.name_scope('training'):
             # Learning rate.
             global_step = tf.Variable(0, name='global_step', trainable=False)
             if decay_type == 'exp':
@@ -317,10 +317,10 @@ class cgcnn(base_model):
                 if self.init_type == 'same':
                     initializer = L
                 elif self.init_type == 'ones':
-                    initializer = tf.initializers.ones
+                    initializer = tf.compat.v1.initializers.ones
                 elif self.init_type == 'random':
                     initializer = tf.initializers.random_uniform_initializer(0, 1)
-                var_mask = tf.get_variable(name='mask', shape=[self.in_joints, self.out_joints] if self.init_type != 'same' else None,
+                var_mask = tf.compat.v1.get_variable(name='mask', shape=[self.in_joints, self.out_joints] if self.init_type != 'same' else None,
                     dtype=tf.float32, initializer=initializer)
                 var_mask = tf.nn.softmax(var_mask, axis=0)
                 # self.mask = var_mask

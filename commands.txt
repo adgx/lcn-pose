@@ -1,0 +1,11 @@
+python train.py --data-type=scale --mode=gt
+pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pyparsing==2.4.7
+pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org parse
+pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org scipy
+matplotlib
+prettytable
+tensorflow==1.14.0
+protobuf==3.17.3
+setuptool
+pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org tensorflow-gpu==1.14.0
+python -c "import tensorflow as tf; print(tf.test.is_built_with_cuda())"
