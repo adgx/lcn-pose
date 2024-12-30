@@ -2,7 +2,7 @@ import pickle
 import tensorflow as tf
 import numpy as np
 from tools import tools, params_help, data
-from network import models_att
+from network import  models_att # models_attr2 as
 import os
 import argparse
 import pprint

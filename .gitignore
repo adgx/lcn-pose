@@ -1,2 +1,12 @@
 # Dataset files #
 *.pkl
+
+# Model files #
+network/__pycache__
+tools/__pycache__
+
+experiment/
+
+.DS_Store
+
+.python-version
