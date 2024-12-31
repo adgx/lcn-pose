@@ -11,3 +11,5 @@ epochs = 200
 python
 
 Tempo 7798 steps 20 minuti
+
+5%

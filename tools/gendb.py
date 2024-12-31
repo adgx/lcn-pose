@@ -14,7 +14,7 @@ import parse
 import cameras
 import pickle
 
-
+#waht is val dirs?
 def find_train_val_dirs(dataset_root_dir):
     trainsubs = ['s_01', 's_05', 's_06', 's_07', 's_08']
     train_dirs, val_dirs = [], []
@@ -46,9 +46,9 @@ def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
     annofile = os.path.join(dataset_root_dir, dset, 'matlab_meta.mat')
     anno = sio.loadmat(annofile)
     numimgs = anno['num_images'][0][0]
-    joints_3d_cam = np.reshape(np.transpose(anno['Y3d_mono']), (numimgs, -1, 3))
-    meta = infer_meta_from_name(dset)
-    cam = _retrieve_camera(cams, meta['subject'], meta['camera'])
+    joints_3d_cam = np.reshape(np.transpose(anno['Y3d_mono']), (numimgs, -1, 3))#joints position for the whole video
+    meta = infer_meta_from_name(dset) #obtain info about subset
+    cam = _retrieve_camera(cams, meta['subject'], meta['camera']) #obtain info about camera
 
     dataset = []
     for i in range(numimgs):
@@ -56,10 +56,10 @@ def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
             meta['subject'], meta['action'], meta['subaction'],
             meta['camera'] + 1, i + 1)
         image = os.path.join(dset, image)
-        joint_3d_cam = joints_3d_cam[i]
-        box = _infer_box(joint_3d_cam, cam, rootIdx)
+        joint_3d_cam = joints_3d_cam[i]#obtain the all joints position for the frame
+        box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
         joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
-        center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3]))
+        center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
         scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
         dataitem = {
             'videoid': vid,
