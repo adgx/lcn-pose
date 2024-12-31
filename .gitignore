@@ -4,7 +4,7 @@
 # Model files #
 network/__pycache__
 tools/__pycache__
-
+dataset/train
 experiment/
 
 .DS_Store

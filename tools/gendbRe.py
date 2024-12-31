@@ -8,12 +8,12 @@ import pickle
 
 
 def find_train_val_dirs(dataset_root_dir):
-    trainsubs = ['s01', 's02', 's03', 's06']
+    trainsubs = ['s01']
     train_dirs, val_dirs = [], []
     allsets = os.listdir(dataset_root_dir)
     for dset in allsets:
         if osp.isdir(osp.join(dataset_root_dir, dset)):
-            if dset[:4] in trainsubs:
+            if dset[:3] in trainsubs:
                 train_dirs.append(dset)
             else:
                 val_dirs.append(dset)
@@ -81,7 +81,7 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
 
 #cams it is a np array
 def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
-    annojointsfile = os.path.join(dataset_root_dir, dset, '001.json')
+    annojointsfile = os.path.join(dataset_root_dir, dset, 'joints3d_25\\001.json')
     with open(annojointsfile, 'r') as f:
         joints_data = json.load(f)
     
@@ -89,7 +89,7 @@ def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
     numimgs = joints_3d_cam.shape[0]
     joints_3d_cam = np.reshape(np.transpose(joints_3d_cam, (0, 1, 2)), (numimgs, -1, 3))
     meta = infer_meta_from_name(dset)
-    cam = _retrieve_camera(cams, meta['subject'], meta['camera'])
+    cam = _retrieve_camera(cams, meta['subject'], meta['camera'])#handle multicamera pov
 
 
     dataset = []
@@ -122,13 +122,16 @@ def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
     return dataset
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('dataset_root_dir')
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument('dataset_root_dir')
+    #args = parser.parse_args()
+    path = 'C:\\Users\\anton\\OneDrive\\Documenti\\poli\\05\\MachineLearning\\3dPoseEstimation\\lcn-poseV2\\dataset\\train\\s01\\camera_parameters\\65906101\\001.json'
+    path_train_dirs = 'C:\\Users\\anton\\OneDrive\\Documenti\\poli\\05\\MachineLearning\\3dPoseEstimation\\lcn-poseV2\\dataset\\train'
+    #camsannot = os.path.join(path)
+    with open(path, 'r') as cams:
+        joints_data = json.load(cams)
 
-    cams = os.path.join(args.dataset_root_dir, 's01', 'camera_parameters', '65906101', '001.json')
-
-    train_dirs, val_dirs = find_train_val_dirs(args.dataset_root_dir)
+    train_dirs, val_dirs = find_train_val_dirs(path_train_dirs)
     train_val_datasets = [train_dirs, val_dirs]
     dbs = []
     video_count = 0
@@ -138,7 +141,7 @@ if __name__ == '__main__':
             if np.mod(video_count, 1) == 0:
                 print('Process {}: {}'.format(video_count, video))
 
-            data = load_db(args.dataset_root_dir, video, video_count, cams)
+            data = load_db(path_train_dirs, video, video_count, cams)
             db.extend(data)
             video_count += 1
         dbs.append(db)
