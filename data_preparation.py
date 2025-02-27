@@ -22,7 +22,7 @@ def convert_h36m_mp4_to_image(base_path, each_x_frame=1):
     subjects = ['65906101']
     # subjects = ['S1', 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
     for subject in subjects:
-        inpath_base = base_path+subject
+        inpath_base = base_path+"/videos"+subject
         outpath_base = base_path+"/images/"+subject
         if not os.path.exists(outpath_base):
             os.makedirs(outpath_base)
