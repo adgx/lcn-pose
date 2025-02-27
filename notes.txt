@@ -13,3 +13,24 @@ python
 Tempo 7798 steps 20 minuti
 
 5%
+
+
+Pensieri:
+
+
+- Potremmo allenare il modello con il dataset esistente h36m: 
+    - ridurre la grandezaa del pkl in modo che arrivi ad un giorno di training al massimo.
+    - ha senso ridurre il train e non ridurre il test - NON HA SENSO RIDURRE IL TEST SET. 
+    - Quanto è grande il test set?
+    - Introdurre slvataggio dei checjpoint per google drive colab
+    
+Per far sì che ci metta solo un giorno il training dataset deve essere grande al massimo 17860 dati 
+
+
+- Allenare il modello con il nuovo dataset HumanScan3D
+    - Dobbiamo creare un pkl
+
+- Finetuning dal modello allenato inizialmenente con il nuovo dataset e confrontare i nuovi risultati
+    - Modificare il codice per prednere un modello in entrata
+
+- Riconoscere la posa - OPT

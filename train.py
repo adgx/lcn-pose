@@ -6,9 +6,10 @@ from network import  models_att # models_attr2 as
 import os
 import argparse
 import pprint
+import numpy as np
+
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description='train')
@@ -40,8 +41,17 @@ def main():
     args = parse_args()
 
     datareader = data.DataReader()
-    train_data, test_data = datareader.read_2d(which=args.data_type, mode=args.mode, read_confidence=True if args.in_F == 3 else False)
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
+    gt_trainset_all = datareader.real_read('train')
+    gt_testset_all = datareader.real_read('test')
+
+    mask = np.random.randint(0, 2, len(gt_trainset_all)).tolist()
+    gt_trainset = [val for val, mask in zip(gt_trainset_all, mask) if mask == 1]
+
+    mask = np.random.randint(0, 2, len(gt_testset_all)).tolist()
+    gt_testset = [val for val, mask in zip(gt_testset_all, mask) if mask == 1]
+
+    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, which=args.data_type, read_confidence=True if args.in_F == 3 else False)
+    train_labels, test_labels = datareader.read_3d(gt_trainset, gt_testset, which=args.data_type, mode=args.mode)
 
     if args.flip_data:
         # only work for scale 
