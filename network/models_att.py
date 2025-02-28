@@ -75,7 +75,7 @@ class base_model(object):
             )
         return string, loss
 
-    def fit(self, train_data, train_labels, val_data, val_labels):
+    def fit(self, train_data, train_labels, val_data, val_labels, google=False):
         tf.compat.v1.disable_eager_execution() # Fix save model issue
         t_process, t_wall = time.process_time(), time.time()
         config = tf.compat.v1.ConfigProto()
@@ -92,7 +92,7 @@ class base_model(object):
         # Training.
         losses = []
         indices = collections.deque()
-        num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size)
+        num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size) # Numero di step totali già moltiplicati per epoche
         epoch_steps = int(train_data.shape[0] / self.batch_size)
         print(f"Total steps: {num_steps}")
         min_loss = 10000
@@ -115,6 +115,15 @@ class base_model(object):
             # Periodical evaluation of the model.
             if step % self.eval_frequency == 0 or step == num_steps:
                 epoch = step * self.batch_size / train_data.shape[0]
+                if google:
+                    f = open("/content/lcn-pose/output.txt", "a")
+                    f.write("step {} / {} (epoch {:.2f} / {}): \n".format(
+                        step, num_steps, epoch, self.num_epochs
+                    ))
+                    f.write("learning_rate = {:.2e}, loss_average = {:.4e} \n".format(
+                        learning_rate, loss_average
+                    ))
+                    f.close()
                 print(
                     "step {} / {} (epoch {:.2f} / {}):".format(
                         step, num_steps, epoch, self.num_epochs
@@ -429,17 +438,18 @@ class cgcnn(base_model):
         return masked_weights
 
     def batch_normalization_warp(self, y, training, name):
+        tf.compat.v1.disable_eager_execution() # Fix save model issue
         keras_bn = tf.keras.layers.BatchNormalization(axis=-1, name=name)
 
         _, output_size = y.get_shape()
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=training)
+        y = keras_bn(y, training=True)
         y = tf.reshape(y, [-1, output_size])
 
-        for item in keras_bn.updates:
-            tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, item)
+        #for item in keras_bn.updates:
+        #    tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, item)
 
         return y
 

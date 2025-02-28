@@ -31,7 +31,7 @@ def parse_args():
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true')
-
+    parser.add_argument('--google', help='use google dataset', action='store_false')
     args = parser.parse_args()
 
     return args
@@ -43,15 +43,15 @@ def main():
     datareader = data.DataReader()
     gt_trainset_all = datareader.real_read('train')
     gt_testset_all = datareader.real_read('test')
-
-    mask = np.random.randint(0, 2, len(gt_trainset_all)).tolist()
+    limit = 1000
+    mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
     gt_trainset = [val for val, mask in zip(gt_trainset_all, mask) if mask == 1]
 
-    mask = np.random.randint(0, 2, len(gt_testset_all)).tolist()
+    mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
     gt_testset = [val for val, mask in zip(gt_testset_all, mask) if mask == 1]
 
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, which=args.data_type, read_confidence=True if args.in_F == 3 else False)
-    train_labels, test_labels = datareader.read_3d(gt_trainset, gt_testset, which=args.data_type, mode=args.mode)
+    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
 
     if args.flip_data:
         # only work for scale 
@@ -64,7 +64,7 @@ def main():
     print(pprint.pformat(params))
 
     network = models_att.cgcnn(**params)
-    network.fit(train_data, train_labels, test_data, test_labels)
+    network.fit(train_data, train_labels, test_data, test_labels, args.google)
 
 if __name__ == '__main__':
     main()

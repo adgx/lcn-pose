@@ -10,7 +10,9 @@ epochs = 200
 
 python
 
-Tempo 7798 steps 20 minuti
+Tempo 7798 steps 
+CPU Time: 20 minuti
+GPU TIme: 3 minuti
 
 5%
 
