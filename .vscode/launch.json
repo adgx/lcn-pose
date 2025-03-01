@@ -15,7 +15,9 @@
                 "--data-type",
                 "scale",
                 "--mode",
-                "gt"
+                "gt",
+                "--resume_from",
+                "/Users/andreaongaro/Documents/Documenti Andrea Ongaro/Magistrale/Torino/Corsi/2_ANNO/ComputerVision/Project/lcn-pose/experiment/test1/checkpoints/final",
             ]
         }
     ]

@@ -36,3 +36,7 @@ Per far sì che ci metta solo un giorno il training dataset deve essere grande a
     - Modificare il codice per prednere un modello in entrata
 
 - Riconoscere la posa - OPT
+
+
+TENSORBOARD NON FUNZIONA:
+tensorboard --logdir="/Users/andreaongaro/Documents/Documenti Andrea Ongaro/Magistrale/Torino/Corsi/2_ANNO/ComputerVision/Project/lcn-pose/experiment/test1/summaries"

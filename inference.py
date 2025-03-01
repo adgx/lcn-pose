@@ -52,7 +52,7 @@ def main():
     print(pprint.pformat(params))
 
     network = models_att.cgcnn(**params)
-    predictions = network.predict(data=test_data)  # [N, 17*3]
+    predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
 
     if args.flip_data:
         predictions = data.unflip_data(predictions)  # [N, 17*3]
