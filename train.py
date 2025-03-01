@@ -74,8 +74,14 @@ def main():
     print(pprint.pformat(params))
 
     network = models_att.cgcnn(**params)
-    network.fit(train_data, train_labels, test_data, test_labels, args.output_file, starting_checkpoint=args.resume_from)
-
+    try: 
+        network.fit(train_data, train_labels, test_data, test_labels, args.output_file, starting_checkpoint=args.resume_from)
+    except KeyboardInterrupt:
+        print('Training interrupted')
+    except Exception as e:
+        print('Error during training: ', e)
+        raise SystemExit
+    
 if __name__ == '__main__':
     main()
 
