@@ -35,6 +35,24 @@ def convert_h36m_mp4_to_image(base_path, each_x_frame=1):
             outpath = outpath + "/frame_"
             convert_mp4_to_image(inpath, outpath, each_x_frame)
 
+def convert_humansc3d_mp4_to_image(base_path, video_dir, image_dir, camera_ids, each_x_frame=1):
+    #base_path = os.path.join(dataset_root_dir, subset, subj_video) 
+    if not os.path.isdir(base_path):
+        print(f"isn\'t a dir: {base_path}")
+    for cam_idx in camera_ids:
+        inpath_base = os.path.join(base_path, video_dir, cam_idx)
+        outpath_base = os.path.join(base_path, image_dir, cam_idx)
+        if not os.path.exists(outpath_base):
+            os.makedirs(outpath_base)
+        videos = os.listdir(inpath_base)
+        for video in videos:
+            inpath = os.path.join(inpath_base, video)
+            outpath = os.path.join(outpath_base, video[:-4])
+            if not os.path.exists(outpath):
+                os.makedirs(outpath)
+            outpath = os.path.join(outpath, "frame_")
+            convert_mp4_to_image(inpath, outpath, each_x_frame)
+
 if __name__ == "__main__":
     path = "./dataset/train/s01"
     convert_h36m_mp4_to_image(path)

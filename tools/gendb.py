@@ -157,7 +157,7 @@ if __name__ == '__main__':
     parser.add_argument('dataset_root_dir')
     args = parser.parse_args()
 
-    #maybe cameras contain informations about intrisic paramiter for each camera 
+    #maybe cameras contain informations about intrisic paramiters for each camera 
     cams = cameras.load_cameras(
         bpath=os.path.join(args.dataset_root_dir, 'canmeras.h5'))
 

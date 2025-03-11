@@ -12,12 +12,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--data-type",
-                "scale",
-                "--mode",
-                "gt",
-                "--resume_from",
-                "/Users/andreaongaro/Documents/Documenti Andrea Ongaro/Magistrale/Torino/Corsi/2_ANNO/ComputerVision/Project/lcn-pose/experiment/test1/checkpoints/final",
+                "-t",
             ]
         }
     ]
