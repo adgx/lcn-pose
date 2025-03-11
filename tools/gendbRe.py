@@ -168,6 +168,9 @@ if __name__ == '__main__':
     camera_param = 'camera_parameters'
     camera_ids = ['50591643', '58860488', '60457274', '65906101']
 
+    #generate the validation set 
+    if args.gen:
+        generate_validation_set(dataset_root_dir, subset_type, subj_name_train)
     # loading cameras data
     # we assuming that camera parameters doesn't change in the time and keep the same between train and validation set
     cams = load_cams_data(dataset_root_dir, subset_type[0], subj_name_train[0], camera_param)
