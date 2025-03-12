@@ -33,7 +33,7 @@ def find_dirs(dataset_root_dir, subset, subj_names):
     allsubjsets = os.listdir(osp.join(dataset_root_dir, subset))
     
     for subj in allsubjsets:
-        if subj[:3] in subj_names:
+        if subj in subj_names:
             dirs.append(subj)
     dirs.sort()
     return dirs
@@ -42,7 +42,7 @@ def find_dirs(dataset_root_dir, subset, subj_names):
 #humansc3d doesn't have the subaction information so we apply a placeholder
 def infer_meta_from_name(subj_video, action, cam_id):
     meta = {
-        'subject': int(subj_video[1:]),
+        'subject': int(subj_video[1:3]),
         'action': int(action[:3]),
         'subaction': int(0),
         'camera': int(cam_id)
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
     subset_type = ['train', 'test']
     subj_name_train = ['s01', 's02', 's03', 's06']
-    subj_name_val = ['s04', 's05']
+    subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
     joints_dir = 'joints3d_25'
     videos_dir = 'videos'
     images_dir = 'images'
@@ -202,7 +202,7 @@ if __name__ == '__main__':
             db.extend(data)
             video_count += 1
         dbs.append(db)
-    idx_subset_type += 1
+        idx_subset_type += 1
 
     datasets = {'train': dbs[0], 'validation': dbs[1]}
 
