@@ -17,7 +17,9 @@
                 "--mode",
                 "gt",
                 "--filename",
-                "humansc3d"
+                "h36m",
+                "--checkpoint",
+                "final"
             ]
         }
     ]

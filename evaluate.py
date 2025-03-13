@@ -8,8 +8,6 @@ import time
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-DATAITEM_GT_PATH = os.path.join(ROOT_PATH, 'dataset/h36m_test.pkl')
-
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
 
@@ -21,7 +19,13 @@ def parse_args():
     parser.add_argument('--protocol2', help='whether use Procrustes', action='store_true')
     parser.add_argument('--test-indices', help='test idx list to eval', required=True, type=str)
     parser.add_argument('--per-joint',  help='joint-wise evaluation', action='store_true')
-    args = parser.parse_args()
+    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"])
+    try :
+        args = parser.parse_args()
+    except:
+        parser.print_help()
+        raise SystemExit
+
     return args
 
 
@@ -69,11 +73,12 @@ def _eval(test_name, dataitem_gt, commd, mode):
     return final_result
 
 
-def eval(commd, test_indices, mode='dt'):
+def eval(commd, test_indices, mode='dt', pkl=""):
     err_dict = {}
 
     print('loading dataset')
 
+    DATAITEM_GT_PATH = os.path.join(ROOT_PATH, pkl)
     with open(DATAITEM_GT_PATH, 'rb') as f:
         dataitem_gt = pickle.load(f)
 
@@ -129,5 +134,5 @@ if __name__ == '__main__':
     print('=> mode:', args.mode)
     print('=> eval experiments:', test_indices)
 
-    eval(commd=commd, test_indices=test_indices, mode=args.mode)
+    eval(commd=commd, test_indices=test_indices, mode=args.mode, pkl=args.filename)
 
