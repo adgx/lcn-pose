@@ -12,8 +12,12 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "-t",
-                "-v"
+                "--data-type",
+                "scale",
+                "--mode",
+                "gt",
+                "--filename",
+                "humansc3d"
             ]
         }
     ]

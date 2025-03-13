@@ -1606,3 +1606,403 @@ step 995 / 1000 (epoch 199.00 / 200):
 learning_rate = 9.99e-04, loss_average = 8.6319e-05 
 step 1000 / 1000 (epoch 200.00 / 200): 
 learning_rate = 9.99e-04, loss_average = 8.7596e-05 
+step 5 / 1000 (epoch 1.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.1967e-02 
+step 10 / 1000 (epoch 2.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.1478e-02 
+step 15 / 1000 (epoch 3.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 9.6000e-03 
+step 20 / 1000 (epoch 4.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 7.5877e-03 
+step 25 / 1000 (epoch 5.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 6.0176e-03 
+step 30 / 1000 (epoch 6.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 4.7284e-03 
+step 35 / 1000 (epoch 7.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.7832e-03 
+step 40 / 1000 (epoch 8.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.0523e-03 
+step 45 / 1000 (epoch 9.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.5036e-03 
+step 50 / 1000 (epoch 10.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.0890e-03 
+step 55 / 1000 (epoch 11.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.7742e-03 
+step 60 / 1000 (epoch 12.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5340e-03 
+step 65 / 1000 (epoch 13.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.3469e-03 
+step 70 / 1000 (epoch 14.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.1994e-03 
+step 75 / 1000 (epoch 15.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.0849e-03 
+step 80 / 1000 (epoch 16.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 9.9567e-04 
+step 85 / 1000 (epoch 17.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 9.2428e-04 
+step 90 / 1000 (epoch 18.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 8.6366e-04 
+step 95 / 1000 (epoch 19.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 8.1431e-04 
+step 100 / 1000 (epoch 20.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 7.7580e-04 
+step 105 / 1000 (epoch 21.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 7.3510e-04 
+step 110 / 1000 (epoch 22.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 7.0019e-04 
+step 115 / 1000 (epoch 23.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 6.7467e-04 
+step 120 / 1000 (epoch 24.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 6.4456e-04 
+step 125 / 1000 (epoch 25.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 6.1863e-04 
+step 130 / 1000 (epoch 26.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 5.9023e-04 
+step 135 / 1000 (epoch 27.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 5.6155e-04 
+step 140 / 1000 (epoch 28.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 5.2556e-04 
+step 145 / 1000 (epoch 29.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 4.9145e-04 
+step 150 / 1000 (epoch 30.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 4.5761e-04 
+step 155 / 1000 (epoch 31.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 4.3775e-04 
+step 160 / 1000 (epoch 32.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 4.0251e-04 
+step 165 / 1000 (epoch 33.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.7609e-04 
+step 170 / 1000 (epoch 34.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.6154e-04 
+step 175 / 1000 (epoch 35.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.3741e-04 
+step 180 / 1000 (epoch 36.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 3.1422e-04 
+step 185 / 1000 (epoch 37.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.9900e-04 
+step 190 / 1000 (epoch 38.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.8868e-04 
+step 195 / 1000 (epoch 39.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.7502e-04 
+step 200 / 1000 (epoch 40.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.6793e-04 
+step 205 / 1000 (epoch 41.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.6779e-04 
+step 210 / 1000 (epoch 42.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.5656e-04 
+step 215 / 1000 (epoch 43.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.4497e-04 
+step 220 / 1000 (epoch 44.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.3367e-04 
+step 225 / 1000 (epoch 45.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.2761e-04 
+step 230 / 1000 (epoch 46.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.2008e-04 
+step 235 / 1000 (epoch 47.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.1391e-04 
+step 240 / 1000 (epoch 48.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.0801e-04 
+step 245 / 1000 (epoch 49.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.0075e-04 
+step 250 / 1000 (epoch 50.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9644e-04 
+step 255 / 1000 (epoch 51.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9275e-04 
+step 260 / 1000 (epoch 52.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9164e-04 
+step 265 / 1000 (epoch 53.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9033e-04 
+step 270 / 1000 (epoch 54.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.8873e-04 
+step 275 / 1000 (epoch 55.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.8332e-04 
+step 280 / 1000 (epoch 56.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.8646e-04 
+step 285 / 1000 (epoch 57.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9607e-04 
+step 290 / 1000 (epoch 58.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.1462e-04 
+step 295 / 1000 (epoch 59.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.0983e-04 
+step 300 / 1000 (epoch 60.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 2.0177e-04 
+step 305 / 1000 (epoch 61.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.9451e-04 
+step 310 / 1000 (epoch 62.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.8708e-04 
+step 315 / 1000 (epoch 63.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.8163e-04 
+step 320 / 1000 (epoch 64.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.7734e-04 
+step 325 / 1000 (epoch 65.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.7090e-04 
+step 330 / 1000 (epoch 66.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.6438e-04 
+step 335 / 1000 (epoch 67.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5948e-04 
+step 340 / 1000 (epoch 68.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5633e-04 
+step 345 / 1000 (epoch 69.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5398e-04 
+step 350 / 1000 (epoch 70.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5314e-04 
+step 355 / 1000 (epoch 71.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5096e-04 
+step 360 / 1000 (epoch 72.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5182e-04 
+step 365 / 1000 (epoch 73.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5363e-04 
+step 370 / 1000 (epoch 74.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5542e-04 
+step 375 / 1000 (epoch 75.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5979e-04 
+step 380 / 1000 (epoch 76.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5514e-04 
+step 385 / 1000 (epoch 77.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.5156e-04 
+step 390 / 1000 (epoch 78.00 / 200): 
+learning_rate = 1.00e-03, loss_average = 1.4775e-04 
+step 395 / 1000 (epoch 79.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4400e-04 
+step 400 / 1000 (epoch 80.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4304e-04 
+step 405 / 1000 (epoch 81.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4335e-04 
+step 410 / 1000 (epoch 82.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4188e-04 
+step 415 / 1000 (epoch 83.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4154e-04 
+step 420 / 1000 (epoch 84.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3840e-04 
+step 425 / 1000 (epoch 85.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3930e-04 
+step 430 / 1000 (epoch 86.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3829e-04 
+step 435 / 1000 (epoch 87.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3755e-04 
+step 440 / 1000 (epoch 88.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3646e-04 
+step 445 / 1000 (epoch 89.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3821e-04 
+step 450 / 1000 (epoch 90.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3902e-04 
+step 455 / 1000 (epoch 91.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4302e-04 
+step 460 / 1000 (epoch 92.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.5504e-04 
+step 465 / 1000 (epoch 93.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.5977e-04 
+step 470 / 1000 (epoch 94.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.5791e-04 
+step 475 / 1000 (epoch 95.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4910e-04 
+step 480 / 1000 (epoch 96.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4402e-04 
+step 485 / 1000 (epoch 97.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4160e-04 
+step 490 / 1000 (epoch 98.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3654e-04 
+step 495 / 1000 (epoch 99.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3409e-04 
+step 500 / 1000 (epoch 100.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3720e-04 
+step 505 / 1000 (epoch 101.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4132e-04 
+step 510 / 1000 (epoch 102.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.4151e-04 
+step 515 / 1000 (epoch 103.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3569e-04 
+step 520 / 1000 (epoch 104.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3162e-04 
+step 525 / 1000 (epoch 105.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2952e-04 
+step 530 / 1000 (epoch 106.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3195e-04 
+step 535 / 1000 (epoch 107.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3239e-04 
+step 540 / 1000 (epoch 108.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3269e-04 
+step 545 / 1000 (epoch 109.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3049e-04 
+step 550 / 1000 (epoch 110.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2715e-04 
+step 555 / 1000 (epoch 111.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2780e-04 
+step 560 / 1000 (epoch 112.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2398e-04 
+step 565 / 1000 (epoch 113.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2224e-04 
+step 570 / 1000 (epoch 114.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2282e-04 
+step 575 / 1000 (epoch 115.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2165e-04 
+step 580 / 1000 (epoch 116.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1940e-04 
+step 585 / 1000 (epoch 117.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1824e-04 
+step 590 / 1000 (epoch 118.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2345e-04 
+step 595 / 1000 (epoch 119.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2336e-04 
+step 600 / 1000 (epoch 120.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2064e-04 
+step 605 / 1000 (epoch 121.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2133e-04 
+step 610 / 1000 (epoch 122.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2201e-04 
+step 615 / 1000 (epoch 123.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2220e-04 
+step 620 / 1000 (epoch 124.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2210e-04 
+step 625 / 1000 (epoch 125.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2361e-04 
+step 630 / 1000 (epoch 126.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2540e-04 
+step 635 / 1000 (epoch 127.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.3037e-04 
+step 640 / 1000 (epoch 128.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2765e-04 
+step 645 / 1000 (epoch 129.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2513e-04 
+step 650 / 1000 (epoch 130.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2331e-04 
+step 655 / 1000 (epoch 131.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2296e-04 
+step 660 / 1000 (epoch 132.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.2170e-04 
+step 665 / 1000 (epoch 133.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1800e-04 
+step 670 / 1000 (epoch 134.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1573e-04 
+step 675 / 1000 (epoch 135.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1671e-04 
+step 680 / 1000 (epoch 136.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1536e-04 
+step 685 / 1000 (epoch 137.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1470e-04 
+step 690 / 1000 (epoch 138.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1218e-04 
+step 695 / 1000 (epoch 139.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0852e-04 
+step 700 / 1000 (epoch 140.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0665e-04 
+step 705 / 1000 (epoch 141.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1354e-04 
+step 710 / 1000 (epoch 142.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1900e-04 
+step 715 / 1000 (epoch 143.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1567e-04 
+step 720 / 1000 (epoch 144.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1128e-04 
+step 725 / 1000 (epoch 145.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0810e-04 
+step 730 / 1000 (epoch 146.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0832e-04 
+step 735 / 1000 (epoch 147.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0844e-04 
+step 740 / 1000 (epoch 148.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1209e-04 
+step 745 / 1000 (epoch 149.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0945e-04 
+step 750 / 1000 (epoch 150.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0797e-04 
+step 755 / 1000 (epoch 151.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0912e-04 
+step 760 / 1000 (epoch 152.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0972e-04 
+step 765 / 1000 (epoch 153.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0747e-04 
+step 770 / 1000 (epoch 154.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0770e-04 
+step 775 / 1000 (epoch 155.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0618e-04 
+step 780 / 1000 (epoch 156.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0451e-04 
+step 785 / 1000 (epoch 157.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0256e-04 
+step 790 / 1000 (epoch 158.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0052e-04 
+step 795 / 1000 (epoch 159.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.8968e-05 
+step 800 / 1000 (epoch 160.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0329e-04 
+step 805 / 1000 (epoch 161.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0637e-04 
+step 810 / 1000 (epoch 162.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0954e-04 
+step 815 / 1000 (epoch 163.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1056e-04 
+step 820 / 1000 (epoch 164.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1009e-04 
+step 825 / 1000 (epoch 165.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1170e-04 
+step 830 / 1000 (epoch 166.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1228e-04 
+step 835 / 1000 (epoch 167.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.1079e-04 
+step 840 / 1000 (epoch 168.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0513e-04 
+step 845 / 1000 (epoch 169.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0175e-04 
+step 850 / 1000 (epoch 170.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.9380e-05 
+step 855 / 1000 (epoch 171.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7492e-05 
+step 860 / 1000 (epoch 172.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.5772e-05 
+step 865 / 1000 (epoch 173.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.3938e-05 
+step 870 / 1000 (epoch 174.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.2096e-05 
+step 875 / 1000 (epoch 175.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.1318e-05 
+step 880 / 1000 (epoch 176.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7007e-05 
+step 885 / 1000 (epoch 177.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.8310e-05 
+step 890 / 1000 (epoch 178.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7805e-05 
+step 895 / 1000 (epoch 179.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7325e-05 
+step 900 / 1000 (epoch 180.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.9502e-05 
+step 905 / 1000 (epoch 181.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.8794e-05 
+step 910 / 1000 (epoch 182.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.9698e-05 
+step 915 / 1000 (epoch 183.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.9227e-05 
+step 920 / 1000 (epoch 184.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7386e-05 
+step 925 / 1000 (epoch 185.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0033e-04 
+step 930 / 1000 (epoch 186.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 1.0016e-04 
+step 935 / 1000 (epoch 187.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.7884e-05 
+step 940 / 1000 (epoch 188.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.5891e-05 
+step 945 / 1000 (epoch 189.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.4239e-05 
+step 950 / 1000 (epoch 190.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.4090e-05 
+step 955 / 1000 (epoch 191.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.4450e-05 
+step 960 / 1000 (epoch 192.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.5196e-05 
+step 965 / 1000 (epoch 193.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.3744e-05 
+step 970 / 1000 (epoch 194.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.4524e-05 
+step 975 / 1000 (epoch 195.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.3550e-05 
+step 980 / 1000 (epoch 196.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 9.0428e-05 
+step 985 / 1000 (epoch 197.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 8.9131e-05 
+step 990 / 1000 (epoch 198.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 8.8312e-05 
+step 995 / 1000 (epoch 199.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 8.6707e-05 
+step 1000 / 1000 (epoch 200.00 / 200): 
+learning_rate = 9.99e-04, loss_average = 8.9414e-05 

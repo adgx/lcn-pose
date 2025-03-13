@@ -4,8 +4,8 @@ import pickle, h5py
 
 ROOT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
-GT_TEST_PATH = os.path.join(ROOT_PATH, "dataset/h36m_test.pkl")
-GT_TRAIN_PATH = os.path.join(ROOT_PATH, "dataset/h36m_train.pkl")
+#GT_TEST_PATH = os.path.join(ROOT_PATH, "dataset/h36m_test.pkl")
+#GT_TRAIN_PATH = os.path.join(ROOT_PATH, "dataset/h36m_train.pkl")
 
 
 def flip_data(data):
@@ -55,8 +55,8 @@ class DataReader(object):
         self.gt_testset = None
         self.dt_dataset = None
 
-    def real_read(self, subset):
-        file_name = "h36m_%s.pkl" % subset
+    def real_read(self, subset, type):
+        file_name = "%s_%s.pkl" % (subset, type)
         print("loading %s" % file_name)
         file_path = os.path.join(ROOT_PATH, "dataset", file_name)
         with open(file_path, "rb") as f:
