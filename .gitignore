@@ -10,3 +10,4 @@ experiment/
 .DS_Store
 
 .python-version
+results/

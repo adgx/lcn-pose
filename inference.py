@@ -31,7 +31,12 @@ def parse_args():
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
     parser.add_argument('--flip-data', help='test time flip', action='store_true')
 
-    args = parser.parse_args()
+    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"])
+    try :
+        args = parser.parse_args()
+    except:
+        parser.print_help()
+        raise SystemExit
 
     return args
 
@@ -39,8 +44,10 @@ def main():
     args = parse_args()
     
     datareader = data.DataReader()
-    train_data, test_data = datareader.read_2d(which=args.data_type, mode=args.mode, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)  # [N, 17*3] [17*3]
+    gt_trainset_all = datareader.real_read(args.filename, "train")
+    gt_testset_all = datareader.real_read(args.filename, "test")
+    train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, which=args.data_type, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
+    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
 
     if args.flip_data:
         test_data = data.flip_data(test_data)
