@@ -120,7 +120,7 @@ def load_db(dataset_root_dir, dset, joints_dir, images_dir, cams, rootIdx=0):
             
             for i in range(numimgs):
                 image = os.path.join(dataset_root_dir, images_dir, camera_id, video_joint[:3], 'frame_'+str(i).zfill(4)+'.jpeg')
-                joint_3d_cam = joints_3d_cam[i]#obtain the all joints position for the frame
+                joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
                 box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
                 joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
                 center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
