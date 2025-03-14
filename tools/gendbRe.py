@@ -61,7 +61,8 @@ def _retrieve_camera(cams, subject, cameraidx):
     camera['cy'] = c[0][1]
     camera['k'] = k[0]
     camera['p'] = p[0]
-    camera['name'] = [subject, cameraidx] #hypothesis
+    #camera['name'] = [subject, cameraidx] #hypothesis
+    camera['name'] = str(cameraidx)
     return camera
 
 def _infer_box(pose3d, camera, rootIdx):
@@ -211,5 +212,5 @@ if __name__ == '__main__':
             pickle.dump(datasets['train'], f)
     
     if args.validation:
-        with open(os.path.join(dataset_root_dir, 'humansc3d_val.pkl'), 'wb') as f:
+        with open(os.path.join(dataset_root_dir, 'humansc3d_test.pkl'), 'wb') as f:
             pickle.dump(datasets['validation'], f)

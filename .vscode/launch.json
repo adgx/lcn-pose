@@ -12,14 +12,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--data-type",
-                "scale",
-                "--mode",
-                "gt",
-                "--filename",
-                "h36m",
-                "--checkpoint",
-                "final"
+                "-t",
+                "-v"
             ]
         }
     ]
