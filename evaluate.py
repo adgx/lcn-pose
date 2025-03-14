@@ -78,7 +78,7 @@ def eval(commd, test_indices, mode='dt', pkl=""):
 
     print('loading dataset')
 
-    DATAITEM_GT_PATH = os.path.join(ROOT_PATH, pkl)
+    DATAITEM_GT_PATH = os.path.join(ROOT_PATH, "dataset/" + pkl + "_test.pkl")
     with open(DATAITEM_GT_PATH, 'rb') as f:
         dataitem_gt = pickle.load(f)
 

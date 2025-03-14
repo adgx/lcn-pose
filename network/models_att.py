@@ -473,7 +473,7 @@ class cgcnn(base_model):
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=True)
+        y = keras_bn(y, training=True) #FIXED
         y = tf.reshape(y, [-1, output_size])
 
         #for item in keras_bn.updates:
