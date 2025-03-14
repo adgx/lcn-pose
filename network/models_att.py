@@ -1,13 +1,13 @@
 import tensorflow as tf
 import scipy.sparse
 import numpy as np
-import os, time, collections, shutil, sys
+import os, time, collections, shutil, sys, re
 
 ROOT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(ROOT_PATH)
 
 import math
-
+import glob
 
 class base_model(object):
 
@@ -75,28 +75,42 @@ class base_model(object):
             )
         return string, loss
 
-    def fit(self, train_data, train_labels, val_data, val_labels):
+    def fit(self, train_data, train_labels, val_data, val_labels, output_file=None, starting_checkpoint=None):
         tf.compat.v1.disable_eager_execution() # Fix save model issue
         t_process, t_wall = time.process_time(), time.time()
+        
+        starting_step = 1
+
         config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         sess = tf.compat.v1.Session(graph=self.graph, config=config)
-        shutil.rmtree(self._get_path("summaries"), ignore_errors=True)
-
-        shutil.rmtree(self._get_path("checkpoints"), ignore_errors=True)
-        os.makedirs(self._get_path("checkpoints"))
+        #shutil.rmtree(self._get_path("summaries"), ignore_errors=True)
         path = os.path.join(self._get_path("checkpoints"), "final", "model")
         best_path = os.path.join(self._get_path("checkpoints"), "best", "model")
-        sess.run(self.op_init)
+        if starting_checkpoint is None:
+            shutil.rmtree(self._get_path("checkpoints"), ignore_errors=True)
+            os.makedirs(self._get_path("checkpoints"))
+        else:
+            #Get the parent directory of the checkpoint
+            match = re.search(r'model-(\d+)', starting_checkpoint + "/model-5.index")
+            if starting_checkpoint and tf.io.gfile.exists(starting_checkpoint + "/model-5.index"):
+                if match:
+                    starting_step = int(match.group(1))
+                    print(f"Resuming from step {starting_step}")
+                    print(f"Restoring from checkpoint: {starting_checkpoint}")
+                    self.op_saver.restore(sess, tf.train.latest_checkpoint(starting_checkpoint))
 
+        sess.run(self.op_init)
         # Training.
         losses = []
         indices = collections.deque()
-        num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size)
-        epoch_steps = int(train_data.shape[0] / self.batch_size)
-        print(f"Total steps: {num_steps}")
+        num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size) # Numero di step totali già moltiplicati per epoche
+        #epoch_steps = int(train_data.shape[0] / self.batch_size)
+        print(f"Total steps to be done to complete all the epochs: {num_steps}")
         min_loss = 10000
-        for step in range(1, num_steps + 1):
+
+        
+        for step in range(starting_step, num_steps + 1):
             if len(indices) < self.batch_size:
                 indices.extend(np.random.permutation(train_data.shape[0]))
             idx = [indices.popleft() for i in range(self.batch_size)]
@@ -115,16 +129,26 @@ class base_model(object):
             # Periodical evaluation of the model.
             if step % self.eval_frequency == 0 or step == num_steps:
                 epoch = step * self.batch_size / train_data.shape[0]
-                print(
-                    "step {} / {} (epoch {:.2f} / {}):".format(
+                if output_file is not None:
+                    f = open(output_file, "a")
+                    f.write("step {} / {} (epoch {:.2f} / {}): \n".format(
                         step, num_steps, epoch, self.num_epochs
-                    )
-                )
-                print(
-                    "  learning_rate = {:.2e}, loss_average = {:.4e}".format(
+                    ))
+                    f.write("learning_rate = {:.2e}, loss_average = {:.4e} \n".format(
                         learning_rate, loss_average
+                    ))
+                    f.close()
+                else:
+                    print(
+                        "step {} / {} (epoch {:.2f} / {}):".format(
+                            step, num_steps, epoch, self.num_epochs
+                        )
                     )
-                )
+                    print(
+                        "  learning_rate = {:.2e}, loss_average = {:.4e}".format(
+                            learning_rate, loss_average
+                        )
+                    )
 
                 string, loss = self.evaluate(val_data, val_labels, sess)
                 losses.append(loss)
@@ -194,6 +218,10 @@ class base_model(object):
             self.op_best_saver = tf.compat.v1.train.Saver(max_to_keep=1)
 
             # Writer for TensorBoard.
+            # Remove the previous logs
+            if os.path.exists(self._get_path("summaries")):
+                shutil.rmtree(self._get_path("summaries"))
+            
             self.writer = tf.compat.v1.summary.FileWriter(
                 self._get_path("summaries"), self.graph
             )
@@ -303,6 +331,15 @@ class base_model(object):
         path = os.path.dirname(os.path.realpath(__file__))
         return os.path.join(path, "..", "experiment", self.dir_name, folder)
 
+    def remove_checkpoint(checkpoint_prefix):
+        # Remove the checkpoint file
+        if os.path.exists(checkpoint_prefix):
+            os.remove(checkpoint_prefix)
+        
+        # Remove associated files (index, data, etc.)
+        for file in glob.glob(checkpoint_prefix + ".*"):
+            os.remove(file)
+        
     def _get_session(self, sess=None):
         """Restore parameters if no session given."""
         if sess is None:
@@ -429,17 +466,18 @@ class cgcnn(base_model):
         return masked_weights
 
     def batch_normalization_warp(self, y, training, name):
+        tf.compat.v1.disable_eager_execution() # Fix save model issue
         keras_bn = tf.keras.layers.BatchNormalization(axis=-1, name=name)
 
         _, output_size = y.get_shape()
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=training)
+        y = keras_bn(y, training=True) #FIXED
         y = tf.reshape(y, [-1, output_size])
 
-        for item in keras_bn.updates:
-            tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, item)
+        #for item in keras_bn.updates:
+        #    tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, item)
 
         return y
 
