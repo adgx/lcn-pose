@@ -83,10 +83,10 @@ class DataReader(object):
         if which == "scale":
             # map to [-1, 1]
             for idx, item in enumerate(self.gt_trainset):
-                camera_name = item["camera_param"]["name"]
+                camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
-                elif camera_name == "55011271" or camera_name == "58860488":
+                elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -95,10 +95,10 @@ class DataReader(object):
                     res_h / res_w,
                 ]
             for idx, item in enumerate(self.gt_testset):
-                camera_name = item["camera_param"]["name"]
+                camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
-                elif camera_name == "55011271" or camera_name == "58860488":
+                elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -131,10 +131,10 @@ class DataReader(object):
         if which == "scale":
             # map to [-1, 1]
             for idx, item in enumerate(self.gt_trainset):
-                camera_name = item["camera_param"]["name"]
+                camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
-                elif camera_name == "55011271" or camera_name == "58860488":
+                elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -144,10 +144,10 @@ class DataReader(object):
                 ]
                 train_labels[idx, :, 2:] = item["joint_3d_image"][:, 2:] / res_w * 2
             for idx, item in enumerate(self.gt_testset):
-                camera_name = item["camera_param"]["name"]
+                camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
-                elif camera_name == "55011271" or camera_name == "58860488":
+                elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -174,7 +174,7 @@ class DataReader(object):
             data = data.reshape((-1, 17, 3)).copy()
             # denormalize (x,y,z) coordiantes for results
             for idx, item in enumerate(self.gt_testset):
-                camera_name = item["camera_param"]["name"]
+                camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488":
