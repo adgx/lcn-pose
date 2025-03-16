@@ -31,7 +31,8 @@ def parse_args():
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
     parser.add_argument('--flip-data', help='test time flip', action='store_true')
 
-    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"])
+    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"],required=True)
+
     try :
         args = parser.parse_args()
     except:

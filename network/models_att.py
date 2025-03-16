@@ -152,9 +152,9 @@ class base_model(object):
 
                 string, loss = self.evaluate(val_data, val_labels, sess)
                 losses.append(loss)
-                print("  validation {}".format(string))
+                print("validation {}".format(string))
                 print(
-                    "  time: {:.0f}s (wall {:.0f}s)".format(
+                    "time: {:.0f}s (wall {:.0f}s)".format(
                         time.process_time() - t_process, time.time() - t_wall
                     )
                 )
@@ -314,6 +314,7 @@ class base_model(object):
                     print("warning: {} has no gradient".format(var.op.name))
                 else:
                     tf.compat.v1.summary.histogram(var.op.name + "/gradients", grad)
+
             # The op return the learning rate.
             with tf.control_dependencies([op_gradients]):
                 op_train = tf.compat.v1.identity(learning_rate, name="control")
@@ -341,12 +342,16 @@ class base_model(object):
             os.remove(file)
         
     def _get_session(self, sess=None):
-        """Restore parameters if no session given."""
+        """
+        Restore parameters if no session given.
+        """
         if sess is None:
+            tf.compat.v1.disable_eager_execution() # Fix save model issue
+        
             config = tf.compat.v1.ConfigProto()
             config.gpu_options.allow_growth = True
             sess = tf.compat.v1.Session(graph=self.graph, config=config)
-            filename = tf.compat.v1.train.latest_checkpoint(
+            filename = tf.train.latest_checkpoint(
                 os.path.join(self._get_path("checkpoints"), self.checkpoints)
             )
             print("restore from %s" % filename)
@@ -473,7 +478,7 @@ class cgcnn(base_model):
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=True) #FIXED
+        y = keras_bn(y, training=training) #FIXED True
         y = tf.reshape(y, [-1, output_size])
 
         #for item in keras_bn.updates:
@@ -584,6 +589,7 @@ class cgcnn(base_model):
                 [self.in_joints * self.in_F, mid_size],
                 regularization=self.regularization != 0,
             )
+
             b1 = self._variable(
                 "b1", self.kaiming, [mid_size], regularization=self.regularization != 0
             )  # equal to b2leaky_relu

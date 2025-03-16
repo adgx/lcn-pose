@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument('--flip-data', help='train time flip', action='store_true')
     parser.add_argument('--output_file', type=str, default=None, help='Output file where save the informations pf the process')
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
-    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"])
+    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"],required=True)
     try :
         args = parser.parse_args()
     except:
@@ -75,7 +75,10 @@ def main():
 
     network = models_att.cgcnn(**params)
     try: 
-        network.fit(train_data, train_labels, test_data, test_labels, args.output_file, starting_checkpoint=args.resume_from)
+        losses, t_step = network.fit(train_data, train_labels, test_data, test_labels, args.output_file, starting_checkpoint=args.resume_from)
+        print(losses)
+        print(t_step)
+    
     except KeyboardInterrupt:
         print('Training interrupted')
     except Exception as e:

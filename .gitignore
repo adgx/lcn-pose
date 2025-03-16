@@ -5,7 +5,7 @@
 network/__pycache__
 tools/__pycache__
 dataset/train
-experiment/
+experiment*/
 
 .DS_Store
 
