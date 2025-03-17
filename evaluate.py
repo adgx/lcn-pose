@@ -32,7 +32,7 @@ def parse_args():
     return args
 #what are test indices?
 #what is protocol2 and the Procrustes?
-#So, the procrustes distance quantifies the dissimilarity between two shapes by measuring how much one shape needs to be transformed to aling with
+#So, the procrustes(MATLAB) distance quantifies the dissimilarity between two shapes by measuring how much one shape needs to be transformed to aling with
 #another. This transformation includes translation, scaling, rotation, and reflection. The goal is to minimize the sum of squared differences between
 #corresponding points of the shapes. 
 
@@ -52,7 +52,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
     for idx, pred in enumerate(preds): #enumetate adds a counter for each iterable item
         pred = tools.image_to_camera_frame(pose3d_image_frame=pred, box=dataitem_gt[idx]['box'],
             camera=dataitem_gt[idx]['camera_param'], rootIdx=0,
-            root_depth=dataitem_gt[idx]['root_depth'])#adjust the 3d pose predict evaluate the intrisic camera's parameters 
+            root_depth=dataitem_gt[idx]['root_depth'])#adjust the 3d pose predict evaluating the intrisic camera's parameters 
         gt = dataitem_gt[idx]['joint_3d_camera']
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     if args.per_joint: #per_joint can have the true or false value
         commd += '_joint'
     else:
-        commd += '_action' #valutazione per azione?
+        commd += '_action' #evaluating per azione
     if args.protocol2: #protocol2 can have the true or false value
         commd += '_protocol2'
 
