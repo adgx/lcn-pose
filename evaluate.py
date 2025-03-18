@@ -109,6 +109,7 @@ def eval(commd, test_indices, mode='dt', pkl=""):
         table.add_row([test_name] + ['%.2f' % d for d in err_dict[test_name]])
 
         time_str = time.strftime('%Y-%m-%d-%H-%M')
+        #make a file where store the error evaluation results 
         log_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'err_{}_{}_{}.log'.format(commd, mode, time_str))
 
         f = open(log_path, 'w')

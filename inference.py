@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument('--data-type', help=' scale', required=True, choices=['scale'], type=str)
     parser.add_argument('--mode', help='dt_ft, gt', required=True, choices=['gt', 'dt_ft'], type=str)
 
+    #what are the purpose of these arguments?
     # optional arguments
     parser.add_argument('--test-indices', help='test idx ', type=str)
     parser.add_argument('--mask-type', help='mask type ', type=str)
@@ -30,7 +31,7 @@ def parse_args():
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
     parser.add_argument('--flip-data', help='test time flip', action='store_true')
-
+    
     parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d"])
     try :
         args = parser.parse_args()
@@ -44,21 +45,30 @@ def main():
     args = parse_args()
     
     datareader = data.DataReader()
-    gt_trainset_all = datareader.real_read(args.filename, "train")
-    gt_testset_all = datareader.real_read(args.filename, "test")
-    train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, which=args.data_type, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
+    gt_trainset_all = datareader.real_read(args.filename, "train") #return the deserialized pkl of the train set
+    gt_testset_all = datareader.real_read(args.filename, "test") #return the deserialized pkl of the train test
+    #which = scale
+    #default in_F = 2 so the read_confidence is true, so add confidence data for each joint normalized(with coordinate x,y)  
+    train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, which=args.data_type, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2] 
+    #normalize and evaluate the x,y,z coordinate per joint
+    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode) # [limit, 51]
 
+    #default is false
+    #flip the joint coordinates and concatenate them with the passed data (augmentation)
     if args.flip_data:
         test_data = data.flip_data(test_data)
         test_labels = data.flip_data(test_labels)
 
     # params
+    #obtain all parameters associated to the model
     params = params_help.get_params(is_training=False, gt_dataset=train_labels)
+    #add and upedate the paramiters based on the args parsed
     params_help.update_parameters(args, params)
     print(pprint.pformat(params))
 
+    #note: ** unpacks the dictionary params, so pass al parameters to cgcnn obj
     network = models_att.cgcnn(**params)
+    #obtain the model's predictions 
     predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
 
     if args.flip_data:
@@ -66,6 +76,7 @@ def main():
     result = datareader.denormalize(predictions, which=args.data_type)
     # result shape [N, 17, 3], no matter which data type
 
+    #save the result data in the pkl file
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result_%s.pkl' % args.mode)
     f = open(save_path, 'wb')
     pickle.dump({'result': result}, f)

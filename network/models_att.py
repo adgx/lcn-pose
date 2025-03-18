@@ -15,7 +15,7 @@ class base_model(object):
         self.regularizers = []
         self.checkpoints = "final"
         self.writer = None
-
+    #what are regularizers and writer?
     # High-level interface which runs the constructed computational graph.
 
     def predict(self, data, labels=None, sess=None):
@@ -365,7 +365,7 @@ class base_model(object):
 
 class cgcnn(base_model):
     """ """
-
+    #set all parameters for the model
     def __init__(
         self,
         F=64,
@@ -398,7 +398,7 @@ class cgcnn(base_model):
         assert neighbour_matrix.shape[0] == neighbour_matrix.shape[1]
         assert neighbour_matrix.shape[0] == in_joints
         self.neighbour_matrix = neighbour_matrix
-
+        #what is the neighbour matrix: see the paper section 3
         self.in_joints = in_joints
         self.out_joints = out_joints
         self.num_layers = num_layers
