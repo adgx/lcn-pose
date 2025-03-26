@@ -133,7 +133,7 @@ def eval(commd, test_indices, mode='dt', pkl=""):
 if __name__ == '__main__':
 
     args = parse_args()
-    test_indices = sorted([int(i) for i in args.test_indices.split(',')]) #sort the passed idices 
+    test_indices = sorted([int(i) for i in args.test_indices.split(',')]) #sort the passed indices 
     commd = args.data_type #always scale
     if args.per_joint: #per_joint can have the true or false value
         commd += '_joint'

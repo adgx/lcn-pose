@@ -48,10 +48,10 @@ def main():
     gt_trainset_all = datareader.real_read(args.filename, "train") #return the deserialized pkl of the train set
     gt_testset_all = datareader.real_read(args.filename, "test") #return the deserialized pkl of the train test
     #which = scale
-    #default in_F = 2 so the read_confidence is true, so add confidence data for each joint normalized(with coordinate x,y)  
+    #default in_F = 2 so the read_confidence is true, so add confidence data for each joint normalized (with coordinate x,y)  
     train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, which=args.data_type, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2] 
     #normalize and evaluate the x,y,z coordinate per joint
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode) # [limit, 51]
+    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode) # [limit, 17*3]
 
     #default is false
     #flip the joint coordinates and concatenate them with the passed data (augmentation)
@@ -61,9 +61,9 @@ def main():
 
     # params
     #obtain all parameters associated to the model
-    params = params_help.get_params(is_training=False, gt_dataset=train_labels)
-    #add and upedate the paramiters based on the args parsed
-    params_help.update_parameters(args, params)
+    params = params_help.get_params(is_training=False, gt_dataset=train_labels) #if is_training=False then no dropout
+    #add and update the paramiters based on the args parsed
+    params_help.update_parameters(args, params) 
     print(pprint.pformat(params))
 
     #note: ** unpacks the dictionary params, so pass al parameters to cgcnn obj

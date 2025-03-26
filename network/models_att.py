@@ -631,3 +631,198 @@ class cgcnn(base_model):
             y = tf.reshape(y, [-1, self.out_joints * 3])
 
         return y
+    
+#notes:
+#GCN(Graph Convolutional Network) computes the output features of a node only depend on the nodes which are regarded as related 
+#determined by the Laplacian matrix.
+#In GCN the Laplacian operator is obtained as the product of structure matrix which encodes the dependence relation among the 
+# nodes,and a weigth matrix which defines how to aggregate the dependent features.
+#The weight matrix has an inherent weight sharing scheme, the learnable operators T are the same for all nodes.
+#The structure matrix is directly determined by node distance (no customized node dependence).
+#
+#Locally Connected Network  discards the weight sharing scheme by freeing all of the parameters in the weight matrix, so 
+# the nodes have their own operators. The structure matrix is constructed according to human joint dependence. 
+#Laplacian operator into the product of a structure matrix and a weight matrix.
+#
+#Revisit GCN
+#
+#Features defined on a graph G = (V, E, W) where V rappresent a set of N nodes, E the edges e W a weighted adjacency
+# matrix.
+# x into R^N is a feature defined on the N nodes where each dimension correspnds to one node.  
+#There are M features in total for each node. So is used the matrix X into R^M*N.
+#Xr and Xc to denote the flattened copies of X in row and column major order.
+#The combinatorial defienition of the Graph Laplacian L is computed as : L = D - A into R^N*N
+# where D is the degree matrix and A is the adjacency matrix.
+#The Laplacian can be diagonalized by the Fourier basis U into R^N*N that is the matrix of eigenvectors of the 
+#Graph Laplacian so L = U*Λ*U^T.
+#Where Λ represents a diagonal matrix that has eigenvalues of the Laplacian matrix, that provides structural information 
+# about the graph in terms of connectivity, diffusion, and frequency modes.
+#The graph Fourier transform of a feature vector x into R^N is:
+#y=gθ(L)*x=U*gθ(Λ)*U^T*x
+#
+#gθ(Λ) = sum(k=0, K-1)θk*Λ^k, where K is a hyperparameter, and θ is a learnable parameter.  
+#
+#Reformulation
+#
+#To obtain an output feature vector y into R^N for N nodes by applying a filter gθ to the input features X
+#
+#y = gθ(X) = sum(k=0, K-1)sum(m=1, M) θkm * L^k * X(m,:)^T
+#
+#The fielter has different θ for different feature dimensions. However, diffent nodes in the graph share the same 
+# filter θ. Same set of θ's is used for computing different dimensions of y which correspond to different nodes.
+#
+#Evaluating the output feature corresponding to the qth node yq, which is the qth dimension of y 
+#
+#yq = sum(k=0, K-1)sum(m=1, M)θkm * L^k(q, :) * X(m, :)^T
+#
+#Based on the characteristics of the Laplacian matrix L^k, if the minimum number of edges connectiong the joints
+# i and j is larger than k, then L^k(i, j) = 0. So this can be interpreted as aggregation features from the 
+# neighboring nodes whose distance is less than K.
+#So:
+#
+#yq = sum(k=0, K-1)sum(m=1, M)X(m, :)*L^k(q, :)^T*θkm =sum(k=0, K-1)sum(m=1, M)X(m, :)*(L^k(q:)T H-mul Θkm)  
+# where Θkm into R^Nx1 with θkm repeated N times. 
+#
+#Concatenation means stacking vectors or matrices along a given axis, so it arranges the elements in a sequence.
+#Finally:
+#
+#yq = sum(k = 0, K-1)Xr*(Skq H-mul Wkq)
+#where skq into R^MNx1 is a vector with L^k(:, q) repeated N times. It constains the neighbourhood information of node q.
+#For all nodes in the graph
+#
+#y = sum(k=0, K-1) Xr * (S^k H-mul W^k)
+#where both S^k and W^k are 2D matrices with the shape of MNxN. Skq it the qth column of S^k and Wkq is the qth column 
+# of W^k.
+#
+#Limitations 
+#
+#The main limitation lies in the weight shariang scheme in W^k. Wkq has only M unique parameters because each Θkm 
+# has unique parameter. Recall Θkm is obtained by repeating θkm N times. Another, GCN computes features for different
+# nodes usign the same set of parameters => Wkq = Wkp.
+#The way GCN constructs the structure matrix S treats all neighbors of the same distance to the node of interest without 
+# discrimination, leaving us no flexibility to freely connect the joints of arbitrary distance.
+#
+#Generalization
+#
+#Obtain a more generic model by dropping the structure constraints in S^k and W^k. Is been developed an approach to 
+# construct the structure matrix S to directly reflect the joint dependence.
+#
+#y = X*(S H-mul W)
+#
+#Relation to FCN and GCN
+#
+#FCN is essentially represented by the product of a weight matrix and a feature matrix. Customizing the generic model into 
+# FCN can be achieved by settign all values in S to be 1
+#
+#y = X*(1 H-mul W)
+#
+#which means all of the nodes are connected. The parameters in W are all free, and are learned end to end form traning datasets.
+#GCN can be obtained by initializing S^k and W^k and stacking S^k, W^k, (k=0, ..., K-1) vertically to generate S and W. 
+#
+#Locally Connected Network
+#
+#LCN is also a specialization of the generic model. But there are no constraints in W, and the joints are sparsely connected 
+# in S.
+#S is shared for all LCN layers which is offline constructed based on the specified joint dependence. Different layers
+# have their own W which is learned end-to-end.
+#
+#Joint Dependence
+#Joint dependence is locality which means each joint only depends on those which have short manifold distance to it.
+# The mainifold distance between two joints is defined by their distance on the graph.
+#So each joint depends on the neighbors whose manifold distance to the joint is less equal than K.
+#This approach is called LCN(K-NN). K is used to wvaluate the 3D estimation accurancy.
+#
+#Structure Matrix
+#
+#S matrix is constructed to reflect the joint dependence. If joint j is dependent on the joint i, then is setted 
+# the (i, j) block of S to be ones. Otherwise, we set it to be zeros.
+#In this way, the features of the ith node will not contribute to the computation of the output features of the jth node.
+#
+#The operation in LCN:
+#
+#u^j = sum(i=1, N)h^i*(S^(i, j) H-mul W^(i, j))
+#Where h^i denotes the M input features of the ith joint -> h^i = X(:, i)^T into R1xM.
+#u^j into R^1xM' deontes the M' output feature of the node j.
+#So if S(i, j) is zero, then h(i) will not contribute to the computation of u(j).
+#One LCN layer gernerates output features for all nodes.
+#The ones in S matrix are replaced by continuous values to reflect the importance among the joints. 
+#We can also learn them from the training dataset end-to-end by replacing the non zero values in S with learnable parameters.
+#
+#Application to 3D Pose Estimation
+#
+#For the 3D pose estimation, is used a deep neural network which uses the LCN layer as the basic building block.
+#LCN has several cascaded blocks with each consisting of two LCN layers, interleaved with BN, LeakyReLU and Dropout.
+#Each block is wrapped in a residual connection.
+#The number of output features M' in each LCN layer is set to be 64.
+#The layers have different weight matrices.
+#The input to the LCN network is the 2D locations of the body joints and the output is the corrensponding 3D locations.
+#
+#Experiments
+#
+#Datasets and Metrics
+#
+#It is computed the Mean Per Joint Position Error (MPJPE) between the ground truth and the 3D pose estimation after aligning
+# the mid-hip joints. Also computes the estiamtions are aligned eith the ground truth via a rigid transformation.
+#Others metrics of average used are PCK and AUC. 
+#
+#Implementation Details 
+#
+#Coordinate system
+#
+#Pw is the 3D location of a joint in the world Coordinate System (CS)
+#Next transform the Pw to Camera coordinate system Pc = R*(Pw - T)
+# where R is the rotation matrix and T is the translation vector.
+#Then projects the Pc=(Xc, Yc, Zc) to 2D image plane
+#Pp = (fx*Xc/Zc + cx, fy*Yc/Zc + cy)
+# where fx,fy are focal lengths, and cx, cy are principal point coordinates.
+#Pc is influnced by pose scale so to remove the scale in Pc is seeked a scalar λ which makes λPc have similar scale as 
+# Pp by minimizing ||λP(cap)c -P(cap)p||2 where P(cap)c and P(cap)p denote the poses centered around their pelvis joints.
+#So is estimated λPc form Pp which is independent of the actual body scale.
+#
+#2D detections 
+#The input of the network is 2D poses estimated by the Stacked Hourglass.
+#
+#Baselines
+#Baselines: FCN variant, GCN variant for 3D pose estimation, LCN (K-NN) where K ranges from 1 to 4, LCN (K-NN)-Learn 
+# where the blocks of ones in S are repalce by learnable parameters to reflect its degree of dependence on the other joints.
+#Finnaly the LCN-Learn where S is completely learn it from data.
+#
+#Notes:
+#Laplacian operator: it is derived from the graph Laplacian matrix, which captures the structure of the graph and how information
+# propagates across nodes.
+#Graph Laplacian L is computed as : L = D - A where D is the degree matrix and A is the adjacency matrix,
+# L is a discete version of the Laplacian operator that is used in continuous domanin.
+#Normalized Laplacian:
+#Lsyn = I - D^-1/2 * A * D^-1/2
+#Λ
+#θ
+#Θ
+#λ
+#Hadamard (element-wise) multiplication
+#
+#While ReLU outputs zero for all negative input values, potentially leading to inactive neurons—a phenomenon known as the "dying ReLU" 
+# problem—Leaky ReLU introduces a small, non-zero gradient for negative inputs, allowing the network to learn from them and mitigating 
+# the risk of neuron inactivity
+#
+#Residual connections allows the input of a layer to bypass one or more intermediate layers and be added directly to the output 
+# of a subsequent layer.gradients can become extremely small during backpropagation, hindering effective training. Residual 
+# connections provide shortcut paths for gradient flow, alleviating this issue
+#
+#Dropout is to randomly deactivate a subset of neurons during each training iteration. This means that in every forward pass
+#  through the network, certain neurons are "dropped out" or ignored, along with their connections.
+#
+#Extrinsic camera parameters define the position and orientation of a camera in the world coordinate system. They consist of two components:​
+#-Rotation Matrix (R): A 3×3 orthogonal matrix that represents the orientation of the camera relative to the world coordinate system. 
+# It aligns the axes of the world coordinate system with those of the camera's coordinate system. ​
+#-Translation Vector (T): A 3×1 vector that specifies the position of the camera's origin in the world coordinate system. 
+# It denotes the displacement of the camera from the world's origin. ​
+#
+#Intrinsic camera parameters are fundamental characteristics that define how a camera captures and projects a 3D scene onto a 2D image 
+# plane.
+#They are typically represented in a 3×3 matrix known as the intrinsic matrix (K), which facilitates the transformation from camera 
+# coordinates to pixel coordinates in the image.
+#fx​ and fy​: These represent the focal lengths in pixels along the x and y axes, respectively. They are calculated by multiplying the 
+# physical focal length of the camera lens by the pixel density (number of pixels per unit length) along each axis. ​
+#cx​ and cy​: These denote the coordinates of the principal point (also known as the optical center) in the image plane, typically 
+# measured in pixels. Ideally, this point is located at the center of the image sensor. ​
+#γ: This is the skew coefficient, which accounts for any non-orthogonality between the x and y pixel axes.
