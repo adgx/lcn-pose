@@ -17,19 +17,19 @@ class base_model(object):
         self.writer = None
     #what are regularizers and writer?
     # High-level interface which runs the constructed computational graph.
-
+    #session flag?
     def predict(self, data, labels=None, sess=None):
         loss = 0
         size = data.shape[0]
-        predictions = np.empty((size, self.out_joints * 3))
+        predictions = np.empty((size, self.out_joints * 3)) #[size, joints*3]
         close_sess_flag = True if sess is None else False
         sess = self._get_session(sess)
         for begin in range(0, size, self.batch_size):
             # If the last batch is smaller than a usual batch, fill with zeros.
             end = begin + self.batch_size
-            end = min([end, size])
+            end = min([end, size]) # not overcome the size of the data 
 
-            batch_data = np.zeros((self.batch_size,) + data.shape[1:])
+            batch_data = np.zeros((self.batch_size,) + data.shape[1:]) #[batch_size, data.shape[1:]]
             tmp_data = data[begin:end]
             if type(tmp_data) is not np.ndarray:
                 tmp_data = tmp_data.toarray()  # convert sparse matrices

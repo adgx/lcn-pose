@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import scipy.io as sio
 import json 
 import numpy as np
 import parse
@@ -22,6 +23,89 @@ def load_cams_data(dataset_root_dir, subset, subj_name, camera_param):
         path_camera = os.path.join(path_cameras, camera_view, '001.json')   
         with open(path_camera, 'r') as cam_json:
             cams_data[camera_view] = json.load(cam_json)
+    return cams_data
+
+#note: for mpii dataset
+#-camera:
+#example of Camera calibaration parameters
+#name          0
+#  sensor      10 10
+#  size        2048 2048
+#  animated    0
+#  intrinsic   1497.693 0 1024.704 0 0 1497.103 1051.394 0 0 0 1 0 0 0 0 1 
+#  extrinsic   0.9650164 0.00488022 0.262144 -562.8666 -0.004488356 -0.9993728 0.0351275 1398.138 0.262151 -0.03507521 -0.9643893 3852.623 0 0 0 1 
+#  radial      0
+
+#Intrinsics:
+#The “intrinsic” line is given as a 4×4 matrix in row-major order:
+
+#[1497.693   0         1024.704   0
+# 0         1497.103   1051.394   0
+# 0         0          1          0
+# 0         0          0          1]
+
+#Here, the camera’s focal lengths and principal point are derived from the top‑left 3×3 block:
+#
+#    Focal lengths (f): fx = 1497.693, fy = 1497.103
+#
+#    Principal point (c): cx = 1024.704, cy = 1051.394
+
+#Extrinsics:
+#The “extrinsic” line represents a 4×4 matrix:
+#
+#[ 0.9650164    0.00488022   0.262144    -562.8666
+# -0.004488356 -0.9993728   0.0351275   1398.138
+#  0.262151   -0.03507521  -0.9643893   3852.623
+#  0           0           0           1 ]
+#
+#The top‑left 3×3 block is the rotation matrix R and the right‑most column (first three entries) is the translation vector T
+
+#The “radial” parameter is provided as “0”. Since no tangential parameters are specified, we assume zero distortion. In many 
+# calibration formats the radial distortion is represented with three coefficients (k1, k2, k3) and tangential with two (p1, p2). Here, we set:
+#
+#    k: [0, 0, 0]
+#
+#    p: [0, 0]
+
+def load_cams_data_mpii(dataset_root_dir, subset, subj_name):
+    path_cameras = os.path.join(dataset_root_dir, subset, subj_name)
+    #check the path
+    if not osp.isdir(path_cameras):
+        print(f'Error path isn\'t valid: {path_cameras}')
+
+    cams_data = {}
+
+    path_camera = os.path.join(path_cameras, 'camera.calibration')   
+    with open(path_camera, 'r') as cam_cal:
+        next(cam_cal)
+        for line in cam_cal:
+            tokens = line.split()
+            key, *values = tokens
+
+            if key == 'name':
+                name = values[0]  # Store as string, not list
+                cam_data = {}
+            elif key in ('sensor', 'animated'):
+                continue
+            elif key == 'intrinsic':
+                cam_data['intrinsics_w_distortion'] = {
+                    'f': [float(values[0]), float(values[5])],
+                    'c': [float(values[2]), float(values[6])],
+                    'k': [0.0, 0.0, 0.0],  # Default values
+                    'p': [0.0, 0.0]
+                }
+            elif key == 'extrinsic':
+                cam_data['extrinsic'] = {
+                    'R': [
+                        list(map(float, values[:3])),
+                        list(map(float, values[4:7])),
+                        list(map(float, values[8:11]))
+                    ],
+                    'T': list(map(float, [values[3], values[7], values[11]]))
+                }
+            elif key == 'radial':  # Assuming 'radial' marks the end of a camera block
+                cams_data[name] = cam_data
+
     return cams_data
 
 def find_dirs(dataset_root_dir, subset, subj_names):
@@ -99,6 +183,21 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
     pose3d_image_frame[:, 2] = pose3d_depth
     return pose3d_image_frame
 
+def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
+    seq_video_dirs = os.listdir(os.path.join(dataset_root_dir, dset))
+    dataset = []
+    
+    for seq_video_anno in seq_video_dirs:
+        print(f'load {seq_video_anno} annotation.mat')
+        annofile = os.path.join(dataset_root_dir, dset, seq_video_anno, 'annot.mat')
+        
+        if os.path.exists(annofile):
+            print("File does not exist")
+            
+        anno = sio.loadmat(annofile)
+
+    
+
 #cams it is a np array
 def load_db(dataset_root_dir, dset, joints_dir, images_dir, cams, rootIdx=0):
     
@@ -138,6 +237,7 @@ def load_db(dataset_root_dir, dset, joints_dir, images_dir, cams, rootIdx=0):
                     'scale': scale,
                     'box': box,
                     'subject': meta['subject'],
+                    'action': meta['action'],
                     'root_depth': joint_3d_cam[rootIdx, 2]
                 }
 
@@ -151,6 +251,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--validation", action="store_true", help="Create the pkl for the validation set")
     parser.add_argument("-m", "--image", action="store_true", help="Convert dataset mp4 videos to images")
     parser.add_argument("-g", "--gen", action="store_true", help="Generate validation set from training set")
+    parser.add_argument("-d", '--dataset', type=str, default="humansc3d", help='Filename of the dataset', choices=["mpii", "humansc3d"])
     args = parser.parse_args()
     
     #debug stuff 
@@ -158,19 +259,32 @@ if __name__ == '__main__':
     print("Current dir:", current_dir)
     
     #information to retrieve the dataset information
-    dataset_name = 'humansc3d'
-    dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
-    subset_type = ['train', 'test']
-    subj_name_train = ['s01', 's02', 's03', 's06']
-    subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
-    joints_dir = 'joints3d_25'
-    videos_dir = 'videos'
-    images_dir = 'images'
-    camera_param = 'camera_parameters'
-    camera_ids = ['50591643', '58860488', '60457274', '65906101']
+
+    if args.dataset == "humansc3d":
+        dataset_name = args.dataset
+        dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
+        subset_type = ['train', 'test']
+        subj_name_train = ['s01', 's02', 's03', 's06']
+        subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
+        joints_dir = 'joints3d_25'
+        videos_dir = 'videos'
+        images_dir = 'images'
+        camera_param = 'camera_parameters'
+        camera_ids = ['50591643', '58860488', '60457274', '65906101']
+    elif args.dataset == "mpii":
+        dataset_name = "mpi_inf_3dhp"
+        dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
+        subset_type = ['train', 'test']
+        subj_name_train = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
+        subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
+        joints_dir = 'joints3d_25'
+        videos_dir = 'videos'
+        images_dir = 'images'
+        camera_param = 'camera_parameters'
+        camera_ids = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
 
     #generate the validation set 
-    if args.gen:
+    if args.gen and dataset_name == "humansc3d":
         generate_validation_set(dataset_root_dir, subset_type, subj_name_train)
     # loading cameras data
     # we assuming that camera parameters doesn't change in the time and keep the same between train and validation set

@@ -61,6 +61,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
         if idx % 10000 == 0:
             print('step:%d' % idx + '-' * 20)
             print(np.mean(error_per_joint))
+    #calculate pck
     results = np.array(results)  # [N ,17] error per joint for each frame
 
     #the gendbRe not define a key 'action' for the dataset's dataitem 
@@ -72,7 +73,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
         for idx, dataitem in enumerate(dataitem_gt):
             action_index_dict[dataitem['action']].append(idx)
         for i in range(2, 17):
-            final_result.append(np.mean(results[action_index_dict[i]]))
+            final_result.append(np.mean(results[action_index_dict[i]])) #no PCK
         error = np.mean(np.array(final_result))
         final_result.append(error)
     elif 'joint' in commd:
