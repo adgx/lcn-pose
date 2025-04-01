@@ -10,8 +10,18 @@ import sys
 
 from data_preparation import convert_humansc3d_mp4_to_image
 from gen_val_set import generate_validation_set
-
 def load_cams_data(dataset_root_dir, subset, subj_name, camera_param):
+    dataset_name = os.path.basename(dataset_root_dir)
+    cams_data = {}
+    if dataset_name == 'humansc3d':
+        cams_data = load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param)    
+    elif dataset_name == 'mpi_inf_3dhp':
+        cams_data = load_cams_data_mpii(dataset_root_dir, subset, subj_name)
+
+    return cams_data
+
+    
+def load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param):
     path_cameras = os.path.join(dataset_root_dir, subset, subj_name, camera_param)
     #check the path
     if not osp.isdir(path_cameras):
@@ -75,7 +85,7 @@ def load_cams_data_mpii(dataset_root_dir, subset, subj_name):
 
     cams_data = {}
 
-    path_camera = os.path.join(path_cameras, 'camera.calibration')   
+    path_camera = os.path.join(path_cameras, 'Seq1', 'camera.calibration')   
     with open(path_camera, 'r') as cam_cal:
         next(cam_cal)
         for line in cam_cal:
@@ -85,7 +95,7 @@ def load_cams_data_mpii(dataset_root_dir, subset, subj_name):
             if key == 'name':
                 name = values[0]  # Store as string, not list
                 cam_data = {}
-            elif key in ('sensor', 'animated'):
+            elif key in ('sensor', 'animated', 'size'):
                 continue
             elif key == 'intrinsic':
                 cam_data['intrinsics_w_distortion'] = {
@@ -183,18 +193,46 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
     pose3d_image_frame[:, 2] = pose3d_depth
     return pose3d_image_frame
 
+#Pw​=(R^−1)×(Pc​−T)
+#to obtain all Pw, make a Pc matrix with all posistion joints like: Pc0^T...Pcn^T; 
+#and make A Matrix of repete T^T n times.
+#R^-1 = R^T
+#dset = subject dir
+#    case 'relevant' %Human3.6m compatible joint set in Our order
+#        joint_idx = [8 = head_top, 6 = neck, 15 = right_shoulder, 16 = right_elbow, 17 = right_wrist, 
+#                     10 = left_shoulder, 11 = left_elbow, 12 = left_wrist, 24 = right_hip, 25 = right_knee,
+#                     26 = right_ankle, 19 = left_hip, 20 = left_knee, 21 = left_ankle, 5 = pelvis, 4 = spine, 7 = head];
+#So to find the corrispondance between joint_idx mpii and h3.6m
+#reording indices mpii for h3.6m: [5, 24, 25, 26, 19, 20, 21, 4, 6, 7, 8, 10, 11, 12, 15, 16, 17]
 def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
-    seq_video_dirs = os.listdir(os.path.join(dataset_root_dir, dset))
+    seq_video_dirs = os.listdir(os.path.join(dataset_root_dir))
     dataset = []
     
     for seq_video_anno in seq_video_dirs:
-        print(f'load {seq_video_anno} annotation.mat')
-        annofile = os.path.join(dataset_root_dir, dset, seq_video_anno, 'annot.mat')
+        print(f'load {dset} {seq_video_anno}')
+        annofile = os.path.join(dataset_root_dir, seq_video_anno, 'annot.mat')
         
-        if os.path.exists(annofile):
-            print("File does not exist")
+        if not os.path.exists(annofile):
+            print(f"{annofile}: file does not exist")
             
         anno = sio.loadmat(annofile)
+        array_joint = anno['univ_annot3'][0][0]
+        #edit array of joints positions
+        print(f'Formatting joints data ')
+        #get the Traslation vector and rotation matrix of the cam 0
+        R_t = np.array(cams['0']['extrinsic']['R']).transpose()
+        T = np.array(cams['0']['extrinsic']['T'])
+        T = T.reshape(-1, 1)
+        T_matrix = np.tile(T, (1, 17))
+        for frame_joints_pos in array_joint:
+            frame_joints_pos_flat = frame_joints_pos.flatten()
+            reshaped_joints_pos = frame_joints_pos_flat.reshape(3, frame_joints_pos_flat.size//3)
+            relevant_joints_pos = reshaped_joints_pos[:, [5, 24, 25, 26, 19, 20, 21, 4, 6, 7, 8, 10, 11, 12, 15, 16, 17]]
+            joints_pos_w = np.matmul(R_t, (relevant_joints_pos - T_matrix))
+        videos = os.listdir(os.path.join(dataset_root_dir, dset, seq_video_anno, 'imageSequence'))
+        
+        for camera_id in cams:
+            print(f'load annotation ')    
 
     
 
@@ -276,7 +314,7 @@ if __name__ == '__main__':
         dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
         subset_type = ['train', 'test']
         subj_name_train = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
-        subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
+        subj_name_val = ['TS1', 'TS2', 'TS3', 'TS4', 'TS5', 'TS6']
         joints_dir = 'joints3d_25'
         videos_dir = 'videos'
         images_dir = 'images'
@@ -313,7 +351,8 @@ if __name__ == '__main__':
             if args.image and dataset_name == 'humansc3d':  
                 convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
 
-            data = load_db(base_path, subj_video, joints_dir, images_dir, cams)
+            #data = load_db(base_path, subj_video, joints_dir, images_dir, cams)
+            data = load_db_mpii(base_path, subj_video, cams)
             db.extend(data)
             video_count += 1
         dbs.append(db)

@@ -13,7 +13,8 @@
             "console": "integratedTerminal",
             "args": [
                 "-t",
-                "-v"
+                "-v",
+                "-d=mpii"
             ]
         }
     ]
