@@ -143,6 +143,17 @@ def infer_meta_from_name(subj_video, action, cam_id):
     }
     return meta
 
+
+#A raw way to get information from dirs
+def infer_meta_from_name_mpii(subj_video, action, cam_id):
+    meta = {
+        'subject': int(subj_video[1]),
+        'action': int(action[3]),
+        'subaction': int(0),
+        'camera': int(cam_id)
+    }
+    return meta
+
 def _retrieve_camera(cams, subject, cameraidx):
     R, T = cams[str(cameraidx)]['extrinsics'].values()
     f, c, k, p = cams[str(cameraidx)]['intrinsics_w_distortion'].values() #what about intrinsics_wo_distortion?
@@ -232,10 +243,39 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
             joints_pos_w = np.matmul(R_t, (relevant_joints_pos - T_matrix)).transpose()
             joints_3d_cam.append(joints_pos_w)
         joints_3d_cam = np.array(joints_3d_cam)
-        videos = os.listdir(os.path.join(dataset_root_dir, dset, seq_video_anno, 'imageSequence'))
+        numimgs = joints_3d_cam.shape[0]
         
         for camera_id in cams:
-            print(f'load annotation ')    
+            meta = infer_meta_from_name_mpii(dset, seq_video_anno, camera_id)
+            cam = _retrieve_camera(cams, meta['subject'], meta['camera'])#handle multicamera pov
+
+            
+            for i in range(numimgs):
+                image = os.path.join(dataset_root_dir, images_dir, camera_id, video_joint[:3], 'frame_'+str(i).zfill(4)+'.jpeg')
+                joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
+                box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
+                joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
+                center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
+                scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
+                dataitem = {
+                    'videoid': seq_video_anno[3],
+                    'cameraid': meta['camera'],
+                    'camera_param': cam,
+                    'imageid': i,
+                    'image_path': image,
+                    'joint_3d_image': joint_3d_image,
+                    'joint_3d_camera': joint_3d_cam,
+                    'center': center,
+                    'scale': scale,
+                    'box': box,
+                    'subject': meta['subject'],
+                    'action': meta['action'],
+                    'root_depth': joint_3d_cam[rootIdx, 2]
+                }
+
+                dataset.append(dataitem)
+    
+    return dataset    
 
     
 
