@@ -220,15 +220,18 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
         #edit array of joints positions
         print(f'Formatting joints data ')
         #get the Traslation vector and rotation matrix of the cam 0
+        joints_3d_cam  = []
         R_t = np.array(cams['0']['extrinsic']['R']).transpose()
         T = np.array(cams['0']['extrinsic']['T'])
         T = T.reshape(-1, 1)
         T_matrix = np.tile(T, (1, 17))
         for frame_joints_pos in array_joint:
             frame_joints_pos_flat = frame_joints_pos.flatten()
-            reshaped_joints_pos = frame_joints_pos_flat.reshape(3, frame_joints_pos_flat.size//3)
-            relevant_joints_pos = reshaped_joints_pos[:, [5, 24, 25, 26, 19, 20, 21, 4, 6, 7, 8, 10, 11, 12, 15, 16, 17]]
-            joints_pos_w = np.matmul(R_t, (relevant_joints_pos - T_matrix))
+            reshaped_joints_pos = frame_joints_pos_flat.reshape(3, -1, order='F')
+            relevant_joints_pos = reshaped_joints_pos[:, [4, 23, 24, 25, 18, 19, 20, 3, 5, 6, 7, 9, 10, 11, 14, 15, 16]]
+            joints_pos_w = np.matmul(R_t, (relevant_joints_pos - T_matrix)).transpose()
+            joints_3d_cam.append(joints_pos_w)
+        joints_3d_cam = np.array(joints_3d_cam)
         videos = os.listdir(os.path.join(dataset_root_dir, dset, seq_video_anno, 'imageSequence'))
         
         for camera_id in cams:
