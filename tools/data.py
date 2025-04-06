@@ -88,6 +88,8 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
+                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                    res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
                 trainset[idx, :, :] = trainset[idx, :, :] / res_w * 2 - [
@@ -100,6 +102,8 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
+                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                    res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
                 testset[idx, :, :] = testset[idx, :, :] / res_w * 2 - [1, res_h / res_w]
@@ -136,6 +140,8 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
+                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                    res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
                 train_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [
@@ -149,6 +155,8 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
+                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                    res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
                 test_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [
@@ -179,6 +187,8 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488"  or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
+                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                    res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
 

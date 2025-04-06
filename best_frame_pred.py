@@ -40,9 +40,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
 
     results = []
     best_frame = []
-    best_frame_idx = 0
-    error_best_frame = 1000000
-    best_frame_gt = []
+    best_frame_id = []
     for idx, pred in enumerate(preds):
         pred = tools.image_to_camera_frame(pose3d_image_frame=pred, box=dataitem_gt[idx]['box'],
             camera=dataitem_gt[idx]['camera_param'], rootIdx=0,
@@ -51,21 +49,15 @@ def _eval(test_name, dataitem_gt, commd, mode):
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
         error_per_joint = np.sqrt(np.square(pred-gt).sum(axis=1))  # [17]
-        if error_best_frame > np.mean(error_per_joint):
-            error_best_frame = np.mean(error_per_joint)
-            best_frame_idx = idx
-            best_frame = pred
-            best_frame_gt = dataitem_gt[idx]
         results.append(error_per_joint)
         if idx % 10000 == 0:
             print('step:%d' % idx + '-' * 20)
             print(np.mean(error_per_joint))
     results = np.array(results)  # [N ,17]
 
-
-    final_results_pck = []
     if 'action' in commd:
         final_result = []
+        final_results_pck = []
         action_index_dict = {}
         for i in range(2, 17):
             action_index_dict[i] = []
@@ -91,7 +83,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
     else:
         assert 0, 'not implemented commd'
     
-    return final_result, final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt
+    return final_result, final_results_pck
 
 
 def eval(commd, test_indices, mode='dt', pkl=""):
@@ -106,50 +98,8 @@ def eval(commd, test_indices, mode='dt', pkl=""):
     # eval each trial
     for i in test_indices:
         test_name = 'test%d' % i
-        err_dict[test_name], final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt = _eval(test_name, dataitem_gt, commd, mode)
+        err_dict[test_name], final_results_pck = _eval(test_name, dataitem_gt, commd, mode)
 
-        # log each trial respectively
-        table = prettytable.PrettyTable()
-        if 'action' in commd:
-            table.field_names = ['test_name'] + [i for i in range(2, 17)] + ['avg']
-        elif 'joint' in commd:
-            table.field_names = ['test_name'] + [i for i in range(0, 17)] + ['avg']
-        else:
-            assert 0, 'not implemented commd'
-        table.add_row([test_name] + ['%.2f' % d for d in err_dict[test_name]])
-        if 'action' in commd:
-            table.add_row([test_name + " - PCK" + str(THRESHOLD)] + ['%.2f' % d for d in final_results_pck])
-        time_str = time.strftime('%Y-%m-%d-%H-%M')
-        log_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'err_{}_{}_{}.log'.format(commd, mode, time_str))
-
-        f = open(log_path, 'w')
-        print(table, file=f)
-        f.close()
-
-    # print summary table to the screen
-    summary_table = prettytable.PrettyTable()
-    if 'action' in commd:
-        summary_table.field_names = ['test_name'] + [i for i in range(2, 17)] + ['avg']
-    elif 'joint' in commd:
-        summary_table.field_names = ['test_name'] + [i for i in range(0, 17)] + ['avg']
-    else:
-        assert 0, 'not implemented commd'
-
-    for k, v in err_dict.items():
-        summary_table.add_row([k] + ['%.2f' % d for d in v])
-    print(summary_table)
-
-    # save best frame
-    best_frame_path = os.path.join(ROOT_PATH, 'experiment', 'best_frame_%s.pkl' % mode)
-    with open(best_frame_path, 'wb') as f:
-        pickle.dump(best_frame, f)
-
-    best_frame_gt_path = os.path.join(ROOT_PATH, 'experiment', 'best_frame_gt_%s.pkl' % mode)
-    with open(best_frame_gt_path, 'wb') as f:
-        pickle.dump(best_frame_gt, f)
-    print('best frame idx:', best_frame_idx)
-    print('best frame error:', error_best_frame)
-    print('best frame saved to %s' % best_frame_path)
 
 
 if __name__ == '__main__':
@@ -163,10 +113,6 @@ if __name__ == '__main__':
         commd += '_action'
     if args.protocol2:
         commd += '_protocol2'
-
-    print('=> commd:', commd)
-    print('=> mode:', args.mode)
-    print('=> eval experiments:', test_indices)
 
     eval(commd=commd, test_indices=test_indices, mode=args.mode, pkl=args.filename)
 

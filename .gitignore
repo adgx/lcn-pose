@@ -11,3 +11,5 @@ experiment*/
 
 .python-version
 results/
+dataset/*
+__pycache__

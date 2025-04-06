@@ -16,7 +16,7 @@
                 "--mode",
                 "gt",
                 "--filename",
-                "humansc3d"
+                "mpii"
             ]
         },
         {
@@ -32,9 +32,11 @@
                 "gt",
                 "--filename",
                 "humansc3d",
+                //"humansc3d",
                 "--test-indices",
                 "1",
-                
+                "--checkpoint",
+                "best"
             ]
         },
         {
@@ -50,9 +52,10 @@
                 "gt",
                 "--filename",
                 "humansc3d",
+                //"humansc3d",
                 "--test-indices",
                 "1",
-                "--per-joint"
+                "--per-joint",
             ]
         }
     ]

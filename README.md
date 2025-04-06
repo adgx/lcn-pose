@@ -40,8 +40,8 @@ ${root}/experiment
 Inference with GT checkpoint
 
 ```sh
-python inference.py --data-type scale --mode gt --test-indices 1 --mask-type locally_connected --knn 3 --layers 3 --in-F 2 --checkpoint best
-python evaluate.py --data-type scale --mode gt --test-indices 1
+python inference_old.py --data-type scale --mode gt --test-indices 1 --mask-type locally_connected --knn 3 --layers 3 --in-F 2 --checkpoint best
+python evaluate_old.py --data-type scale --mode gt --test-indices 1
 ```
 
 Inference with SH_DT checkpoint
