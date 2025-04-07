@@ -6,6 +6,8 @@ import numpy as np
 import parse
 import argparse
 import pickle
+import re
+import mat73
 import sys
 
 from data_preparation import convert_humansc3d_mp4_to_image
@@ -33,6 +35,131 @@ def load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param):
         path_camera = os.path.join(path_cameras, camera_view, '001.json')   
         with open(path_camera, 'r') as cam_json:
             cams_data[camera_view] = json.load(cam_json)
+    return cams_data
+
+
+
+
+#Example of  mpii test set camera calibration file
+#sensorSize      10 10       # mm
+#focalLength     7.32506     # mm
+#centerOffset    -0.0322884 0.0929296     # mm
+#distortion      0.0 0.0 0.0 0.0 0.0
+#origin          3427.28 1387.86 309.42
+#up              -0.208215 0.976233 0.06014
+#right           0.000575281 0.0616098 -0.9981
+#
+#From this, we can derive:
+#Intrinsics
+#
+#To go from physical units (mm) to pixels, you need the image resolution, which isn't in your snippet. But assuming you have that (say, W x H = 1024 x 768 or similar), we can calculate:
+# Focal length in pixels:
+#
+#fx = focalLength * (image_width / sensor_width)
+#fy = focalLength * pixelAspect
+#
+#Principal point (optical center):
+#
+#cx = image_width / 2 + centerOffset_x * (image_width / sensor_width)
+#cy = image_height / 2 + centerOffset_y * (image_height / sensor_height)
+#
+#Distortion:
+#
+#From the line:
+#
+#distortion      0.0 0.0 0.0 0.0 0.0
+#
+#This maps to OpenCV's distortion model:
+#
+#    k1, k2, k3, p1, p2
+#
+#Extrinsics
+#
+#From this block:
+#
+#origin   3427.28 1387.86 309.42
+#up       -0.208215 0.976233 0.06014
+#right    0.000575281 0.0616098 -0.9981
+#
+#You can reconstruct a rotation matrix R from the right, up, and view vectors. The third vector (view) can be calculated as:
+#
+#view = cross(up, right)
+#
+#Then, assemble the rotation matrix R using:
+#
+#R = [right, up, view]^T
+#
+#The translation vector T is usually the negative of the camera position in world coordinates (depending on conventions), possibly:
+#
+#T = -R @ origin
+
+def load_cams_datatest_mpii(dataset_root_dir, subset):
+    dir_util = 'test_util'
+    dir_cameras = 'camera_calibration'
+    path_cameras = os.path.join(dataset_root_dir, subset, dir_util, dir_cameras)
+    #check the path
+    if not osp.isdir(path_cameras):
+        print(f'Error path isn\'t valid: {path_cameras}')
+
+    cams_data = {}
+    image_height = 2048
+    image_width = 2048
+    calib_files = os.listdir(path_cameras)
+    for idx, calib_file in enumerate(calib_files):
+        path_camera = os.path.join(path_cameras, calib_file)   
+        with open(path_camera, 'r') as cam_cal:
+            next(cam_cal)
+            
+            for line in cam_cal:
+                tokens = line.split()
+                key, *values = tokens
+
+                if key == 'camera':
+                    name = camera_test_ids[idx]  # Store as string, not list
+                    cam_data = {}
+                elif key in ('sensorSize'):
+                    sensor_width = float(values[0])
+                    sensor_height = float(values[1])
+                elif key in ('focalLength'):
+                    focal_length = float(values[0])
+                elif key in ('centerOffset'):
+                    center_off_x = float(values[0])
+                    center_off_y = float(values[1])
+                elif key in ('pixelAspect'):
+                    pixel_aspect = values[0]
+                elif key in ('distortion'):
+                    k = list(map(float, values[:3]))
+                    p = list(map(float, values[3:5]))
+                elif key == 'origin':
+                    cam_data['intrinsics_w_distortion'] = {
+                        'f': [float(values[0]), float(values[5])],
+                        'c': [float(values[2]), float(values[6])],
+                        'k': [0.0, 0.0, 0.0],  # Default values
+                        'p': [0.0, 0.0]
+                    }
+                elif key == 'up':
+                    cam_data['extrinsics'] = {
+                        'R': [
+                            list(map(float, values[:3])),
+                            list(map(float, values[4:7])),
+                            list(map(float, values[8:11]))
+                        ],
+                        'T': list(map(float, [values[3], values[7], values[11]]))
+                    }
+                elif key == 'right':  # Assuming 'right' marks the end of a camera block
+                    fx = float(focal_length/(image_width/sensor_width))
+                    cam_data['intrinsics_w_distortion'] = {
+                        
+                        'f': [fx, 
+                              float(fx * pixel_aspect)],
+                        'c': [float(image_width / 2 + center_off_x * (image_width / sensor_width)),
+                              float(image_height / 2 + center_off_y * (image_height / sensor_height))],
+                        'k': k,
+                        'p': p
+
+                    }
+                    cams_data[name] = cam_data
+
     return cams_data
 
 #note: for mpii dataset
@@ -105,7 +232,7 @@ def load_cams_data_mpii(dataset_root_dir, subset, subj_name):
                     'p': [0.0, 0.0]
                 }
             elif key == 'extrinsic':
-                cam_data['extrinsic'] = {
+                cam_data['extrinsics'] = {
                     'R': [
                         list(map(float, values[:3])),
                         list(map(float, values[4:7])),
@@ -117,6 +244,8 @@ def load_cams_data_mpii(dataset_root_dir, subset, subj_name):
                 cams_data[name] = cam_data
 
     return cams_data
+
+
 
 def find_dirs(dataset_root_dir, subset, subj_names):
     dirs = []
@@ -146,9 +275,11 @@ def infer_meta_from_name(subj_video, action, cam_id):
 
 #A raw way to get information from dirs
 def infer_meta_from_name_mpii(subj_video, action, cam_id):
+    digit_subj_video = re.search(r'\d+', subj_video).group()
+    digit_action = re.search(r'\d+', action).group()
     meta = {
-        'subject': int(subj_video[1]),
-        'action': int(action[3]),
+        'subject': int(digit_subj_video),
+        'action': int(digit_action),
         'subaction': int(0),
         'camera': int(cam_id)
     }
@@ -166,7 +297,21 @@ def _retrieve_camera(cams, subject, cameraidx):
     camera['cy'] = c[0][1]
     camera['k'] = k[0]
     camera['p'] = p[0]
-    #camera['name'] = [subject, cameraidx] #hypothesis
+    camera['name'] = str(cameraidx)
+    return camera
+
+def _retrieve_camera_mpii(cams, subject, cameraidx):
+    R, T = cams[str(cameraidx)]['extrinsics'].values()
+    f, c, k, p = cams[str(cameraidx)]['intrinsics_w_distortion'].values() #what about intrinsics_wo_distortion?
+    camera = {}
+    camera['R'] = R
+    camera['T'] = T
+    camera['fx'] = f[0]
+    camera['fy'] = f[1]
+    camera['cx'] = c[0]
+    camera['cy'] = c[1]
+    camera['k'] = k
+    camera['p'] = p
     camera['name'] = str(cameraidx)
     return camera
 
@@ -215,8 +360,14 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
 #                     26 = right_ankle, 19 = left_hip, 20 = left_knee, 21 = left_ankle, 5 = pelvis, 4 = spine, 7 = head];
 #So to find the corrispondance between joint_idx mpii and h3.6m
 #reording indices mpii for h3.6m: [5, 24, 25, 26, 19, 20, 21, 4, 6, 7, 8, 10, 11, 12, 15, 16, 17]
-def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
-    seq_video_dirs = os.listdir(os.path.join(dataset_root_dir))
+def load_db_mpii(dataset_root_dir, dset, cams,  joints_dir = '', images_dir = '', rootIdx=0):
+
+    if dset.startswith('TS'):
+        seq_video_dirs = [dset] 
+        dataset_root_dir = os.path.dirname(dataset_root_dir)
+    else:    
+        seq_video_dirs = os.listdir(os.path.join(dataset_root_dir))
+    
     dataset = []
     
     for seq_video_anno in seq_video_dirs:
@@ -227,13 +378,14 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
             print(f"{annofile}: file does not exist")
             
         anno = sio.loadmat(annofile)
+        #anno = mat73.loadmat(annofile)
         array_joint = anno['univ_annot3'][0][0]
         #edit array of joints positions
         print(f'Formatting joints data ')
         #get the Traslation vector and rotation matrix of the cam 0
-        joints_3d_cam  = []
-        R_t = np.array(cams['0']['extrinsic']['R']).transpose()
-        T = np.array(cams['0']['extrinsic']['T'])
+        joints_3d_cam = []
+        R_t = np.array(cams['0']['extrinsics']['R']).transpose()
+        T = np.array(cams['0']['extrinsics']['T'])
         T = T.reshape(-1, 1)
         T_matrix = np.tile(T, (1, 17))
         for frame_joints_pos in array_joint:
@@ -244,21 +396,22 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
             joints_3d_cam.append(joints_pos_w)
         joints_3d_cam = np.array(joints_3d_cam)
         numimgs = joints_3d_cam.shape[0]
+        print('Formatting done')
         
         for camera_id in cams:
             meta = infer_meta_from_name_mpii(dset, seq_video_anno, camera_id)
-            cam = _retrieve_camera(cams, meta['subject'], meta['camera'])#handle multicamera pov
+            cam = _retrieve_camera_mpii(cams, meta['subject'], meta['camera'])#handle multicamera pov
 
             
             for i in range(numimgs):
-                image = os.path.join(dataset_root_dir, images_dir, camera_id, video_joint[:3], 'frame_'+str(i).zfill(4)+'.jpeg')
+                image = os.path.join(dataset_root_dir, images_dir, camera_id, meta['action'], 'frame_'+str(i).zfill(4)+'.jpeg')
                 joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
                 box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
                 joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
                 center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
                 scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
                 dataitem = {
-                    'videoid': seq_video_anno[3],
+                    'videoid': '0',
                     'cameraid': meta['camera'],
                     'camera_param': cam,
                     'imageid': i,
@@ -280,7 +433,7 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
     
 
 #cams it is a np array
-def load_db(dataset_root_dir, dset, joints_dir, images_dir, cams, rootIdx=0):
+def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rootIdx=0):
     
     videos_joints = os.listdir(os.path.join(dataset_root_dir, joints_dir))
     dataset = []
@@ -339,6 +492,7 @@ if __name__ == '__main__':
     current_dir = os.getcwd()
     print("Current dir:", current_dir)
     
+    load_db = None
     #information to retrieve the dataset information
 
     if args.dataset == "humansc3d":
@@ -352,6 +506,7 @@ if __name__ == '__main__':
         images_dir = 'images'
         camera_param = 'camera_parameters'
         camera_ids = ['50591643', '58860488', '60457274', '65906101']
+        load_db = load_cams_data_humansc3d
     elif args.dataset == "mpii":
         dataset_name = "mpi_inf_3dhp"
         dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
@@ -363,7 +518,14 @@ if __name__ == '__main__':
         images_dir = 'images'
         camera_param = 'camera_parameters'
         camera_ids = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
+        camera_test_ids = ['cam_0', 'cam_8']
+        load_db = load_db_mpii
 
+    if load_db is None:
+        print("Error loader for the dataset not found")
+        exit(-1)
+
+    
     #generate the validation set 
     if args.gen and dataset_name == "humansc3d":
         generate_validation_set(dataset_root_dir, subset_type, subj_name_train)
@@ -394,8 +556,9 @@ if __name__ == '__main__':
             if args.image and dataset_name == 'humansc3d':  
                 convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
 
-            #data = load_db(base_path, subj_video, joints_dir, images_dir, cams)
-            data = load_db_mpii(base_path, subj_video, cams)
+            #data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
+            #data = load_db_mpii(base_path, subj_video, cams)
+            data = load_db(base_path, subj_video, cams)
             db.extend(data)
             video_count += 1
         dbs.append(db)
@@ -404,9 +567,10 @@ if __name__ == '__main__':
     datasets = {'train': dbs[0], 'validation': dbs[1]}
 
     if args.train:
-        with open(os.path.join(dataset_root_dir,'humansc3d_train.pkl'), 'wb') as f:
+        with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
             pickle.dump(datasets['train'], f)
     
     if args.validation:
-        with open(os.path.join(dataset_root_dir, 'humansc3d_test.pkl'), 'wb') as f:
+        with open(os.path.join(dataset_root_dir,f'{args.dataset}_test.pkl'), 'wb') as f:
             pickle.dump(datasets['validation'], f)
+
