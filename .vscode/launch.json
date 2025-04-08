@@ -13,8 +13,6 @@
             "args": [
                 "--data-type",
                 "scale",
-                "--mode",
-                "gt",
                 "--filename",
                 "mpii"
             ]
@@ -28,15 +26,21 @@
             "args": [
                 "--data-type",
                 "scale",
-                "--mode",
-                "gt",
                 "--filename",
-                "humansc3d",
+                "h36m",
                 //"humansc3d",
                 "--test-indices",
-                "1",
+                "2",
                 "--checkpoint",
-                "best"
+                "best",
+                /*"--mask-type",
+                "locally_connected",
+                "--knn",
+                "3",
+                "--layers",
+                "3",
+                "--in-F",
+                "2"*/
             ]
         },
         {
@@ -46,16 +50,12 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--data-type",
-                "scale",
-                "--mode",
-                "gt",
                 "--filename",
-                "humansc3d",
                 //"humansc3d",
+                "h36m",
                 "--test-indices",
-                "1",
-                "--per-joint",
+                "2",
+                //"--per-joint",
             ]
         }
     ]

@@ -11,10 +11,6 @@ THRESHOLD = 10  # mm
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
 
-    # general
-    parser.add_argument('--data-type', help='scale', required=True, choices=['scale'], type=str)
-    parser.add_argument('--mode', help='finetuned 2d detection or gt', required=True, choices=['gt', 'dt_ft'], type=str)
-
     # special
     parser.add_argument('--protocol2', help='whether use Procrustes', action='store_true')
     parser.add_argument('--test-indices', help='test idx list to eval', required=True, type=str)
@@ -29,8 +25,8 @@ def parse_args():
     return args
 
 
-def _eval(test_name, dataitem_gt, commd, mode):
-    result_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'result_%s.pkl' % mode)
+def _eval(test_name, dataitem_gt, commd):
+    result_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'result.pkl')
 
     with open(result_path, 'rb') as f:
         preds = pickle.load(f)['result']  # [N, 17, 3]
@@ -94,7 +90,7 @@ def _eval(test_name, dataitem_gt, commd, mode):
     return final_result, final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt
 
 
-def eval(commd, test_indices, mode='dt', pkl=""):
+def eval(commd, test_indices, pkl=""):
     err_dict = {}
 
     print('loading dataset')
@@ -106,7 +102,7 @@ def eval(commd, test_indices, mode='dt', pkl=""):
     # eval each trial
     for i in test_indices:
         test_name = 'test%d' % i
-        err_dict[test_name], final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt = _eval(test_name, dataitem_gt, commd, mode)
+        err_dict[test_name], final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt = _eval(test_name, dataitem_gt, commd)
 
         # log each trial respectively
         table = prettytable.PrettyTable()
@@ -120,7 +116,7 @@ def eval(commd, test_indices, mode='dt', pkl=""):
         if 'action' in commd:
             table.add_row([test_name + " - PCK" + str(THRESHOLD)] + ['%.2f' % d for d in final_results_pck])
         time_str = time.strftime('%Y-%m-%d-%H-%M')
-        log_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'err_{}_{}_{}.log'.format(commd, mode, time_str))
+        log_path = os.path.join(ROOT_PATH, 'experiment', "test"+ str(i), 'err_{}_{}.log'.format(commd, time_str))
 
         f = open(log_path, 'w')
         print(table, file=f)
@@ -140,23 +136,25 @@ def eval(commd, test_indices, mode='dt', pkl=""):
     print(summary_table)
 
     # save best frame
-    best_frame_path = os.path.join(ROOT_PATH, 'experiment', 'best_frame_%s.pkl' % mode)
+    best_frame_path = os.path.join(ROOT_PATH, 'experiment', "test"+ str(i), 'best_frame_predicted_{}_{}.pkl'.format(commd, time_str))
     with open(best_frame_path, 'wb') as f:
         pickle.dump(best_frame, f)
 
-    best_frame_gt_path = os.path.join(ROOT_PATH, 'experiment', 'best_frame_gt_%s.pkl' % mode)
+    best_frame_gt_path = os.path.join(ROOT_PATH, 'experiment', "test"+ str(i), 'best_frame_predicted_{}_{}.pkl'.format(commd, time_str))
     with open(best_frame_gt_path, 'wb') as f:
         pickle.dump(best_frame_gt, f)
-    print('best frame idx:', best_frame_idx)
-    print('best frame error:', error_best_frame)
-    print('best frame saved to %s' % best_frame_path)
 
+    #Save txt file with information
+    best_frame_txt_path = os.path.join(ROOT_PATH, 'experiment', "test"+ str(i), 'best_frame_{}_{}.txt'.format(commd, time_str))
+    with open(best_frame_txt_path, 'w') as f:
+        f.write('best frame idx: %d\n' % best_frame_idx)
+        f.write('best frame error: %.2f\n' % error_best_frame)
 
 if __name__ == '__main__':
 
     args = parse_args()
     test_indices = sorted([int(i) for i in args.test_indices.split(',')])
-    commd = args.data_type
+    commd = ""
     if args.per_joint:
         commd += '_joint'
     else:
@@ -165,8 +163,7 @@ if __name__ == '__main__':
         commd += '_protocol2'
 
     print('=> commd:', commd)
-    print('=> mode:', args.mode)
     print('=> eval experiments:', test_indices)
 
-    eval(commd=commd, test_indices=test_indices, mode=args.mode, pkl=args.filename)
+    eval(commd=commd, test_indices=test_indices, pkl=args.filename)
 

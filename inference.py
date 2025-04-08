@@ -12,10 +12,6 @@ ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 def parse_args():
     parser = argparse.ArgumentParser(description='inference')
 
-    # general
-    parser.add_argument('--data-type', help=' scale', required=True, choices=['scale'], type=str)
-    parser.add_argument('--mode', help='dt_ft, gt', required=True, choices=['gt', 'dt_ft'], type=str)
-
     # optional arguments
     parser.add_argument('--test-indices', help='test idx ', type=str)
     parser.add_argument('--mask-type', help='mask type ', type=str)
@@ -47,8 +43,8 @@ def main():
     datareader = data.DataReader()
     gt_trainset_all = datareader.real_read(args.filename, "train")
     gt_testset_all = datareader.real_read(args.filename, "test")
-    train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, which=args.data_type, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
+    train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
+    train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
         test_data = data.flip_data(test_data)
@@ -64,10 +60,9 @@ def main():
 
     if args.flip_data:
         predictions = data.unflip_data(predictions)  # [N, 17*3]
-    result = datareader.denormalize(predictions, which=args.data_type)
-    # result shape [N, 17, 3], no matter which data type
+    result = datareader.denormalize(predictions)
 
-    save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result_%s.pkl' % args.mode)
+    save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
     f = open(save_path, 'wb')
     pickle.dump({'result': result}, f)
     f.close()

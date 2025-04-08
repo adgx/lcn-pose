@@ -14,10 +14,6 @@ ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 def parse_args():
     parser = argparse.ArgumentParser(description='train')
 
-    # general
-    parser.add_argument('--data-type', help='scale', required=True, choices=['scale'], type=str)
-    parser.add_argument('--mode', help='dt_ft, gt', required=True, choices=['gt', 'dt_ft'], type=str)
-
     # optional arguments
     parser.add_argument('--test-indices', help='test idx ', type=str)
     parser.add_argument('--mask-type', help='mask type ', type=str)
@@ -55,8 +51,8 @@ def main():
     mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
     gt_testset = [val for val, mask in zip(gt_testset_all, mask) if mask == 1]
 
-    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, which=args.data_type, read_confidence=True if args.in_F == 3 else False)
-    train_labels, test_labels = datareader.read_3d(which=args.data_type, mode=args.mode)
+    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
+    train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
         # only work for scale 

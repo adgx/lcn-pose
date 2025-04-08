@@ -1,11 +1,9 @@
 import numpy as np
 import scipy
 import os, sys
-import pickle, h5py
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(CURRENT_DIR)
 import filter_hub
-from random_graph import generate_random_graph 
 
 
 def get_neighbour_matrix_by_hand(neighbour_dict, knn=1):
@@ -136,20 +134,7 @@ def get_params(is_training, gt_dataset):
     params['mask_type'] = 'locally_connected'
     params['init_type'] = 'random'  # same, ones, random; only used when learnable
     params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=3)
-    # import random
-    # random.seed(146)
-    # graph = generate_random_graph(17, 20)
-    # params['neighbour_matrix'] = gen_neighbour_matrix_from_edges(graph.edges, knn=2)
 
-    # # norm 1
-    # params['neighbour_matrix'] = params['neighbour_matrix'] / np.sum(params['neighbour_matrix'], axis=1, keepdims=True)
-    # # norm2
-    # degree_matrix = np.diag(1/np.sqrt(np.sum(params['neighbour_matrix'], axis=1)))
-    # params['neighbour_matrix'] = degree_matrix @ params['neighbour_matrix'] @ degree_matrix
-
-    # params['neighbour_matrix'] = get_laplacian_matrix(filter_hub.neighbour_dict_set[0], gt_dataset,
-    #     normalized=True, rescale=True)
-    # params['neighbour_matrix'] = np.ones((17, 17))
     params['in_joints'] = 17
     params['out_joints'] = 17
     params['num_layers'] = 3
@@ -165,12 +150,4 @@ def get_params(is_training, gt_dataset):
 
     return params
 
-
-if __name__ == '__main__':
-    import random
-    random.seed(146)
-    graph = generate_random_graph(17, 20)
-    neighbour_matrix = gen_neighbour_matrix_from_edges(graph.edges, knn=2)
-    print(graph.edges)
-    print(neighbour_matrix)
 

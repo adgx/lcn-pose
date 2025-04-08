@@ -123,11 +123,11 @@ class DataReader(object):
 
         return trainset, testset
 
-    def read_3d(self, which="scale", mode="dt_ft", limit=1000):
+    def read_3d(self, which="scale"):
         if self.gt_trainset is None:
-            self.gt_trainset = self.real_read("train")[:limit]
+            self.gt_trainset = self.real_read("train")
         if self.gt_testset is None:
-            self.gt_testset = self.real_read("test")[:limit]
+            self.gt_testset = self.real_read("test")
 
         # normalize
         train_labels = np.empty((len(self.gt_trainset), 17, 3))
