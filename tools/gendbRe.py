@@ -623,6 +623,7 @@ if __name__ == '__main__':
         
         with open(os.path.join(dataset_root_dir, 'test',f'{args.dataset}_test.pkl'), 'wb') as f:
             pickle.dump(db_mpii_test, f)
+        exit(1)
     train_dirs = []
     val_dirs = []
     #allow to find the train and validation set
