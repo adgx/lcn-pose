@@ -438,7 +438,7 @@ def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
 
     dataset = []
     
-    print(f'load {dataset_root_dir} ')
+    print(f'load {dataset_root_dir}\test\{dset}')
     annofile = os.path.join(dataset_root_dir, 'test', dset, 'annot_data.mat')
     
     if not os.path.exists(annofile):
@@ -464,7 +464,7 @@ def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
     if int(dset[2:]) < 5:
         cam_name = camera_test_ids[0]
     else: 
-        came_name = camera_test_ids[1]
+        cam_name = camera_test_ids[1]
     
     #get the Traslation vector and rotation matrix of the cam 0
     joints_3d_cam = []
