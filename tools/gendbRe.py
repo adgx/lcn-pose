@@ -154,8 +154,10 @@ def load_cams_datatest_mpii(dataset_root_dir, subset):
                         'c' : cam_data['intrinsics_w_distortion']['c'],
                         'f' : cam_data['intrinsics_w_distortion']['f']
                     }
-                    cam_data['T'] = origin
-                    cam_data['R'] = [right, up, [a * b for a, b in zip(right, up)]]
+                    cam_data['extrinsics'] = {
+                        'T' : origin,
+                        'R' : [right, up, [a * b for a, b in zip(right, up)]]
+                    }
                     cams_data[name] = cam_data
                     break
 
@@ -276,11 +278,13 @@ def infer_meta_from_name(subj_video, action, cam_id):
 def infer_meta_from_name_mpii(subj_video, action, cam_id):
     digit_subj_video = re.search(r'\d+', subj_video).group()
     digit_action = re.search(r'\d+', action).group()
+
+
     meta = {
         'subject': int(digit_subj_video),
         'action': int(digit_action),
         'subaction': int(0),
-        'camera': int(cam_id)
+        'camera': cam_id
     }
     return meta
 
@@ -427,7 +431,84 @@ def load_db_mpii(dataset_root_dir, dset, cams,  joints_dir = '', images_dir = ''
 
                 dataset.append(dataitem)
     
-    return dataset    
+    return dataset
+
+
+def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
+
+    dataset = []
+    
+    print(f'load {dataset_root_dir} ')
+    annofile = os.path.join(dataset_root_dir, 'test', dset, 'annot_data.mat')
+    
+    if not os.path.exists(annofile):
+        print(f"{annofile}: file does not exist")
+        
+    anno = mat73.loadmat(annofile)
+    valid_frame = anno['valid_frame']
+    array_joint = anno['univ_annot3']
+    array_joint = np.squeeze(array_joint, axis=2)
+
+    #obtain the vailid index frame
+    valid_frame_idx = []
+    count = 0 
+    for idx, valid in enumerate(valid_frame):
+        if valid:
+            valid_frame_idx.append(idx)
+            #debug count += 1
+
+    array_joint_val = array_joint[:,:,valid_frame_idx] 
+    
+    #edit array of joints positions
+    print(f'Formatting joints data ')
+    if int(dset[2:]) < 5:
+        cam_name = camera_test_ids[0]
+    else: 
+        came_name = camera_test_ids[1]
+    
+    #get the Traslation vector and rotation matrix of the cam 0
+    joints_3d_cam = []
+    R_t = np.array(cams[cam_name]['extrinsics']['R']).transpose()
+    T = np.array(cams[cam_name]['extrinsics']['T'])
+    T = T.reshape(-1, 1)
+    T_matrix = np.tile(T, (1, 17))
+    num_frames = array_joint_val.shape[2]
+    for frame in range(num_frames):
+        frame_joints_pos = array_joint_val[:, :, frame]
+        joints_pos_w = np.matmul(R_t, (frame_joints_pos - T_matrix)).transpose()
+        joints_3d_cam.append(joints_pos_w)
+    joints_3d_cam = np.array(joints_3d_cam)
+    print('Formatting done')
+    
+    meta = infer_meta_from_name_mpii(dset, '0', cam_name)
+    cam = _retrieve_camera_mpii(cams, meta['subject'], meta['camera'])#handle multicamera pov
+
+    for i in range(num_frames):
+        image = os.path.join(dataset_root_dir, dset, images_dir, 'img_'+str(i).zfill(6)+'.jpeg')
+        joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
+        box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
+        joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
+        center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
+        scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
+        dataitem = {
+            'videoid': '0',
+            'cameraid': meta['camera'],
+            'camera_param': cam,
+            'imageid': i,
+            'image_path': image,
+            'joint_3d_image': joint_3d_image,
+            'joint_3d_camera': joint_3d_cam,
+            'center': center,
+            'scale': scale,
+            'box': box,
+            'subject': meta['subject'],
+            'action': meta['action'],
+            'root_depth': joint_3d_cam[rootIdx, 2]
+        }
+
+        dataset.append(dataitem)
+    
+    return dataset
 
     
 
@@ -515,6 +596,7 @@ if __name__ == '__main__':
         joints_dir = 'joints3d_25'
         videos_dir = 'videos'
         images_dir = 'images'
+        images_test_dir = 'imageSequence'
         camera_param = 'camera_parameters'
         camera_ids = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
         camera_test_ids = ['cam_0', 'cam_8']
@@ -534,6 +616,13 @@ if __name__ == '__main__':
     
     if args.dataset == 'mpii' and args.validation is True:
         cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
+        db_mpii_test = []
+        for subj in subj_name_val:
+           data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
+           db_mpii_test.extend(data)
+        
+        with open(os.path.join(dataset_root_dir, 'test',f'{args.dataset}_test.pkl'), 'wb') as f:
+            pickle.dump(db_mpii_test, f)
     train_dirs = []
     val_dirs = []
     #allow to find the train and validation set
