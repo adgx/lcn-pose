@@ -89,9 +89,9 @@ def load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param):
 #
 #R = [right, up, view]^T
 #
-#The translation vector T is usually the negative of the camera position in world coordinates (depending on conventions), possibly:
+#The translation vector T is :
 #
-#T = -R @ origin
+#T = origin
 
 def load_cams_datatest_mpii(dataset_root_dir, subset):
     dir_util = 'test_util'
@@ -111,10 +111,13 @@ def load_cams_datatest_mpii(dataset_root_dir, subset):
             next(cam_cal)
             
             for line in cam_cal:
+
                 tokens = line.split()
                 key, *values = tokens
 
-                if key == 'camera':
+                if key in ('frame', 'distortionModel','colorCorrection', 'red', 'green', 'blue'):
+                    continue
+                elif key == 'camera':
                     name = camera_test_ids[idx]  # Store as string, not list
                     cam_data = {}
                 elif key in ('sensorSize'):
@@ -126,27 +129,17 @@ def load_cams_datatest_mpii(dataset_root_dir, subset):
                     center_off_x = float(values[0])
                     center_off_y = float(values[1])
                 elif key in ('pixelAspect'):
-                    pixel_aspect = values[0]
+                    pixel_aspect = float(values[0])
                 elif key in ('distortion'):
                     k = list(map(float, values[:3]))
                     p = list(map(float, values[3:5]))
                 elif key == 'origin':
-                    cam_data['intrinsics_w_distortion'] = {
-                        'f': [float(values[0]), float(values[5])],
-                        'c': [float(values[2]), float(values[6])],
-                        'k': [0.0, 0.0, 0.0],  # Default values
-                        'p': [0.0, 0.0]
-                    }
+                    origin = list(map(float, values[:3]))
                 elif key == 'up':
-                    cam_data['extrinsics'] = {
-                        'R': [
-                            list(map(float, values[:3])),
-                            list(map(float, values[4:7])),
-                            list(map(float, values[8:11]))
-                        ],
-                        'T': list(map(float, [values[3], values[7], values[11]]))
-                    }
+                    up = list(map(float, values[:3]))
                 elif key == 'right':  # Assuming 'right' marks the end of a camera block
+                    right = list(map(float, values[:3]))
+
                     fx = float(focal_length/(image_width/sensor_width))
                     cam_data['intrinsics_w_distortion'] = {
                         
@@ -156,9 +149,15 @@ def load_cams_datatest_mpii(dataset_root_dir, subset):
                               float(image_height / 2 + center_off_y * (image_height / sensor_height))],
                         'k': k,
                         'p': p
-
                     }
+                    cam_data['intrinsics_wo_distortion'] = {
+                        'c' : cam_data['intrinsics_w_distortion']['c'],
+                        'f' : cam_data['intrinsics_w_distortion']['f']
+                    }
+                    cam_data['T'] = origin
+                    cam_data['R'] = [right, up, [a * b for a, b in zip(right, up)]]
                     cams_data[name] = cam_data
+                    break
 
     return cams_data
 
@@ -532,7 +531,9 @@ if __name__ == '__main__':
     # loading cameras data
     # we assuming that camera parameters doesn't change in the time and keep the same between train and validation set
     cams = load_cams_data(dataset_root_dir, subset_type[0], subj_name_train[0], camera_param)
-
+    
+    if args.dataset == 'mpii' and args.validation is True:
+        cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
     train_dirs = []
     val_dirs = []
     #allow to find the train and validation set
@@ -573,4 +574,3 @@ if __name__ == '__main__':
     if args.validation:
         with open(os.path.join(dataset_root_dir,f'{args.dataset}_test.pkl'), 'wb') as f:
             pickle.dump(datasets['validation'], f)
-
