@@ -46,12 +46,21 @@ def _eval(test_name, dataitem_gt, commd):
         gt = dataitem_gt[idx]['joint_3d_camera']
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
+
+        first_step = pred-gt
+        secnd_step = np.square(first_step)
+        third_step = np.sum(secnd_step, axis=1)
+        fourth_step = np.sqrt(third_step)
+        # error_per_joint = np.sqrt(np.square(pred-gt).sum(axis=1))  # [17]
         error_per_joint = np.sqrt(np.square(pred-gt).sum(axis=1))  # [17]
+        
+        # Save best frame
         if error_best_frame > np.mean(error_per_joint):
             error_best_frame = np.mean(error_per_joint)
             best_frame_idx = idx
             best_frame = pred
             best_frame_gt = dataitem_gt[idx]
+
         results.append(error_per_joint)
         if idx % 10000 == 0:
             print('step:%d' % idx + '-' * 20)
@@ -60,6 +69,8 @@ def _eval(test_name, dataitem_gt, commd):
 
 
     final_results_pck = []
+
+    print(arr = np.array(results[results < THRESHOLD]) / (len(arr) * arr.shape[1]) * 100)
     if 'action' in commd:
         final_result = []
         action_index_dict = {}

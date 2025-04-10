@@ -4,7 +4,7 @@ import pickle
 
 def main():
 
-    pickle_path = "/Users/andreaongaro/Documents/Documenti Andrea Ongaro/Magistrale/Torino/Corsi/2_ANNO/ComputerVision/Project/lcn-pose/experiment/best_frame_gt_gt.pkl"
+    pickle_path = "/Users/andreaongaro/Documents/Documenti Andrea Ongaro/Magistrale/Torino/Corsi/2_ANNO/ComputerVision/Project/lcn-pose/experiment/test3/best_frame_predicted__joint_2025-04-08-17-46.pkl"
 
     with open(pickle_path, 'rb') as f:
         data = pickle.load(f)

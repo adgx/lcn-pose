@@ -52,9 +52,9 @@
             "args": [
                 "--filename",
                 //"humansc3d",
-                "h36m",
+                "humansc3d",
                 "--test-indices",
-                "2",
+                "3",
                 //"--per-joint",
             ]
         }

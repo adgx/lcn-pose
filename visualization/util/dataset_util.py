@@ -86,7 +86,7 @@ def plot_over_image(frame, points_2d=np.array([]), with_ids=True, with_limbs=Tru
     fig, ax = plt.subplots(figsize=(10,10))
     ax.imshow(frame)
     if points_2d.shape[0]:
-        #ax.plot(points_2d[:, 0], points_2d[:, 1], 'x', markeredgewidth=10, color='white')
+        ax.plot(points_2d[:, 0], points_2d[:, 1], 'x', markeredgewidth=10, color='white')
         if with_ids:
             for i in range(num_points):
                 ax.text(points_2d[i, 0], points_2d[i, 1], str(i), color='red', fontsize=20)
@@ -106,6 +106,7 @@ def plot_over_image(frame, points_2d=np.array([]), with_ids=True, with_limbs=Tru
     plt.margins(0,0)
     plt.gca().xaxis.set_major_locator(plt.NullLocator())
     plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    #plt.show()
     if path_to_write:
         plt.ioff()
         plt.savefig(path_to_write, pad_inches = 0, bbox_inches='tight')
