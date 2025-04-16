@@ -7,6 +7,7 @@ import parse
 import argparse
 import pickle
 import re
+import math
 import mat73
 import sys
 
@@ -163,7 +164,7 @@ def load_cams_datatest_mpii(dataset_root_dir, subset):
 
     return cams_data
 
-#note: for mpii dataset
+#note: for mpii trainset
 #-camera:
 #example of Camera calibaration parameters
 #name          0
@@ -352,6 +353,39 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
     pose3d_image_frame[:, 2] = pose3d_depth
     return pose3d_image_frame
 
+
+def load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam, rootIdx = 0):
+    meta = infer_meta_from_name_mpii(dset, seq_video_anno, camera_id)
+    cam = _retrieve_camera_mpii(cams, meta['subject'], meta['camera'])#handle multicamera pov
+
+    dataset = []
+
+    for i in range(numimgs):
+        image = os.path.join(dataset_root_dir, str(camera_id), str(meta['action']), 'frame_'+str(i).zfill(4)+'.jpeg')
+        joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
+        box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
+        joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
+        center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
+        scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
+        dataitem = {
+            'videoid': '0',
+            'cameraid': meta['camera'],
+            'camera_param': cam,
+            'imageid': i,
+            'image_path': image,
+            'joint_3d_image': joint_3d_image,
+            'joint_3d_camera': joint_3d_cam,
+            'center': center,
+            'scale': scale,
+            'box': box,
+            'subject': meta['subject'],
+            'action': meta['action'],
+            'root_depth': joint_3d_cam[rootIdx, 2]
+        }  
+        dataset.append(dataitem)
+
+    return dataset
+
 #Pw​=(R^−1)×(Pc​−T)
 #to obtain all Pw, make a Pc matrix with all posistion joints like: Pc0^T...Pcn^T; 
 #and make A Matrix of repete T^T n times.
@@ -363,19 +397,16 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
 #                     26 = right_ankle, 19 = left_hip, 20 = left_knee, 21 = left_ankle, 5 = pelvis, 4 = spine, 7 = head];
 #So to find the corrispondance between joint_idx mpii and h3.6m
 #reording indices mpii for h3.6m: [5, 24, 25, 26, 19, 20, 21, 4, 6, 7, 8, 10, 11, 12, 15, 16, 17]
-def load_db_mpii(dataset_root_dir, dset, cams,  joints_dir = '', images_dir = '', rootIdx=0):
-
-    if dset.startswith('TS'):
-        seq_video_dirs = [dset] 
-        dataset_root_dir = os.path.dirname(dataset_root_dir)
-    else:    
-        seq_video_dirs = os.listdir(os.path.join(dataset_root_dir))
+def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
+   
+    seq_video_dirs = os.listdir(os.path.join(dataset_root_dir, dset))
     
-    dataset = []
+    trainingset = []
+    testset = []
     
     for seq_video_anno in seq_video_dirs:
         print(f'load {dset} {seq_video_anno}')
-        annofile = os.path.join(dataset_root_dir, seq_video_anno, 'annot.mat')
+        annofile = os.path.join(dataset_root_dir, dset, seq_video_anno, 'annot.mat')
         
         if not os.path.exists(annofile):
             print(f"{annofile}: file does not exist")
@@ -401,44 +432,29 @@ def load_db_mpii(dataset_root_dir, dset, cams,  joints_dir = '', images_dir = ''
         numimgs = joints_3d_cam.shape[0]
         print('Formatting done')
         
-        for camera_id in cams:
-            meta = infer_meta_from_name_mpii(dset, seq_video_anno, camera_id)
-            cam = _retrieve_camera_mpii(cams, meta['subject'], meta['camera'])#handle multicamera pov
+        
 
-            
-            for i in range(numimgs):
-                image = os.path.join(dataset_root_dir, images_dir, camera_id, meta['action'], 'frame_'+str(i).zfill(4)+'.jpeg')
-                joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
-                box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
-                joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
-                center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
-                scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
-                dataitem = {
-                    'videoid': '0',
-                    'cameraid': meta['camera'],
-                    'camera_param': cam,
-                    'imageid': i,
-                    'image_path': image,
-                    'joint_3d_image': joint_3d_image,
-                    'joint_3d_camera': joint_3d_cam,
-                    'center': center,
-                    'scale': scale,
-                    'box': box,
-                    'subject': meta['subject'],
-                    'action': meta['action'],
-                    'root_depth': joint_3d_cam[rootIdx, 2]
-                }
+        #used for the traing set
+        if args.train:
+            for camera_id in camera_ids[:-3]:
+                trainingset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam))
+        #used for the validation set
+        if args.validation is True:
+            for  camera_id in camera_ids[-3:]:
+                testset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam))
 
-                dataset.append(dataitem)
-    
-    return dataset
+
+    return trainingset, testset
+
+
+
 
 
 def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
 
     dataset = []
     
-    print(f'load {dataset_root_dir}\test\{dset}')
+    print(f'load {dataset_root_dir}\\test\{dset}')
     annofile = os.path.join(dataset_root_dir, 'test', dset, 'annot_data.mat')
     
     if not os.path.exists(annofile):
@@ -566,12 +582,77 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--image", action="store_true", help="Convert dataset mp4 videos to images")
     parser.add_argument("-g", "--gen", action="store_true", help="Generate validation set from training set")
     parser.add_argument("-d", '--dataset', type=str, default="humansc3d", help='Filename of the dataset', choices=["mpii", "humansc3d"])
+    parser.add_argument("-c", "--compose", action="store_true", help="Generate a train set that is coposed by humansc3d, mpii and h3.6m")
     args = parser.parse_args()
     
     #debug stuff 
     current_dir = os.getcwd()
     print("Current dir:", current_dir)
-    
+
+    #composing datasets
+    if args.compose:
+        print("composing datasets: h3.6m, humansc3d, mpii")
+
+        #check that exists the pkl for all dataset
+        datasets_dir = os.path.join('..', 'datasets')
+        if not os.path.exists(datasets_dir):
+            print(f"{datasets_dir}: doesn't exist")
+            exit()
+
+        #h3.6m
+        dataset_h36m_path = os.path.join(datasets_dir, 'h3.6m', 'h36m_train.pkl') 
+        
+        if not os.path.exists(dataset_h36m_path):
+            print(f"{dataset_h36m_path}: not exist")
+            exit()
+        
+        #humansc3d
+        dataset_humansc3d_path = os.path.join(datasets_dir, 'humansc3d', 'humansc3d_train.pkl')
+        if not os.path.exists(dataset_humansc3d_path):
+            print(f"{dataset_humansc3d_path}: not exist")
+            exit()
+
+        #mpii
+        dataset_mpii_path = os.path.join(datasets_dir, 'mpi_inf_3dhp', 'mpii_train.pkl')
+        if not os.path.exists(dataset_mpii_path):
+            print(f"{dataset_mpii_path}: not exist")
+
+        #open h3.6m
+        with open(dataset_h36m_path, 'rb') as h36m_pkl:
+            dataset_h36m = pickle.load(h36m_pkl)
+
+        #open humansc3d
+        with open(dataset_humansc3d_path, 'rb') as humansc3d_pkl:
+            dataset_humansc3d = pickle.load(humansc3d_pkl)
+
+        #open mpii
+        with open(dataset_mpii_path, 'rb') as mpii_pkl:
+            dataset_mpii = pickle.load(mpii_pkl)
+        #determinate the min number of samples
+        num_mpii_samples = len(dataset_mpii)
+        num_humansc3d_samples = len(dataset_humansc3d)
+        num_h36m_samples = len(dataset_h36m)
+        min_samples = min([num_h36m_samples, num_humansc3d_samples, num_mpii_samples])
+        
+        percentage = 0.33
+
+        num_sample = math.ceil(percentage*min_samples)
+
+        dataset_composed = []
+        dataset_composed.extend(dataset_h36m[:num_sample])
+        dataset_composed.extend(dataset_humansc3d[:num_sample])
+        dataset_composed.extend(dataset_mpii[:num_sample])
+
+        dataset_composed_path = os.path.join(datasets_dir, 'dataset_composed')
+        if not os.path.exists(dataset_composed_path):
+            os.makedirs(dataset_composed_path)
+        with open(os.path.join(dataset_composed_path, f'db_composed.pkl'), 'wb') as f:
+                pickle.dump(dataset_composed, f)
+
+        exit()
+        
+        
+
     load_db = None
     #information to retrieve the dataset information
 
@@ -614,16 +695,44 @@ if __name__ == '__main__':
     # we assuming that camera parameters doesn't change in the time and keep the same between train and validation set
     cams = load_cams_data(dataset_root_dir, subset_type[0], subj_name_train[0], camera_param)
     
-    if args.dataset == 'mpii' and args.validation is True:
-        cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
-        db_mpii_test = []
-        for subj in subj_name_val:
-           data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
-           db_mpii_test.extend(data)
+    if args.dataset == 'mpii':
+
+        mpii_dbs = [[], []]
+
+        base_dir = osp.join(dataset_root_dir, subset_type[0])
         
-        with open(os.path.join(dataset_root_dir, 'test',f'{args.dataset}_test.pkl'), 'wb') as f:
-            pickle.dump(db_mpii_test, f)
-        exit(1)
+        for subj in subj_name_train:
+            #check if the subject dir exist
+            if not osp.isdir(osp.join(base_dir, subj)):
+                print(f'subject: {subj} not found')
+                continue
+                
+            #loading data from training set and pushes the last three point view into the validation set  
+            trainingset, testset = load_db_mpii(base_dir, subj, cams, rootIdx=0)
+            mpii_dbs[0].extend(trainingset) 
+            mpii_dbs[1].extend(testset)
+
+        #loading the mpii validation set
+        if args.validation:
+            cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
+        
+        for subj in subj_name_val:
+            if not osp.isdir(osp.join(dataset_root_dir, subset_type[1],subj)):
+                print(f'subject: {subj} not found')
+                continue
+            data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
+            mpii_dbs[1].extend(data)
+        
+        #generate the traing set
+        if args.train:
+            with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
+                pickle.dump(mpii_dbs[0], f)
+        #generate the validation set
+        if args.validation:
+            with open(os.path.join(dataset_root_dir, f'{args.dataset}_test.pkl'), 'wb') as f:
+                pickle.dump(mpii_dbs[1], f)
+        exit()
+    
     train_dirs = []
     val_dirs = []
     #allow to find the train and validation set
@@ -637,30 +746,33 @@ if __name__ == '__main__':
     dbs = []
     video_count = 0
     idx_subset_type = 0 
-    for dataset in train_val_datasets:
-        db = []
-        for subj_video in dataset:
-            base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
-            if np.mod(video_count, 1) == 0:
-                print('Process {}: {}'.format(video_count, subj_video))
 
-            if args.image and dataset_name == 'humansc3d':  
-                convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
+    if dataset_name == 'humansc3d':
 
-            #data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
-            #data = load_db_mpii(base_path, subj_video, cams)
-            data = load_db(base_path, subj_video, cams)
-            db.extend(data)
-            video_count += 1
-        dbs.append(db)
-        idx_subset_type += 1
-
-    datasets = {'train': dbs[0], 'validation': dbs[1]}
-
-    if args.train:
-        with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
-            pickle.dump(datasets['train'], f)
+        for dataset in train_val_datasets:
+            db = []
+            for subj_video in dataset:
+                base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+                if np.mod(video_count, 1) == 0:
+                    print('Process {}: {}'.format(video_count, subj_video))
     
-    if args.validation:
-        with open(os.path.join(dataset_root_dir,f'{args.dataset}_test.pkl'), 'wb') as f:
-            pickle.dump(datasets['validation'], f)
+                if args.image and dataset_name == 'humansc3d':  
+                    convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
+    
+                #data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
+                #data = load_db_mpii(base_path, subj_video, cams)
+                data = load_db(base_path, subj_video, cams)
+                db.extend(data)
+                video_count += 1
+            dbs.append(db)
+            idx_subset_type += 1
+    
+        datasets = {'train': dbs[0], 'validation': dbs[1]}
+    
+        if args.train:
+            with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
+                pickle.dump(datasets['train'], f)
+        
+        if args.validation:
+            with open(os.path.join(dataset_root_dir,f'{args.dataset}_test.pkl'), 'wb') as f:
+                pickle.dump(datasets['validation'], f)
