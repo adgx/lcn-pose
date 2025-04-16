@@ -45,8 +45,8 @@ def main():
     args = parse_args()
 
     datareader = data.DataReader()
-    gt_trainset_all = datareader.real_read(args.train, "train")
-    gt_testset_all = datareader.real_read(args.test, "test")
+    gt_trainset_all = datareader.real_read(args.train_set, "train")
+    gt_testset_all = datareader.real_read(args.test_set, "test")
     
     mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
     gt_trainset = [val for val, mask in zip(gt_trainset_all, mask) if mask == 1]
@@ -62,9 +62,8 @@ def main():
         train_data = data.flip_data(train_data)
         train_labels = data.flip_data(train_labels)
 
-    args.output_file = os.path.join(ROOT_PATH, 'output', 'output.txt')
     if args.output_file is not None:
-        if not os.path.exists(os.path.dirname(args.output_file)):
+        if not os.path.exists(os.path.join(ROOT_PATH, 'output', args.output_file)):
             os.makedirs(os.path.dirname(args.output_file))
 
     # params
@@ -86,4 +85,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-
