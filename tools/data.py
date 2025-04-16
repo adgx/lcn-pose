@@ -88,7 +88,9 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
-                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                elif camera_name.find("cam_") != -1:
+                    res_w, res_h = 2048, 2048
+                elif int(camera_name) >= 0:
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -102,7 +104,9 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
-                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                elif camera_name.find("cam_") != -1:
+                    res_w, res_h = 2048, 2048
+                elif int(camera_name) >= 0:
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -140,7 +144,9 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
-                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                elif camera_name.find("cam_") != -1:
+                    res_w, res_h = 2048, 2048
+                elif int(camera_name) >= 0:
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -155,7 +161,9 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
-                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                elif camera_name.find("cam_") != -1:
+                    res_w, res_h = 2048, 2048
+                elif int(camera_name) >= 0:
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
@@ -187,7 +195,9 @@ class DataReader(object):
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488"  or camera_name == "50591643" or camera_name == "65906101":
                     res_w, res_h = 1000, 1000
-                elif int(camera_name) >= 0 and int(camera_name) < 100: #mpii dataset
+                elif camera_name.find("cam_") != -1:
+                    res_w, res_h = 2048, 2048
+                elif int(camera_name) >= 0:
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx

@@ -7,7 +7,7 @@ import argparse
 import time
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-THRESHOLD = 10  # mm
+THRESHOLD = 0.1  # mm
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
 
@@ -70,7 +70,7 @@ def _eval(test_name, dataitem_gt, commd):
 
     final_results_pck = []
 
-    print(arr = np.array(results[results < THRESHOLD]) / (len(arr) * arr.shape[1]) * 100)
+    print(len(np.array(results[results < THRESHOLD])) / (len(results) * results.shape[1]) * 100)
     if 'action' in commd:
         final_result = []
         action_index_dict = {}

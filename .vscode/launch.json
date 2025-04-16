@@ -5,15 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Training Graph",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset",
+                "hm_3L"
+            ]
+        },
+        {
             "name": "Python Debugger: Training",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--data-type",
-                "scale",
-                "--filename",
+                "--test_set",
+                "mpii",
+                "--train_set",
                 "mpii"
             ]
         },
@@ -54,7 +65,7 @@
                 //"humansc3d",
                 "humansc3d",
                 "--test-indices",
-                "3",
+                "1",
                 //"--per-joint",
             ]
         }
