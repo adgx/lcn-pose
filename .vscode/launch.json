@@ -23,9 +23,11 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "mpii",
+                "humansc3d",
                 "--train_set",
-                "mpii"
+                "humansc3d",
+                "--test-indices",
+                "7"
             ]
         },
         {
@@ -35,23 +37,23 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--data-type",
-                "scale",
-                "--filename",
-                "h36m",
+                "--test_set",
+                "mpii",
+                "--train_set",
+                "mpii",
                 //"humansc3d",
                 "--test-indices",
-                "2",
+                "6",
                 "--checkpoint",
                 "best",
-                /*"--mask-type",
+                "--mask-type",
                 "locally_connected",
                 "--knn",
                 "3",
                 "--layers",
                 "3",
                 "--in-F",
-                "2"*/
+                "2"
             ]
         },
         {
@@ -63,10 +65,10 @@
             "args": [
                 "--filename",
                 //"humansc3d",
-                "humansc3d",
+                "mpii",
                 "--test-indices",
-                "1",
-                //"--per-joint",
+                "6",
+                "--per-joint",
             ]
         }
     ]

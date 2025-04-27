@@ -58,7 +58,6 @@ def main():
     train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
-        # only work for scale 
         train_data = data.flip_data(train_data)
         train_labels = data.flip_data(train_labels)
 

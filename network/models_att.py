@@ -75,7 +75,7 @@ class base_model(object):
             )
         return string, loss
 
-    def fit(self, train_data, train_labels, val_data, val_labels, output_file=None, starting_checkpoint=None):
+    def fit(self, train_data, train_labels, val_data, val_labels, output_dir=None, starting_checkpoint=None):
         tf.compat.v1.disable_eager_execution() # Fix save model issue
         t_process, t_wall = time.process_time(), time.time()
         
@@ -108,8 +108,9 @@ class base_model(object):
         #epoch_steps = int(train_data.shape[0] / self.batch_size)
         print(f"Total steps to be done to complete all the epochs: {num_steps}")
         min_loss = 10000
+        training_error = []
+        validation_error = []
 
-        
         for step in range(starting_step, num_steps + 1):
             if len(indices) < self.batch_size:
                 indices.extend(np.random.permutation(train_data.shape[0]))
@@ -129,27 +130,22 @@ class base_model(object):
             # Periodical evaluation of the model.
             if step % self.eval_frequency == 0 or step == num_steps:
                 epoch = step * self.batch_size / train_data.shape[0]
-                if output_file is not None:
-                    f = open(output_file, "a")
-                    f.write("step {} / {} (epoch {:.2f} / {}): \n".format(
-                        step, num_steps, epoch, self.num_epochs
-                    ))
-                    f.write("learning_rate = {:.2e}, loss_average = {:.4e} \n".format(
-                        learning_rate, loss_average
-                    ))
-                    f.close()
-                else:
-                    print(
+                print(
                         "step {} / {} (epoch {:.2f} / {}):".format(
                             step, num_steps, epoch, self.num_epochs
                         )
                     )
-                    print(
+                    
+                print(
                         "  learning_rate = {:.2e}, loss_average = {:.4e}".format(
                             learning_rate, loss_average
                         )
                     )
-
+                training_error.append([
+                    time.time(),
+                    step,
+                    loss_average,
+                ])
                 string, loss = self.evaluate(val_data, val_labels, sess)
                 losses.append(loss)
                 print("validation {}".format(string))
@@ -158,6 +154,11 @@ class base_model(object):
                         time.process_time() - t_process, time.time() - t_wall
                     )
                 )
+                validation_error.append([
+                    0, # Valore utile solo per la compatibilità con la generazione dei dati da colab
+                    step,
+                    loss,
+                ])
 
                 # Summaries for TensorBoard.
                 summary = tf.compat.v1.Summary()
@@ -180,6 +181,17 @@ class base_model(object):
         sess.close()
 
         t_step = (time.time() - t_wall) / num_steps
+
+        if output_dir is not None:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            import json
+            with open(output_dir + "/training_error.json", "w") as f:
+                f.write(json.dumps([training_error], indent=4))
+                  
+            with open(output_dir + "/validation_error.json", "w") as f:
+                f.write(json.dumps([validation_error], indent=4))
+
         return losses, t_step
 
     def build_graph(self, M_0, in_F):
@@ -395,6 +407,7 @@ class cgcnn(base_model):
         eval_frequency=200,
         dir_name="",
         checkpoints="final",
+        knn=0 # not used
     ):
         super().__init__()
 
@@ -479,7 +492,7 @@ class cgcnn(base_model):
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=True) #FIXED True
+        y = keras_bn(y, training=False) #FIXED True
         y = tf.reshape(y, [-1, output_size])
 
         #for item in keras_bn.updates:

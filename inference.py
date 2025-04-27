@@ -27,7 +27,8 @@ def parse_args():
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
     parser.add_argument('--flip-data', help='test time flip', action='store_true')
 
-    parser.add_argument('--filename', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
 
     try :
         args = parser.parse_args()
@@ -41,8 +42,8 @@ def main():
     args = parse_args()
     
     datareader = data.DataReader()
-    gt_trainset_all = datareader.real_read(args.filename, "train")
-    gt_testset_all = datareader.real_read(args.filename, "test")
+    gt_trainset_all = datareader.real_read(args.train_set, "train")
+    gt_testset_all = datareader.real_read(args.test_set, "test")
     train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
     train_labels, test_labels = datareader.read_3d()
 
