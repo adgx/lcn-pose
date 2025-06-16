@@ -436,7 +436,7 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
 
         #used for the traing set
         if args.train:
-            for camera_id in camera_ids[:-3]:
+            for camera_id in camera_ids[:4]: #-3
                 trainingset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam))
         #used for the validation set
         if args.validation is True:
@@ -715,14 +715,14 @@ if __name__ == '__main__':
         #loading the mpii validation set
         if args.validation:
             cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
-        
-        for subj in subj_name_val:
-            if not osp.isdir(osp.join(dataset_root_dir, subset_type[1],subj)):
-                print(f'subject: {subj} not found')
-                continue
-            data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
-            mpii_dbs[1].extend(data)
-        
+            
+            for subj in subj_name_val:
+                if not osp.isdir(osp.join(dataset_root_dir, subset_type[1],subj)):
+                    print(f'subject: {subj} not found')
+                    continue
+                data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
+                mpii_dbs[1].extend(data)
+            
         #generate the traing set
         if args.train:
             with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:

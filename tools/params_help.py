@@ -133,6 +133,9 @@ def get_params(is_training, gt_dataset):
         locally_connected
         locally_connected_learn
     """
+
+    #to try the locally connected learn mask maybe is refered to the use of S matrix with values that can also learn them form the 
+    # training
     params['mask_type'] = 'locally_connected'
     params['init_type'] = 'random'  # same, ones, random; only used when learnable
     params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=3)

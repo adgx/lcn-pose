@@ -12,7 +12,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "-c"
+                "-t",
+                "-d=mpii"
             ]
         }
     ]
