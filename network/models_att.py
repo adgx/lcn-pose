@@ -20,7 +20,7 @@ class base_model(object):
     #inferece uses the test_data
     def predict(self, data, labels=None, sess=None):
         loss = 0
-        size = data.shape[0] #n frames pre videocamera
+        size = data.shape[0] #n frames per videocamera
         predictions = np.empty((size, self.out_joints * 3)) #[size, joints(17)*3]
         #doto find more info for the close_sess_flag
         close_sess_flag = True if sess is None else False
@@ -704,9 +704,9 @@ class cgcnn(base_model):
 #Features defined on a graph G = (V, E, W) where V rappresent a set of N nodes, E the edges e W a weighted adjacency
 # matrix.
 # x into R^N is a feature defined on the N nodes where each dimension correspnds to one node.  
-#There are M features in total for each node. So is used the matrix X into R^M*N.
-#Xr and Xc to denote the flattened copies of X in row and column major order.
-#The combinatorial defienition of the Graph Laplacian L is computed as : L = D - A into R^N*N
+#There are M features in total for each node. So is used the matrix X into R^M*N.(Row: feature m, col: feature m for the node n)
+#Xr (X(m, :) the mth feature of all nodes) and Xc (X(:, n) the fatures of the nth node) to denote the flattened copies of X in row and column major order.
+#The combinatorial definition of the Graph Laplacian L is computed as : L = D - A into R^N*N
 # where D is the degree matrix and A is the adjacency matrix.
 #The Laplacian can be diagonalized by the Fourier basis U into R^N*N that is the matrix of eigenvectors of the 
 # Graph Laplacian so L = U*Λ*U^T.
