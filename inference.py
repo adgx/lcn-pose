@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--checkpoints', help='type of checkpoints', type=str, choices=['final', 'best'])
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
-    parser.add_argument('--flip-data', help='test time flip', action='store_true')
+    parser.add_argument('--flip-data', help='test time flip', action='store_true', default=True)
 
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
@@ -59,8 +59,16 @@ def main():
     network = models_att.cgcnn(**params)
     predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
 
-    if args.flip_data:
-        predictions = data.unflip_data(predictions)  # [N, 17*3]
+    #if args.translate_data:
+    #    predictions = data.untranslation_data(predictions, translation_factor=params['translation_factor'])  # [N, 17*3]
+
+    augmented = args.flip_data or args.translate_data
+    ## Increase the number of actions if flip_data is True
+    number_action = 0
+    number_action += +1 if args.flip_data else 0
+    number_action += 1 if args.translate_data else 0
+    if augmented:
+        predictions = data.undo(predictions, translation_factor=args.translation_factor, number_action = number_action)  # [N, 17*3]
     result = datareader.denormalize(predictions)
 
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
