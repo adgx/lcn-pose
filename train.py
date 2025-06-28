@@ -26,7 +26,9 @@ def parse_args():
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
-    parser.add_argument('--flip-data', help='train time flip', action='store_true')
+    parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
+    parser.add_argument('--translate_data', help='train time translate', action='store_true', default=True)
+    parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
     parser.add_argument('--output_file', type=str, default=None, help='Output file where save the informations pf the process')
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
@@ -40,7 +42,13 @@ def parse_args():
 
     return args
 
+"""
+- H36M: azioni, soggetti, camera -> 
+- Humansc3d: soggetti, camera -> 
+- MPII: attivita, soggetti, camera -> 
 
+- UNITO: soggetti, camera -> 
+"""
 def main():
     args = parse_args()
 
@@ -48,18 +56,32 @@ def main():
     gt_trainset_all = datareader.real_read(args.train_set, "train")
     gt_testset_all = datareader.real_read(args.test_set, "test")
     
-    mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
-    gt_trainset = [val for val, mask in zip(gt_trainset_all, mask) if mask == 1]
+    gt_trainset = data.get_subset(gt_trainset_all, subset_size=10000, mode="camera")
+    gt_testset = data.get_subset(gt_testset_all, subset_size=1000, mode="camera")
 
-    mask = np.random.randint(1, 2, len(gt_trainset_all)).tolist()
-    gt_testset = [val for val, mask in zip(gt_testset_all, mask) if mask == 1]
-
+    train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
     train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
-        train_data = data.flip_data(train_data)
-        train_labels = data.flip_data(train_labels)
+        train_data_flip = data.flip_data(train_data)
+        train_labels_flip = data.flip_data(train_labels)
+
+    if args.translate_data:
+        translation_factor = args.translation_factor
+        if translation_factor < 0:
+            raise ValueError("Translation factor must be non-negative")
+        translation = np.random.uniform(-translation_factor, translation_factor)
+        train_data_translate = data.translation_data(train_data, translation)
+        train_labels_translate = data.translation_data(train_labels, translation)
+    
+    if args.flip_data:
+        train_data = np.concatenate((train_data, train_data_flip), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_flip), axis=0)
+
+    if args.translate_data:
+        train_data = np.concatenate((train_data, train_data_translate), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_translate), axis=0)
 
     if args.output_file is not None:
         if not os.path.exists(os.path.join(ROOT_PATH, 'output', args.output_file)):

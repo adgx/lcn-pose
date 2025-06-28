@@ -29,8 +29,160 @@ def flip_data(data):
 
     return result
 
+def translation_data(data, translation_factor=2):
+    """
+    Translate data of a given factor
+        data: [N, 17*k] or [N, 17, k] -> k can be 2 or 3 in our case
+    Return
+        result: [N, 17*k] or [N, 17, k]
 
-def unflip_data(data):
+    This function adds a random translation to the data.
+    The translation is a random integer in the range [-translation_factor, translation_factor].
+    The data is reshaped to ensure it has the correct dimensions.
+    """
+    data_copied = data.copy().reshape((len(data), 17, -1))
+    data_copied += translation_factor
+    return data_copied.reshape(data.shape) #TODO: fix this to return the correct shape
+
+def get_subset_by_camera(gt_dataset, subset_size=1000):
+    """
+    Get a subset of the dataset.
+        gt_dataset: list of dictionaries containing the ground truth data
+        subset_size: number of items to include in the subset
+    Return
+        subset: list of dictionaries containing the subset of the dataset
+    """
+
+    # check if cameraid is present in the dataset
+    if not all("cameraid" in item for item in gt_dataset):
+        raise ValueError("The dataset must contain 'cameraid' key in each item.")
+    
+    # Get distinct camera names
+    camera_names = set(item["cameraid"] for item in gt_dataset)
+
+    # Divide the dataset into n. subsets based on camera names
+    subsets = {camera_name: [] for camera_name in camera_names}
+   
+    # Randomly select items for each camera to create the subset until the subset size divided by the number of cameras is reached
+    for item in gt_dataset:
+        camera_name = item["cameraid"]
+        if len(subsets[camera_name]) < subset_size // len(camera_names):
+            subsets[camera_name].append(item)
+        
+    # Combine the subsets into a single list
+    return [gt_dataset_item for subset in subsets.values() for gt_dataset_item in subset]
+    
+
+def get_subset_by_action(gt_dataset, subset_size=1000):
+    """
+    Get a subset of the dataset.
+        gt_dataset: list of dictionaries containing the ground truth data
+        subset_size: number of items to include in the subset
+    Return
+        subset: list of dictionaries containing the subset of the dataset
+    """
+    # check if action is present in the dataset
+    if not all("action" in item for item in gt_dataset):
+        raise ValueError("The dataset must contain 'action' key in each item.")
+    # Get distinct action names
+    action_names = set(item["action"] for item in gt_dataset)
+
+    # Divide the dataset into n. subsets based on action names
+    subsets = {action_name: [] for action_name in action_names}
+   
+    # Randomly select items for each action to create the subset until the subset size divided by the number of actions is reached
+    for item in gt_dataset:
+        action_name = item["action"]
+        if len(subsets[action_name]) < subset_size // len(action_names):
+            subsets[action_name].append(item)
+        
+    # Combine the subsets into a single list
+    return [gt_dataset_item for subset in subsets.values() for gt_dataset_item in subset]
+
+def get_subset_by_subject(gt_dataset, subset_size=1000):
+    """
+    Get a subset of the dataset.
+        gt_dataset: list of dictionaries containing the ground truth data
+        subset_size: number of items to include in the subset
+    Return
+        subset: list of dictionaries containing the subset of the dataset
+    """
+    # check if subject is present in the dataset
+    if not all("subject" in item for item in gt_dataset):
+        raise ValueError("The dataset must contain 'subject' key in each item.")
+    
+    # Get distinct subject names
+    subject_names = set(item["subject"] for item in gt_dataset)
+
+    # Divide the dataset into n. subsets based on subject names
+    subsets = {subject_name: [] for subject_name in subject_names}
+   
+    # Randomly select items for each subject to create the subset until the subset size divided by the number of subjects is reached
+    for item in gt_dataset:
+        subject_name = item["subject"]
+        if len(subsets[subject_name]) < subset_size // len(subject_names):
+            subsets[subject_name].append(item)
+        
+    # Combine the subsets into a single list
+    return [gt_dataset_item for subset in subsets.values() for gt_dataset_item in subset]
+
+def get_subset(gt_dataset, subset_size=1000, mode="camera"):
+    """
+    Get a subset of the dataset.
+        gt_dataset: list of dictionaries containing the ground truth data
+        subset_size: number of items to include in the subset
+        mode: "camera" or "action" or "camera_action" or "subject"
+    Return
+        subset: list of dictionaries containing the subset of the dataset
+    """
+    if mode == "camera":
+        return get_subset_by_camera(gt_dataset, subset_size)
+    elif mode == "action":
+        return get_subset_by_action(gt_dataset, subset_size)
+    elif mode == "subject":
+        return get_subset_by_subject(gt_dataset, subset_size)  # Assuming subject is similar to action
+    elif mode == "camera_action":
+        # Get a subset of the dataset by camera and action
+        camera_subset = get_subset_by_camera(gt_dataset, subset_size)
+        action_subset = get_subset_by_action(gt_dataset, subset_size)
+        
+        # Combine the two subsets
+        combined_subset = list(set(camera_subset) & set(action_subset))
+        
+        # If the combined subset is smaller than the requested size, return it
+        if len(combined_subset) < subset_size:
+            return combined_subset
+        
+        # Otherwise, randomly select items from the combined subset to reach the requested size
+        return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
+    elif mode == "camera_subject":
+        # Get a subset of the dataset by camera and subject
+        camera_subset = get_subset_by_camera(gt_dataset, subset_size)
+        subject_subset = get_subset_by_subject(gt_dataset, subset_size)
+        
+        # Combine the two subsets
+        combined_subset = list(set(camera_subset) & set(subject_subset))
+        
+        # If the combined subset is smaller than the requested size, return it
+        if len(combined_subset) < subset_size:
+            return combined_subset
+        
+        # Otherwise, randomly select items from the combined subset to reach the requested size
+        return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
+    
+
+def untranslation_data(data, translation_factor=2, number_actions=2):
+    """
+    Average original data and translated data
+        data: [2N, 17*k] or [2N, 17, k]
+    Return
+        result: [N, 17*k] or [N, 17, k]
+    """
+    data = data.copy().reshape((number_actions, -1, 17, -1))
+    data[2, :, :, 0] *= -1
+    return data
+
+def unflip_data(data, number_actions=2):
     """
     Average original data and flipped data
         data: [2N, 17*3]
@@ -40,12 +192,28 @@ def unflip_data(data):
     left_joints = [4, 5, 6, 11, 12, 13]
     right_joints = [1, 2, 3, 14, 15, 16]
 
-    data = data.copy().reshape((2, -1, 17, 3))
+    data = data.copy().reshape((number_actions, -1, 17, 3))
     data[1, :, :, 0] *= -1  # flip x of all joints
     data[1, :, left_joints + right_joints] = data[1, :, right_joints + left_joints]
-    data = np.mean(data, axis=0)
     data = data.reshape((-1, 17 * 3))
+    return data
 
+def undo(data, translation_factor=2, number_actions=2):
+    """
+    Average original data, flipped data, rotated data and translated data
+        data: [2N, 17*3]
+    Return
+        result: [N, 17*3]
+    """
+    # Untranslation
+    data = untranslation_data(data, translation_factor, number_actions)
+    
+    # Unflip
+    data = unflip_data(data, number_actions)
+    
+    # Average the results
+    data = np.mean(data, axis=0)  # [N, 17*3]
+    data = data.reshape((-1, 17 * 3))
     return data
 
 #rotate and concatenate data(
@@ -84,7 +252,6 @@ def rotate_data(data, angle = 180):
     result = np.concatenate((data, rotated_data), axis=0)
     
     return result
-
 
 class DataReader(object):
     def __init__(self):

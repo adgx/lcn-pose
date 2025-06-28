@@ -7,6 +7,9 @@ import filter_hub
 
 
 def get_neighbour_matrix_by_hand(neighbour_dict, knn=1):
+    """
+    Generate a neighbour matrix from a dictionary of neighbours.
+    """
     assert len(neighbour_dict) == 17
     neighbour_matrix = np.zeros((17, 17), dtype=np.float32)
     for idx in range(len(neighbour_dict)):
@@ -149,5 +152,3 @@ def get_params(is_training, gt_dataset):
     params['checkpoints'] = 'final'
 
     return params
-
-
