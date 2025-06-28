@@ -26,6 +26,7 @@ def parse_args():
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
     parser.add_argument('--flip-data', help='test time flip', action='store_true', default=True)
+    parser.add_argument('--augmentation', type=str, default=None, help='Select the kind of data augmantation: flip, rotation, translate', choices=["f", "r", "t"], nargs=3)
 
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
@@ -47,9 +48,27 @@ def main():
     train_data, test_data = datareader.read_2d(gt_trainset_all, gt_testset_all, read_confidence=True if args.in_F == 3 else False)  # [N, 17*2]
     train_labels, test_labels = datareader.read_3d()
 
-    if args.flip_data:
-        test_data = data.flip_data(test_data)
-        test_labels = data.flip_data(test_labels)
+    if args.augmentation is not None:
+        op_ord = []
+        test_data_copy = test_data.copy()
+        test_labels_copy =test_labels.copy()
+        #flip data 
+        if 'f' in args.augmentation:
+            #test_data = data.flip_data(test_data)
+            test_data = np.concatenate(test_data, data.flip_data(test_data_copy), axis = 0)
+            test_labels = np.concatenate(test_labels, data.flip_data(test_labels_copy), axis = 0)
+            op_ord.append(data.unflip_data)
+        #rotate data
+        if 'r' in args.augmentation:
+            test_data = np.concatenate(test_data, data.rotate_data(test_data_copy), axis = 0)
+            test_labels = np.concatenate(test_labels, data.rotate_data(test_labels_copy), axis = 0)
+            op_ord.append(data.rotate_data)
+        #translate data
+        if 't' in args.augmentation:
+            test_data = np.concatenate(test_data, data.translation_data(test_data_copy), axis=0)
+            test_labels = np.concatenate(test_labels, data.translation_data(test_labels_copy), axis=0)
+            op_ord.append(data.rotate_data)
+    
 
     # params
     params = params_help.get_params(is_training=False, gt_dataset=train_labels)
@@ -62,13 +81,13 @@ def main():
     #if args.translate_data:
     #    predictions = data.untranslation_data(predictions, translation_factor=params['translation_factor'])  # [N, 17*3]
 
-    augmented = args.flip_data or args.translate_data
+    #augmented = args.flip_data or args.translate_data
     ## Increase the number of actions if flip_data is True
-    number_action = 0
-    number_action += +1 if args.flip_data else 0
-    number_action += 1 if args.translate_data else 0
-    if augmented:
-        predictions = data.undo(predictions, translation_factor=args.translation_factor, number_action = number_action)  # [N, 17*3]
+    #number_action = 0
+    #number_action += +1 if args.flip_data else 0
+    #number_action += 1 if args.translate_data else 0
+    if args.augmantation is not None:
+        predictions = data.undo(predictions, op_ord)  # [N, 17*3]
     result = datareader.denormalize(predictions)
 
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')

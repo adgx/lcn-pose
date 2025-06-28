@@ -171,18 +171,35 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
         return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
     
 
-def untranslation_data(data, translation_factor=2, number_actions=2):
+def untranslation_data(data):
     """
     Average original data and translated data
         data: [2N, 17*k] or [2N, 17, k]
     Return
         result: [N, 17*k] or [N, 17, k]
     """
-    data = data.copy().reshape((number_actions, -1, 17, -1))
-    data[2, :, :, 0] *= -1
+    data = data.copy().reshape( -1, 17, 3)
+    data[:, :, 0] *= -1
+    
     return data
 
-def unflip_data(data, number_actions=2):
+#def unflip_data(data, number_actions=2):
+#    """
+#    Average original data and flipped data
+#        data: [2N, 17*3]
+#    Return
+#        result: [N, 17*3]
+#    """
+#    left_joints = [4, 5, 6, 11, 12, 13]
+#    right_joints = [1, 2, 3, 14, 15, 16]
+#
+#    data = data.copy().reshape((number_actions, -1, 17, 3))
+#    data[1, :, :, 0] *= -1  # flip x of all joints
+#    data[1, :, left_joints + right_joints] = data[1, :, right_joints + left_joints]
+#    data = data.reshape((-1, 17 * 3))
+#    return data
+
+def unflip_data(data):
     """
     Average original data and flipped data
         data: [2N, 17*3]
@@ -192,31 +209,53 @@ def unflip_data(data, number_actions=2):
     left_joints = [4, 5, 6, 11, 12, 13]
     right_joints = [1, 2, 3, 14, 15, 16]
 
-    data = data.copy().reshape((number_actions, -1, 17, 3))
-    data[1, :, :, 0] *= -1  # flip x of all joints
-    data[1, :, left_joints + right_joints] = data[1, :, right_joints + left_joints]
-    data = data.reshape((-1, 17 * 3))
+    data = data.copy().reshape(-1, 17, 3)
+    data[:, :, 0] *= -1  # flip x of all joints
+    data[:, left_joints + right_joints] = data[1, :, right_joints + left_joints]
     return data
 
-def undo(data, translation_factor=2, number_actions=2):
+#def undo(data, translation_factor=2, number_actions=2):
+#    """
+#    Average original data, flipped data, rotated data and translated data
+#        data: [2N, 17*3]
+#    Return
+#        result: [N, 17*3]
+#    """
+#    # Untranslation
+#    #data = untranslation_data(data, translation_factor, number_actions)
+#    
+#    # Unflip
+#    #data = unflip_data(data, number_actions)
+#    
+#    # Average the results
+#    data = np.mean(data, axis=0)  # [N, 17*3]
+#    data = data.reshape((-1, 17 * 3))
+#    return data
+
+def undo(data, op_ord):
     """
     Average original data, flipped data, rotated data and translated data
-        data: [2N, 17*3]
+        data: [N*(nop+1), 17*3]
     Return
         result: [N, 17*3]
     """
     # Untranslation
-    data = untranslation_data(data, translation_factor, number_actions)
+    #data = untranslation_data(data, translation_factor, number_actions)
     
     # Unflip
-    data = unflip_data(data, number_actions)
+    #data = unflip_data(data, number_actions)
     
     # Average the results
-    data = np.mean(data, axis=0)  # [N, 17*3]
+    data = data.copy().reshape(len(op_ord), -1, 17)
+    
+    for idx, undo_op in enumerate(op_ord):
+        data[idx+1] = undo_op(data[idx+1])
+
+    data = np.mean(data, axis=0)  # [N, 17, 3]
     data = data.reshape((-1, 17 * 3))
     return data
 
-#rotate and concatenate data(
+#rotate 
 def rotate_data(data, angle = 180):
     """
     rotate points
@@ -249,9 +288,9 @@ def rotate_data(data, angle = 180):
         rotated_data[idx] = jointsPoint
 
     rotated_data = rotated_data.reshape(data.shape)
-    result = np.concatenate((data, rotated_data), axis=0)
+    #result = np.concatenate((data, rotated_data), axis=0)
     
-    return result
+    return rotated_data 
 
 class DataReader(object):
     def __init__(self):

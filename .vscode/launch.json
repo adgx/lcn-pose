@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Python Debugger: Training Graph",
             "type": "debugpy",
@@ -69,6 +70,24 @@
                 "--test-indices",
                 "6",
                 "--per-joint",
+            ]
+        },
+        //evaluate: testing the data augmentation
+        {
+            "name": "Python Debugger: Evaluate: test DataAugmentation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--test_set",
+                "mpii",
+                "--train_set",
+                "mpii",
+                "--augmentation",
+                "f", 
+                "t", 
+                "r"
             ]
         }
     ]
