@@ -48,6 +48,43 @@ def unflip_data(data):
 
     return data
 
+#rotate and concatenate data(
+def rotate_data(data, angle = 180):
+    """
+    rotate points
+    """
+    #rotation angle in radians
+    theta = np.radians(angle)
+    #rotation matrix for z-axis
+    Rz = np.array([
+        [np.cos(theta), -np.sin(theta), 0],
+        [np.sin(theta),  np.cos(theta), 0],
+        [0,              0,             1]
+    ])
+
+    rotated_data = data.copy().reshape((len(data), 17, -1))
+    
+    #rotation
+    for idx, jointsPoint in enumerate(rotated_data):
+        pivot = jointsPoint[0,:2].copy()
+        jointsPoint[:, :2] -= pivot
+        
+        #case [x, y, confidence], [x, y, z]
+        if rotated_data.shape[2] == 3:
+            jointsPoint =  jointsPoint @ Rz.T
+        #case [x, y]
+        else:
+            jointsPoint = jointsPoint @ Rz.T[:2, :2]
+
+        jointsPoint[:, :2] += pivot
+
+        rotated_data[idx] = jointsPoint
+
+    rotated_data = rotated_data.reshape(data.shape)
+    result = np.concatenate((data, rotated_data), axis=0)
+    
+    return result
+
 
 class DataReader(object):
     def __init__(self):
