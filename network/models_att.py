@@ -3,11 +3,61 @@ import scipy.sparse
 import numpy as np
 import os, time, collections, shutil, sys, re
 
+
 ROOT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(ROOT_PATH)
 
 import math
 import glob
+
+
+def get_exponential_matrix():
+    #make a graph of skeleton
+    edges = [(0, 1, 1),
+            (0, 7, 1),
+            (0, 4, 1),
+            (4, 5, 1),
+            (4, 7, 1),
+            (5, 6, 1),
+            (1, 7, 1),
+            (1, 2, 1),
+            (2, 3, 1),
+            (7, 11, 1),
+            (7, 8, 1),
+            (7, 14, 1),
+            (11, 12, 1),
+            (12, 13, 1),
+            (14, 15, 1),
+            (15, 16, 1),
+            (8, 9, 1),
+            (9, 10, 1)]
+
+    n_nodes = 17
+    INF = np.inf
+
+    #initialize
+    dist = np.full((n_nodes, n_nodes), INF)
+    np.fill_diagonal(dist, 0)
+
+    # graph undirect
+    for u, v, w in edges:
+        dist[u][v] = w
+        dist[v][u] = w 
+
+    # Floyd–Warshall
+    for k in range(n_nodes):
+        for i in range(n_nodes):
+            for j in range(n_nodes):
+                if dist[i, j] > dist[i, k] + dist[k, j]:
+                    dist[i, j] = dist[i, k] + dist[k, j]
+
+    print(dist)
+
+    exp_mat = np.exp(1/2**(dist)) 
+
+    print(exp_mat)
+
+    return exp_mat
 
 class base_model(object):
 
@@ -438,6 +488,7 @@ class cgcnn(base_model):
         """
         Parameter
             mask_type
+                exponential
                 locally_connected
                 locally_connected_learnable
             init_type
@@ -449,6 +500,8 @@ class cgcnn(base_model):
             assert self.neighbour_matrix is not None
             L = self.neighbour_matrix.T
             assert L.shape == (self.in_joints, self.in_joints)
+            if "exponential" in self.mask_type:
+                self.mask = tf.constant(get_exponential_matrix())
             if "learnable" not in self.mask_type:
                 self.mask = tf.constant(L)
             else:
