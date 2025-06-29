@@ -76,6 +76,7 @@ def main():
     print(pprint.pformat(params))
 
     network = models_att.cgcnn(**params)
+    print("Start with predictions")
     predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
 
     #if args.translate_data:

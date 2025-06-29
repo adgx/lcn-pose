@@ -211,7 +211,7 @@ def unflip_data(data):
 
     data = data.copy().reshape(-1, 17, 3)
     data[:, :, 0] *= -1  # flip x of all joints
-    data[:, left_joints + right_joints] = data[1, :, right_joints + left_joints]
+    data[:, left_joints + right_joints] = data[:, right_joints + left_joints]
     return data
 
 #def undo(data, translation_factor=2, number_actions=2):
@@ -246,7 +246,7 @@ def undo(data, op_ord):
     #data = unflip_data(data, number_actions)
     
     # Average the results
-    data = data.copy().reshape(len(op_ord)+1, -1, 17)
+    data = data.copy().reshape(len(op_ord)+1, -1, 17, 3)
     
     for idx, undo_op in enumerate(op_ord):
         data[idx+1] = undo_op(data[idx+1])
