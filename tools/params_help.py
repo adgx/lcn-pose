@@ -1,5 +1,4 @@
 import numpy as np
-import networkx as nx
 import scipy
 import os, sys
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -8,31 +7,47 @@ import filter_hub
 
 def get_exponential_matrix():
     #make a graph of skeleton
-    s = nx.Graph()
-    s.add_edge(0, 1, weight=1)
-    s.add_edge(0, 7, weight=1)
-    s.add_edge(0, 4, weight=1)
-    s.add_edge(4, 5, weight=1)
-    s.add_edge(4, 7, weight=1)
-    s.add_edge(5, 6, weight=1)
-    s.add_edge(1, 7, weight=1)
-    s.add_edge(1, 2, weight=1)
-    s.add_edge(2, 3, weight=1)
-    s.add_edge(7, 11, weight=1)
-    s.add_edge(7, 8, weight=1)
-    s.add_edge(7, 14, weight=1)
-    s.add_edge(11, 12, weight=1)
-    s.add_edge(12, 13, weight=1)
-    s.add_edge(14, 15, weight=1)
-    s.add_edge(15, 16, weight=1)
-    s.add_edge(8, 9, weight=1)
-    s.add_edge(9, 10, weight=1)
-    
-    matrix = nx.to_numpy_array(s, weight='weight')
+    edges = [(0, 1, 1),
+            (0, 7, 1),
+            (0, 4, 1),
+            (4, 5, 1),
+            (4, 7, 1),
+            (5, 6, 1),
+            (1, 7, 1),
+            (1, 2, 1),
+            (2, 3, 1),
+            (7, 11, 1),
+            (7, 8, 1),
+            (7, 14, 1),
+            (11, 12, 1),
+            (12, 13, 1),
+            (14, 15, 1),
+            (15, 16, 1),
+            (8, 9, 1),
+            (9, 10, 1)]
 
-    print(matrix)
+    n_nodes = 17
+    INF = np.inf
 
-    exp_mat = np.exp(1/2**(matrix)) 
+    #initialize
+    dist = np.full((n_nodes, n_nodes), INF)
+    np.fill_diagonal(dist, 0)
+
+    # graph undirect
+    for u, v, w in edges:
+        dist[u][v] = w
+        dist[v][u] = w 
+
+    # Floyd–Warshall
+    for k in range(n_nodes):
+        for i in range(n_nodes):
+            for j in range(n_nodes):
+                if dist[i, j] > dist[i, k] + dist[k, j]:
+                    dist[i, j] = dist[i, k] + dist[k, j]
+
+    print(dist)
+
+    exp_mat = np.exp(1/2**(dist)) 
 
     print(exp_mat)
 
@@ -184,3 +199,6 @@ def get_params(is_training, gt_dataset):
     params['checkpoints'] = 'final'
 
     return params
+
+if __name__ == '__main__':
+    get_exponential_matrix()
