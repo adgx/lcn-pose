@@ -1,10 +1,42 @@
 import numpy as np
+import networkx as nx
 import scipy
 import os, sys
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(CURRENT_DIR)
 import filter_hub
 
+def get_exponential_matrix():
+    #make a graph of skeleton
+    s = nx.Graph()
+    s.add_edge(0, 1, weight=1)
+    s.add_edge(0, 7, weight=1)
+    s.add_edge(0, 4, weight=1)
+    s.add_edge(4, 5, weight=1)
+    s.add_edge(4, 7, weight=1)
+    s.add_edge(5, 6, weight=1)
+    s.add_edge(1, 7, weight=1)
+    s.add_edge(1, 2, weight=1)
+    s.add_edge(2, 3, weight=1)
+    s.add_edge(7, 11, weight=1)
+    s.add_edge(7, 8, weight=1)
+    s.add_edge(7, 14, weight=1)
+    s.add_edge(11, 12, weight=1)
+    s.add_edge(12, 13, weight=1)
+    s.add_edge(14, 15, weight=1)
+    s.add_edge(15, 16, weight=1)
+    s.add_edge(8, 9, weight=1)
+    s.add_edge(9, 10, weight=1)
+    
+    matrix = nx.to_numpy_array(s, weight='weight')
+
+    print(matrix)
+
+    exp_mat = np.exp(1/2**(matrix)) 
+
+    print(exp_mat)
+
+    return exp_mat
 
 def get_neighbour_matrix_by_hand(neighbour_dict, knn=1):
     """
