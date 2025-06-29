@@ -246,7 +246,7 @@ def undo(data, op_ord):
     #data = unflip_data(data, number_actions)
     
     # Average the results
-    data = data.copy().reshape(len(op_ord), -1, 17)
+    data = data.copy().reshape(len(op_ord)+1, -1, 17)
     
     for idx, undo_op in enumerate(op_ord):
         data[idx+1] = undo_op(data[idx+1])
