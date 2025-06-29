@@ -55,18 +55,18 @@ def main():
         #flip data 
         if 'f' in args.augmentation:
             #test_data = data.flip_data(test_data)
-            test_data = np.concatenate(test_data, data.flip_data(test_data_copy), axis = 0)
-            test_labels = np.concatenate(test_labels, data.flip_data(test_labels_copy), axis = 0)
+            test_data = np.concatenate((test_data, data.flip_data(test_data_copy)), axis=0)
+            test_labels = np.concatenate((test_labels, data.flip_data(test_labels_copy)), axis=0)
             op_ord.append(data.unflip_data)
         #rotate data
         if 'r' in args.augmentation:
-            test_data = np.concatenate(test_data, data.rotate_data(test_data_copy), axis = 0)
-            test_labels = np.concatenate(test_labels, data.rotate_data(test_labels_copy), axis = 0)
+            test_data = np.concatenate((test_data, data.rotate_data(test_data_copy)), axis = 0)
+            test_labels = np.concatenate((test_labels, data.rotate_data(test_labels_copy)), axis = 0)
             op_ord.append(data.rotate_data)
         #translate data
         if 't' in args.augmentation:
-            test_data = np.concatenate(test_data, data.translation_data(test_data_copy), axis=0)
-            test_labels = np.concatenate(test_labels, data.translation_data(test_labels_copy), axis=0)
+            test_data = np.concatenate((test_data, data.translation_data(test_data_copy)), axis=0)
+            test_labels = np.concatenate((test_labels, data.translation_data(test_labels_copy)), axis=0)
             op_ord.append(data.rotate_data)
     
 
@@ -86,7 +86,7 @@ def main():
     #number_action = 0
     #number_action += +1 if args.flip_data else 0
     #number_action += 1 if args.translate_data else 0
-    if args.augmantation is not None:
+    if args.augmentation is not None:
         predictions = data.undo(predictions, op_ord)  # [N, 17*3]
     result = datareader.denormalize(predictions)
 

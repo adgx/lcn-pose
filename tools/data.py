@@ -25,9 +25,9 @@ def flip_data(data):
     ]
     flipped_data = flipped_data.reshape(data.shape)
 
-    result = np.concatenate((data, flipped_data), axis=0)
+    #result = np.concatenate((data, flipped_data), axis=0)
 
-    return result
+    return flipped_data
 
 def translation_data(data, translation_factor=2):
     """

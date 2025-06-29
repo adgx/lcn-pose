@@ -81,9 +81,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "mpii",
+                "humansc3d",
                 "--train_set",
-                "mpii",
+                "humansc3d",
                 "--augmentation",
                 "f", 
                 "t", 
