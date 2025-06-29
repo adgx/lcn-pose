@@ -27,6 +27,7 @@ def parse_args():
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
+    parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=True)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=True)
     parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
     parser.add_argument('--output_file', type=str, default=None, help='Output file where save the informations pf the process')
@@ -74,7 +75,12 @@ def main():
         translation = np.random.uniform(-translation_factor, translation_factor)
         train_data_translate = data.translation_data(train_data, translation)
         train_labels_translate = data.translation_data(train_labels, translation)
+
+    if args.rotation_data:
+        train_data_rotated = data.rotate_data(train_data)
+        train_labels_rotated = data.rotate_data(train_labels)
     
+
     if args.flip_data:
         train_data = np.concatenate((train_data, train_data_flip), axis=0)
         train_labels = np.concatenate((train_labels, train_labels_flip), axis=0)
@@ -82,6 +88,10 @@ def main():
     if args.translate_data:
         train_data = np.concatenate((train_data, train_data_translate), axis=0)
         train_labels = np.concatenate((train_labels, train_labels_translate), axis=0)
+
+    if args.rotation_data:
+        train_data = np.concatenate((train_data, train_data_rotated), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_rotated), axis=0)
 
     if args.output_file is not None:
         if not os.path.exists(os.path.join(ROOT_PATH, 'output', args.output_file)):

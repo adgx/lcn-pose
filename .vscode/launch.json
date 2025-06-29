@@ -72,9 +72,9 @@
                 "--per-joint",
             ]
         },
-        //evaluate: testing the data augmentation
+        //Inference: testing the data augmentation
         {
-            "name": "Python Debugger: Evaluate: test DataAugmentation",
+            "name": "Python Debugger: Inference: test DataAugmentation",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -89,6 +89,20 @@
                 "t", 
                 "r"
             ]
-        }
+        },
+        {
+            "name": "Python Debugger: Evaluate: Human3d",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--filename",
+                "humansc3d",
+                "--test-indices",
+                "1",
+                "--per-joint",
+            ]
+        },
     ]
 }
