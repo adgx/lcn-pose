@@ -151,6 +151,3 @@ def get_params(is_training, gt_dataset):
     params['checkpoints'] = 'final'
 
     return params
-
-if __name__ == '__main__':
-    get_exponential_matrix()
