@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument('--out-joints', help='number of output joints', type=int, default=17)
     parser.add_argument('--dropout', help='dropout probability', type=float)
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
+    parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
@@ -53,12 +54,15 @@ def parse_args():
 def main():
     args = parse_args()
 
+    #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset_all = datareader.real_read(args.train_set, "train")
     gt_testset_all = datareader.real_read(args.test_set, "test")
     
-    gt_trainset = data.get_subset(gt_trainset_all, subset_size=10000, mode="camera")
-    gt_testset = data.get_subset(gt_testset_all, subset_size=1000, mode="camera")
+    #Make a subset
+    if args.subset is not None:
+        gt_trainset = data.get_subset(gt_trainset_all, subset_size=args.subset, mode="camera")
+        gt_testset = data.get_subset(gt_testset_all, subset_size=args.subset, mode="camera")
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)

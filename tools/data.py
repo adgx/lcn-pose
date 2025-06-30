@@ -325,6 +325,8 @@ class DataReader(object):
         # normalize
         if which == "scale":
             # map to [-1, 1]
+            
+            #Trainset
             for idx, item in enumerate(self.gt_trainset):
                 camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
@@ -337,10 +339,9 @@ class DataReader(object):
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
-                trainset[idx, :, :] = trainset[idx, :, :] / res_w * 2 - [
-                    1,
-                    res_h / res_w,
-                ]
+                trainset[idx, :, :] = trainset[idx, :, :] / res_w * 2 - [1,res_h / res_w]
+            
+            #Testset
             for idx, item in enumerate(self.gt_testset):
                 camera_name = str(item["camera_param"]["name"])
                 if camera_name == "54138969" or camera_name == "60457274":
@@ -364,9 +365,7 @@ class DataReader(object):
             testset = np.concatenate((testset, test_confidence), axis=2)  # [N, 17, 3]
 
         # reshape
-        trainset, testset = trainset.reshape((len(trainset), -1)), testset.reshape(
-            (len(testset), -1)
-        )
+        trainset, testset = trainset.reshape((len(trainset), -1)), testset.reshape((len(testset), -1))
 
         return trainset, testset
 
@@ -393,10 +392,7 @@ class DataReader(object):
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
-                train_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [
-                    1,
-                    res_h / res_w,
-                ]
+                train_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [1, res_h / res_w]
                 train_labels[idx, :, 2:] = item["joint_3d_image"][:, 2:] / res_w * 2
             for idx, item in enumerate(self.gt_testset):
                 camera_name = str(item["camera_param"]["name"])
@@ -410,10 +406,7 @@ class DataReader(object):
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
-                test_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [
-                    1,
-                    res_h / res_w,
-                ]
+                test_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [1,res_h / res_w]
                 test_labels[idx, :, 2:] = item["joint_3d_image"][:, 2:] / res_w * 2
         else:
             assert 0, "not support normalize type %s" % which
