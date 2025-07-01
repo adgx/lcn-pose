@@ -119,7 +119,7 @@ def get_params(is_training, gt_dataset):
 
     params = {}
     params['dir_name'] = 'test1/'
-    params['num_epochs'] = 200
+    params['num_epochs'] = 100
     params['batch_size'] = 200
     # decay_strategy: lr * decay_rate ^ (epoch_num)
     params['decay_type'] = 'exp'  # 'step', 'exp'

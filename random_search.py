@@ -8,6 +8,7 @@ import argparse
 import pprint
 import numpy as np
 import json
+from train import parse_args 
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -20,37 +21,6 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='train')
-
-    # optional arguments
-    parser.add_argument('--test-indices', help='test idx ', type=str)
-    parser.add_argument('--mask-type', help='mask type ', type=str)
-    parser.add_argument('--graph', help='index of graphs', type=int, default=0)
-    parser.add_argument('--knn', help='expand of neighbourhood', type=int)
-    parser.add_argument('--layers', help='number of layers', type=int)
-    parser.add_argument('--in-joints', help='number of input joints', type=int, default=17)
-    parser.add_argument('--out-joints', help='number of output joints', type=int, default=17)
-    parser.add_argument('--dropout', help='dropout probability', type=float)
-    parser.add_argument('--channels', help='number of channels', type=int, default=64)
-
-    parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
-    parser.add_argument('--flip-data', help='train time flip', action='store_true')
-    parser.add_argument('--output_file', type=str, default=None, help='Output file where save the informations pf the process')
-    parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
-    parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-
-    try :
-        args = parser.parse_args()
-    except:
-        parser.print_help()
-        raise SystemExit
-
-    return args
-
-
 if __name__ == '__main__': 
     args = parse_args()
 
@@ -58,30 +28,53 @@ if __name__ == '__main__':
     gt_trainset_all = datareader.real_read(args.train_set, "train")
     gt_testset_all = datareader.real_read(args.test_set, "test")
     
-    mask = np.random.randint(0, 2, 10000).tolist()
-    gt_trainset = [val for val, mask in zip(gt_trainset_all, mask) if mask == 1]
+    gt_trainset = data.get_subset(gt_trainset_all, subset_size=args.subset, mode="camera")
+    gt_testset = data.get_subset(gt_testset_all, subset_size=args.subset, mode="camera")
 
-    mask = np.random.randint(0, 2, 100).tolist()
-    gt_testset = [val for val, mask in zip(gt_testset_all, mask) if mask == 1]
-
+    train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
     train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
-        train_data = data.flip_data(train_data)
-        train_labels = data.flip_data(train_labels)
+        train_data_flip = data.flip_data(train_data)
+        train_labels_flip = data.flip_data(train_labels)
+
+    if args.translate_data:
+        translation_factor = args.translation_factor
+        if translation_factor < 0:
+            raise ValueError("Translation factor must be non-negative")
+        translation = np.random.uniform(-translation_factor, translation_factor)
+        train_data_translate = data.translation_data(train_data, translation)
+        train_labels_translate = data.translation_data(train_labels, translation)
+
+    if args.rotation_data:
+        train_data_rotated = data.rotate_data(train_data)
+        train_labels_rotated = data.rotate_data(train_labels)
+    
+
+    if args.flip_data:
+        train_data = np.concatenate((train_data, train_data_flip), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_flip), axis=0)
+
+    if args.translate_data:
+        train_data = np.concatenate((train_data, train_data_translate), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_translate), axis=0)
+
+    if args.rotation_data:
+        train_data = np.concatenate((train_data, train_data_rotated), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_rotated), axis=0)
 
     # Impostiamo un valore fisso per il numero di epoche
     # Così possiamo testare il modello con diverse configurazioni di parametri
     # Random perchè sono troppe le possibilità
     possible_params = {
         'knn': [1, 2, 3, 4, 5],
-        'batch_size': [128, 256, 512],
+        'batch_size': [128],
         #'decay_steps': [10000, 20000, 30000, 40000, 50000],
         #'decay_rate': [0.1, 0.2, 0.3, 0.4, 0.5],
         'num_layers': [1],
-        'dropout': [0.1, 0.25, 0.3],
-        'learning_rate': [1e-1, 1e-2, 1e-3, 1e-4],
+        'dropout': [0, 0.1, 0.25, 0.3],
+        'learning_rate': [1e-1],
         'regularization': [0, 1e-4, 5e-4]
     }
 
@@ -90,7 +83,7 @@ if __name__ == '__main__':
     
     saves_configurations = []
 
-    for i in range(2):
+    for i in range(1):
         # Randomly select parameters
         selected_params = {key: np.random.choice(value) for key, value in possible_params.items()}
         
@@ -118,7 +111,11 @@ if __name__ == '__main__':
         try: 
             losses, t_step = network.fit(train_data, train_labels, test_data, test_labels)
             selected_params['losses'] = losses
+            selected_params['mean_loss'] = np.mean(losses)
+            selected_params['std_loss'] = np.std(losses)
+            selected_params['validation_loss'] = losses[-1] if losses else None
             selected_params['t_step'] = t_step
+            selected_params["best_loss"] = np.min(losses) if losses else None
             saves_configurations.append(selected_params)
         except KeyboardInterrupt:
             print('Training interrupted')
@@ -134,6 +131,15 @@ if __name__ == '__main__':
     
     # Save the configurations to a file
     ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(ROOT_PATH, "experiment", 'saves_configurations.json')
+    
+    #csv 
+    file_path = os.path.join(ROOT_PATH, "experiment", 'saves_configurations.csv')
+
     with open(file_path, 'w') as f:
-        f.write(json.dumps(saves_configurations, indent=3, cls=NpEncoder))
+        f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,t_step,error\n")
+        for config in saves_configurations:
+            f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
+                    f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
+                    f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
+                    f"{config.get('best_loss', 'N/A')},"
+                    f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
