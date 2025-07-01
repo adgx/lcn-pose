@@ -68,13 +68,13 @@ if __name__ == '__main__':
     # Così possiamo testare il modello con diverse configurazioni di parametri
     # Random perchè sono troppe le possibilità
     possible_params = {
-        'knn': [1, 2, 3, 4, 5],
-        'batch_size': [128, 256, 512, 1024],
+        'knn': [1, 3, 5],
+        'batch_size': [128, 256, 512],
         #'decay_steps': [10000, 20000, 30000, 40000, 50000],
         #'decay_rate': [0.1, 0.2, 0.3, 0.4, 0.5],
-        'num_layers': [1, 2, 3, 4, 5],
+        'num_layers': [1, 3, 5],
         'dropout': [1, 0.25, 0.3],
-        'learning_rate': [1e-1],
+        'learning_rate': [1e-1, 1e-2, 1e-3, 1e-4],
         'regularization': [1e-4, 5e-4]
     }
 
