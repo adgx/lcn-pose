@@ -166,9 +166,9 @@ if __name__ == '__main__':
         # Create the file and write the header if it doesn't exist
         with open(file_path, 'w') as f:
             f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,t_step,error\n")
-        for config in saves_configurations:
-            f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
-                    f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
-                    f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
-                    f"{config.get('best_loss', 'N/A')},"
-                    f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
+            for config in saves_configurations:
+                f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
+                        f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
+                        f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
+                        f"{config.get('best_loss', 'N/A')},"
+                        f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
