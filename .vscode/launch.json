@@ -33,6 +33,24 @@
                 "7"
             ]
         },
+
+        {
+            "name": "Python Debugger: Random Search",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--test_set",
+                "humansc3d",
+                "--train_set",
+                "humansc3d",
+                "--test-indices",
+                "7",
+                "--subset",
+                "10000"
+            ]
+        },
         {
             "name": "Python Debugger: Inference",
             "type": "debugpy",

@@ -135,6 +135,8 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
     Return
         subset: list of dictionaries containing the subset of the dataset
     """
+    if subset_size == None:
+        return gt_dataset
     if mode == "camera":
         return get_subset_by_camera(gt_dataset, subset_size)
     elif mode == "action":
