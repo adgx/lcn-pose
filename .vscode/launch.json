@@ -23,6 +23,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
+                "--subset",
+                "10000",
                 "--test_set",
                 "humansc3d",
                 "--train_set",
