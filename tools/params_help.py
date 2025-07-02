@@ -114,6 +114,8 @@ def update_parameters(args, params):
         params['init_type'] = args.init_type
     if args.in_F:
         params['in_F'] = args.in_F
+    if args.epochs:
+        params['num_epochs'] = args.epochs
 
     print(params['dir_name'])
 
@@ -122,7 +124,7 @@ def get_params(is_training, gt_dataset):
 
     params = {}
     params['dir_name'] = 'test1/'
-    params['num_epochs'] = 100
+    params['num_epochs'] = 200
     params['batch_size'] = 200
     # decay_strategy: lr * decay_rate ^ (epoch_num)
     params['decay_type'] = 'exp'  # 'step', 'exp'

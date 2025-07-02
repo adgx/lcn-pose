@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument('--dropout', help='dropout probability', type=float)
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
     parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
+    parser.add_argument('--epochs', help='number of epochs', type=int, default=200)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
