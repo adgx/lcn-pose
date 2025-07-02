@@ -110,6 +110,8 @@ def update_parameters(args, params):
         params['checkpoints'] = args.checkpoints
     if args.mask_type:
         params['mask_type'] = args.mask_type
+    if args.init_type:
+        params['init_type'] = args.init_type
     if args.in_F:
         params['in_F'] = args.in_F
 

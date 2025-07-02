@@ -17,6 +17,7 @@ def parse_args():
     # optional arguments
     parser.add_argument('--test-indices', help='test idx ', type=str)
     parser.add_argument('--mask-type', help='mask type ', type=str)
+    parser.add_argument('--init-type', help='initialization type ', type=str, default='random', choices=['same', 'ones', 'random'])
     parser.add_argument('--graph', help='index of graphs', type=int, default=0)
     parser.add_argument('--knn', help='expand of neighbourhood', type=int)
     parser.add_argument('--layers', help='number of layers', type=int)
