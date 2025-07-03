@@ -2,7 +2,6 @@ import os
 import argparse
 import numpy as np 
 import plotly.express as px
-from functions import read_json
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
@@ -12,6 +11,19 @@ VALIDATION_PATH = os.path.join(ROOT_PATH, "data", "validation")
 
 PATH_LOSS = os.path.join(TRAINING_PATH, "loss")
 PATH_VAL_LOSS = os.path.join(VALIDATION_PATH, "loss")
+
+def read_json(file_path):
+    """
+    Reads a JSON file and returns the data.
+    Args:
+        file_path (str): Path to the JSON file.
+    Returns:
+        dict: Data read from the JSON file.
+    """
+    import json
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return np.array(data)
 
 if __name__ == "__main__":
     

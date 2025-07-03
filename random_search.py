@@ -165,7 +165,7 @@ if __name__ == '__main__':
     else:
         # Create the file and write the header if it doesn't exist
         with open(file_path, 'w') as f:
-            f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,t_step,error\n")
+            f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,best_loss,t_step,error\n")
             for config in saves_configurations:
                 f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
                         f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"

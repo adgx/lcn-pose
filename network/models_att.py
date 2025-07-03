@@ -511,12 +511,6 @@ class cgcnn(base_model):
                     initializer = tf.compat.v1.initializers.ones
                 elif self.init_type == "random":
                     initializer = tf.initializers.random_uniform_initializer(0, 1)
-                elif self.init_type == "exponential":
-                    # Exponential initialization with 1 / 2^(d)
-                    # where d is the manifold distance
-                    initializer = tf.compat.v1.initializers.random_normal(
-                        mean=0.0, stddev=1.0, seed=None
-                    )
                 else:
                     raise ValueError("Unknown init_type: {}".format(self.init_type)) 
                    

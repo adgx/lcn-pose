@@ -1,85 +1,370 @@
-# Quick start
+# Machine Learning for Vision and Multimedia
 
-Tensorflow Implementation of [Optimizing Network Structure for 3D Human Pose Estimation](http://openaccess.thecvf.com/content_ICCV_2019/papers/Ci_Optimizing_Network_Structure_for_3D_Human_Pose_Estimation_ICCV_2019_paper.pdf) (ICCV 2019)
+## 3D Human Pose Estimation
 
-## Requirements
+A comprehensive implementation for training, evaluating, and visualizing 3D human pose estimation models using deep learning techniques.
 
-* Python 3.6
-* tensorflow (==1.14.0)
-* pprint
-* prettytable
+---
 
-## Data
+## Table of Contents
 
-Download finetuned Stacked Hourglass detections and our preprocessed H3.6M data (.pkl) [here](https://drive.google.com/drive/folders/1l-Xn5wiDd5ZcnClcqgiBCjHPp4ZjVVsY?usp=sharing) and put them under the directory dataset/.
-If you would like to know how we prepare the H3.6M data, please have a look at the tools/gendb.py.
+- [Project Overview](#project-overview)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Training](#training)
+- [Evaluation](#evaluation)
+- [Inference](#inference)
+- [Visualization](#visualization)
+- [Repository Structure](#repository-structure)
+- [Models](#models)
+- [Contact](#contact)
+- [Acknowledgements](#acknowledgements)
 
-## Pretrained Models
+---
 
-We provide two kinds of checkpoints which can be downloaded [here](https://drive.google.com/drive/folders/1l-Xn5wiDd5ZcnClcqgiBCjHPp4ZjVVsY?usp=sharing).
+## Project Overview
 
-* trained with 2d poses detected by finetuned SH
-* trained with gt 2d poses
+This repository contains all the code required to train, evaluate, and visualize 3D human pose estimation models. The implementation is based on state-of-the-art deep learning approaches and supports multiple datasets and evaluation protocols.
 
-Make two directories experiment/test1 and experiment/test2. Put the GT checkpoint file and SH_DT checkpoint file under test1/ and test2/ respectively, like:
+### Key Features
+
+- Support for multiple datasets (H36M, HumanSC3D, MPII)
+- Flexible network architectures with configurable layers
+- Multiple evaluation protocols (Protocol #1 and Protocol #2 with Procrustes alignment)
+- Data augmentation techniques (flip, rotation, translation)
+- Interactive visualization tools
+- Comprehensive training and evaluation scripts
+
+### Project Details
+
+- **Course**: Machine Learning for Vision and Multimedia
+- **Date**: July 17, 2025
+
+---
+
+## Quick Start
+
+Already have the checkpoints? Clone → install → run the example commands below.
+
+```bash
+# Clone and enter repository
+git clone <repo-url> && cd ml-pose-estimation
+
+# Create a fresh environment (recommended)
+python3.8.20 -m venv .venv && source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify installation
+python -c "import tensorflow as tf; print(tf.__version__)" 
+```
+
+### Checkpoint Structure
+
+When working with pre-trained models, organize your checkpoints as follows:
 
 ```ini
-${root}/experiment
-   └── test1
-       └── checkpoints
-           ├── best
-           └── final
-   └── test2
-       └── checkpoints
-           ├── best
-           └── final
+experiment/
+│
+├── test1/
+│   └── checkpoints/
+│       ├── best/
+│       │   └── checkpoint
+│       └── final/
+│           └── checkpoint
+└── test2/
+    └── checkpoints/
+        ├── best/
+        │   └── checkpoint
+        └── final/
+            └── checkpoint
 ```
 
-### Inference and evaluate with the pretrained models.
+**Important**: When moving checkpoints from Kaggle to your local machine, you must update the absolute paths stored inside each checkpoint file located in `best/` and `final/` directories.
 
-Inference with GT checkpoint
+---
 
-```sh
-python inference.py --data-type scale --mode gt --test-indices 1 --mask-type locally_connected --knn 3 --layers 3 --in-F 2 --checkpoint best
-python evaluate.py --data-type scale --mode gt --test-indices 1
+## Installation
+
+### Requirements
+
+tensorflow==2.13.0
+numpy==1.24.3
+opencv-python==4.11.0.86
+scipy==1.10.1
+pandas==2.0.3
+matplotlib==3.7.5
+pyrender==0.1.45
+trimesh==4.6.5
+PyOpenGL==3.1.0
+prettytable==3.11.0
+PyYAML==6.0.2
+
+### Core Dependencies
+
+```bash
+# Install core requirements
+pip install -r requirements.txt
 ```
 
-Inference with SH_DT checkpoint
+### Optional Dependencies
 
-```sh
-python inference.py --data-type scale --mode dt_ft --test-indices 2 --mask-type locally_connected --knn 3 --layers 3 --in-F 2 --checkpoint best
-python evaluate.py --data-type scale --mode dt_ft --test-indices 2
+For running Jupyter notebooks:
+
+```bash
+pip install notebook
 ```
 
-You will get an MPJPE of 32.5mm (GT) and 51.1mm (SH_DT) respectively.
+### Environment Setup
 
-## Train from Scratch
+We recommend using a virtual environment:
 
-```sh
-python train.py --data-type scale --mode dt_ft --test-indices 3 --mask-type locally_connected --knn 3 --layers 3 --in-F 2
-python inference.py --data-type scale --mode dt_ft --test-indices 3 --mask-type locally_connected --knn 3 --layers 3 --in-F 2
-python evaluate.py --data-type scale --mode dt_ft --test-indices 3
+---
+
+## Training
+
+Train models using the `train.py` script with various configuration options.
+
+### Basic Training Command
+
+```bash
+python train.py \
+  --train_set h36m \
+  --test_set h36m \
+  --test-indices 3 \
+  --mask-type locally_connected \
+  --knn 3 \
+  --layers 3 \
+  --in-F 2
 ```
 
-You can also try training and testing with horizontal flip (arg: --flip-data) or confidence values (--in-F 3). Both can bring an extra improvement of about 1mm in MPJPE.
+### Common Training Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--flip-data` | Enable horizontal flip augmentation | False |
+| `--rotation-data` | Enable rotation augmentation | False |
+| `--translate_data` | Enable translation augmentation | False |
+| `--epochs` | Number of training epochs | 200 |
+| `--resume_from` | Resume training from existing checkpoint | None |
+| `--output_file` | Training log output file | None |
+
+### Advanced Configuration
+
+For hyperparameter tuning and ablation studies:
+
+- `--mask-type`: Choose from `locally_connected`, `fully_connected`, or `dilated`
+- `--init-type`: Initialization strategy - `same`, `ones`, or `random` (default)
+- `--graph`: Graph topology index (integer)
+
+### Example Training Commands
+
+```bash
+# Training with data augmentation
+python train.py \
+  --train_set h36m \
+  --test_set h36m \
+  --test-indices 3 \
+  --mask-type locally_connected \
+  --knn 3 \
+  --layers 3 \
+  --in-F 2 \
+  --flip-data \
+  --rotation-data \
+  --translate_data \
+  --epochs 300
+
+# Resume training from checkpoint
+python train.py \
+  --train_set h36m \
+  --test_set h36m \
+  --resume_from experiment/test1/checkpoints/best/checkpoint
+```
+
+---
+
+## Evaluation
+
+Evaluate trained models using standard metrics and protocols.
+
+### Protocol #1 (Standard Evaluation)
+
+```bash
+python evaluate.py \
+  --filename h36m \
+  --test-indices 3 \
+  --per-joint              # optional: joint-wise results
+```
+
+### Protocol #2 (Procrustes-Aligned Evaluation)
+
+```bash
+python evaluate.py \
+  --filename h36m \
+  --test-indices 3 \
+  --protocol2
+```
+
+### Evaluation Metrics
+
+The evaluation script computes:
+
+- Mean Per Joint Position Error (MPJPE)
+- Procrustes-aligned MPJPE (when using `--protocol2`)
+- Per-joint error analysis (when using `--per-joint`)
+
+---
+
+## Inference
+
+Generate predictions on new data and save results to disk.
+
+### Basic Inference
+
+```bash
+python inference.py \
+  --train_set h36m \
+  --test_set h36m \
+  --test-indices 3 \
+  --mask-type locally_connected \
+  --knn 3 \
+  --layers 3 \
+  --in-F 2 \
+  --checkpoints best            # "best" or "final"
+```
+
+### Test-Time Augmentation
+
+Enable data augmentation during inference for improved results:
+
+```bash
+python inference.py \
+  --train_set h36m \
+  --test_set h36m \
+  --test-indices 3 \
+  --mask-type locally_connected \
+  --knn 3 \
+  --layers 3 \
+  --in-F 2 \
+  --checkpoints best \
+  --augmentation f r t          # f=flip, r=rotation, t=translate
+```
+
+---
+
+## Visualization
+
+Interactive tools for qualitative analysis of model predictions.
+
+### Jupyter Notebook
+
+Launch the interactive visualization notebook:
+
+```bash
+jupyter notebook visualise_human_prediction.ipynb
+```
+
+The notebook provides:
+
+- 3D pose visualization
+- Comparison between ground truth and predictions
+- Error analysis per joint
+- Interactive 3D plotting capabilities
+
+---
+
+## Repository Structure
+
+```ini
+ml-pose-estimation/
+├── analysis/                           # Core network components
+│   ├── data/
+│   └────  training/ 
+│   └────  validation/
+│   ├── main.py
+├── datasets/                       # Dataset loaders and preprocessors
+│   ├── human3.6/                       # Human3.6M dataset
+│   ├── humansc3d/                  # HumanSC3D dataset
+│   └── mpii/                       # MPII dataset
+│   └── h36m_test.pkl
+│   └── h36m_train.pkl
+│   └── humansc3d_test.pkl
+│   └── humansc3d_train.pkl
+│   └── mpii_test.pkl
+│   └── mpii_train.pkl
+├── network/                        
+│   └── models_att.py               # Model architecture definitions
+├── visualization/
+│   ├── util/      
+│   └──── .....
+│   ├── notebook/                   # Jupyter notebooks
+│   └──── visualise_human_prediction.ipynb
+├── experiments/                    # Experiment outputs
+│   └─- .....
+├── tools/  
+│   └─- .....
+├── train.py                        # Training script
+├── random_search.py 
+├── evaluate.py                     # Evaluation script
+├── inference.py                    # Inference script
+├── requirements.txt                # Python dependencies
+└── README.md                       # This file
+```
+
+---
+
+## Models
+
+### Pre-trained Models
+
+The best performing models are available for download. These models have been trained on standard datasets and achieve state-of-the-art performance.
+
+**Download Link**: [Coming Soon]
+
+### Experiment Tracking
+
+All experimental results and hyperparameter configurations are documented and can be accessed through the provided links above.
+
+**Excel Link**: [Coming Soon]
+
+---
+
+## Contact
+
+For questions, issues, or contributions, please:
+
+1. Open an issue on GitHub
+2. Contact the development team
+3. Check the documentation for common solutions
+
+---
+
+## Acknowledgements
+
+This repository is based on the original TensorFlow implementation released by the authors of the ICCV 2019 paper. We thank them for making their research publicly available and contributing to the open-source community.
+
+### References
+
+- Original paper: [Paper Title] (ICCV 2019)
+- Dataset providers: Human3.6M, HumanSC3D, MPII
+- TensorFlow community for framework support
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Citation
 
-If you use this code in your work, please consider citing:
+If you use this code in your research, please cite:
 
-```tex
-@inproceedings{ci2019optimizing,
-  title={Optimizing Network Structure for 3D Human Pose Estimation},
-  author={Ci, Hai and Wang, Chunyu and Ma, Xiaoxuan and Wang, Yizhou},
-  booktitle={Proceedings of the IEEE International Conference on Computer Vision},
-  pages={2262--2271},
-  year={2019}
+```bibtex
+@misc{ml-pose-estimation-2025,
+  title={3D Human Pose Estimation},
+  author={[Your Names]},
+  year={2025},
+  howpublished={\url{https://github.com/your-repo/ml-pose-estimation}}
 }
 ```
-
-Quando si passa da kaggle al proprio pc bisogna cambiare il percorso all'interno del file checkpoint
-
-# Acknowledgement
-
-This repo is built on https://github.com/mdeff/cnn_graph#using-the-model and https://github.com/una-dinosauria/3d-pose-baseline.
-We would like to thank the authors for publishing their code.

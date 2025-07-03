@@ -14,4 +14,4 @@ results/
 dataset/*
 __pycache__
 output/*
-overfitting/data/
+*/data/*
