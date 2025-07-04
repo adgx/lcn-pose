@@ -16,6 +16,8 @@ def parse_args():
     parser.add_argument('--test-indices', help='test idx ', type=str)
     parser.add_argument('--mask-type', help='mask type ', type=str)
     parser.add_argument('--graph', help='index of graphs', type=int, default=0)
+    parser.add_argument('--init-type', help='initialization type ', type=str, default='random', choices=['same', 'ones', 'random'])
+    parser.add_argument('--epochs', help='number of epochs', type=int, default=200)
     parser.add_argument('--knn', help='expand of neighbourhood', type=int)
     parser.add_argument('--layers', help='number of layers', type=int)
     parser.add_argument('--in-joints', help='number of input joints', type=int, default=17)
@@ -25,12 +27,12 @@ def parse_args():
     parser.add_argument('--checkpoints', help='type of checkpoints', type=str, choices=['final', 'best'])
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2)
-    parser.add_argument('--flip-data', help='test time flip', action='store_true', default=True)
     parser.add_argument('--augmentation', type=str, default=None, help='Select the kind of data augmantation: flip, rotation, translate', choices=["f", "r", "t"], nargs=3)
 
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-
+    parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
+    
     try :
         args = parser.parse_args()
     except:
