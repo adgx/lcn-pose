@@ -65,11 +65,13 @@ def main():
     dataset_copy = test_data.copy()
     labelset_copy = test_labels.copy()
     num_augmentations = 0
+    op_ord = {}
 
     if args.flip_data:
         test_data = np.concatenate((test_data,  data.flip_data(dataset_copy)), axis=0)
         train_labels = np.concatenate((test_labels, data.flip_data(labelset_copy)), axis=0)
         num_augmentations += 1
+        op_ord['f'] = num_augmentations
 
     if args.translate_data:
         translation_factor = args.translation_factor
@@ -79,11 +81,13 @@ def main():
         test_data = np.concatenate((test_data,  data.translation_data(dataset_copy, translation)), axis=0)
         train_labels = np.concatenate((test_labels, data.translation_data(labelset_copy, translation)), axis=0)
         num_augmentations += 1
+        op_ord['t'] = num_augmentations
 
     if args.rotation_data:
         test_data = np.concatenate((test_data, data.rotate_data(dataset_copy)), axis=0)
         train_labels = np.concatenate((test_labels,  data.rotate_data(labelset_copy) ), axis=0)
         num_augmentations += 1
+        op_ord['r'] = num_augmentations
 
     # params
     params = params_help.get_params(is_training=False, gt_dataset=train_labels)
@@ -98,7 +102,7 @@ def main():
 
     
     if args.flip_data or args.rotation_data or args.translate_data:
-        predictions = data.undo(predictions, number_actions=num_augmentations)
+        predictions = data.undo(predictions, op_ord, number_actions=num_augmentations, translation=translation)
     result = datareader.denormalize(predictions)
 
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
