@@ -234,7 +234,7 @@ def unflip_data(data):
 #    data = data.reshape((-1, 17 * 3))
 #    return data
 
-def undo(data, translation_factor=2, number_actions=2):
+def undo(data, number_actions=2):
     """
     Average original data, flipped data, rotated data and translated data
         data: [N*(nop+1), 17*3]
@@ -242,16 +242,14 @@ def undo(data, translation_factor=2, number_actions=2):
         result: [N, 17*3]
     """
     # Untranslation
-    data = untranslation_data(data, translation_factor, number_actions)
+    data = data.copy().reshape(number_actions+1, -1, 17, 3)
     
-    # Unflip
-    data = unflip_data(data, number_actions)
-    
-    # Average the results
-    data = np.mean(data.reshape((number_actions, -1, 17 * 3)), axis=0)  # [N, 17*3]
+    for idx, undo_op in enumerate(data):
+        data[idx+1] = undo_op(data[idx+1])
+
+    data = np.mean(data, axis=0)  # [N, 17, 3]
     data = data.reshape((-1, 17 * 3))
     return data
-
 #rotate 
 def rotate_data(data, angle = 180):
     """

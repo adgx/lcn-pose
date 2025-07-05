@@ -65,6 +65,8 @@
                 "best",
                 "--mask-type",
                 "locally_connected",
+                "--test-indices",
+                "2"
             ]
         },
         {

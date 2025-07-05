@@ -98,9 +98,7 @@ def main():
 
     
     if args.flip_data or args.rotation_data or args.translate_data:
-        predictions = data.undo(predictions, 
-                                translation_factor=args.translation_factor, 
-                                number_actions=num_augmentations)
+        predictions = data.undo(predictions, number_actions=num_augmentations)
     result = datareader.denormalize(predictions)
 
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
