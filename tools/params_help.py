@@ -116,6 +116,8 @@ def update_parameters(args, params):
         params['in_F'] = args.in_F
     if args.epochs:
         params['num_epochs'] = args.epochs
+    if args.batch_size:
+        params['batch_size'] = args.batch_size
 
     print(params['dir_name'])
 

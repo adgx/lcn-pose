@@ -70,6 +70,31 @@
             ]
         },
         {
+            "name": "Python Debugger: Inference test 0",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--test_set",
+                "humansc3d",
+                "--train_set",
+                "humansc3d",
+                "--checkpoints",
+                "best",
+                "--mask-type",
+                "locally_connected",
+                "--test-indices",
+                "0",
+                "--channels",
+                "64",
+                "--subset", 
+                "1000", 
+                "--epoch",
+                "25"
+            ]
+        },
+        {
             "name": "Python Debugger: Evaluate",
             "type": "debugpy",
             "request": "launch",
