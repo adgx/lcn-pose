@@ -52,19 +52,19 @@ def main():
     #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
-    gt_trainset = datareader.real_read(args.test_set, "test")
+    gt_testset = datareader.real_read(args.test_set, "test")
     
     #Make a subset
     if args.subset is not None:
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
-        gt_testset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
+        gt_testset = data.get_subset(gt_testset, subset_size=args.subset, mode="camera")
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
     train_labels, test_labels = datareader.read_3d()
 
-    dataset_copy = gt_trainset.copy()
-    labelset_copy = gt_trainset.copy()
+    dataset_copy = train_data.copy()
+    labelset_copy = train_labels.copy()
 
     if args.flip_data:
         train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
@@ -75,8 +75,8 @@ def main():
         if translation_factor < 0:
             raise ValueError("Translation factor must be non-negative")
         translation = np.random.uniform(-translation_factor, translation_factor)
-        train_data = np.concatenate(train_data,  data.translation_data(dataset_copy, translation), axis=0)
-        train_labels = np.concatenate(train_labels, data.translation_data(labelset_copy, translation), axis=0)
+        train_data = np.concatenate((train_data,  data.translation_data(dataset_copy, translation)), axis=0)
+        train_labels = np.concatenate((train_labels, data.translation_data(labelset_copy, translation)), axis=0)
 
     if args.rotation_data:
         train_data = np.concatenate((train_data, data.rotate_data(dataset_copy)), axis=0)

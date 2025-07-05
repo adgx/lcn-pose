@@ -245,9 +245,9 @@ def undo(data, op_ord, number_actions=2, angle = 180, translation=2):
     data = data.copy().reshape(number_actions+1, -1, 17, 3)
     
     if 'f' in op_ord:
-        data[op_ord['f']+1] = unflip_data(data[op_ord['f']+1])
+        data[op_ord['f']] = unflip_data(data[op_ord['f']])
     if 'r' in op_ord:
-        data[op_ord['r']+1] = rotate_data(data[op_ord['r']+1], angle)
+        data[op_ord['r']] = rotate_data(data[op_ord['r']], angle)
     if 't' in op_ord:
         data[op_ord['t']+1] = untranslation_data(data[op_ord['t']+1], translation)
 
