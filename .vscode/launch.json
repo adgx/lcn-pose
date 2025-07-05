@@ -90,6 +90,12 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
+                "--knn",
+                "1",
+                "--checkpoints",
+                "best",
+                "--test-indices",
+                "21",
                 "--test_set",
                 "humansc3d",
                 "--train_set",
@@ -110,7 +116,7 @@
                 "--filename",
                 "humansc3d",
                 "--test-indices",
-                "1",
+                "21",
                 "--per-joint",
             ]
         },
