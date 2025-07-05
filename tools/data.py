@@ -6,7 +6,28 @@ ROOT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
 #GT_TEST_PATH = os.path.join(ROOT_PATH, "dataset/h36m_test.pkl")
 #GT_TRAIN_PATH = os.path.join(ROOT_PATH, "dataset/h36m_train.pkl")
+def undo(data, op_ord):
+    """
+    Average original data, flipped data, rotated data and translated data
+        data: [N*(nop+1), 17*3]
+    Return
+        result: [N, 17*3]
+    """
+    # Untranslation
+    #data = untranslation_data(data, translation_factor, number_actions)
+    
+    # Unflip
+    #data = unflip_data(data, number_actions)
+    
+    # Average the results
+    data = data.copy().reshape(len(op_ord)+1, -1, 17, 3)
+    
+    for idx, undo_op in enumerate(op_ord):
+        data[idx+1] = undo_op(data[idx+1])
 
+    data = np.mean(data, axis=0)  # [N, 17, 3]
+    data = data.reshape((-1, 17 * 3))
+    return data
 
 def flip_data(data):
     """
