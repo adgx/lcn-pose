@@ -6,6 +6,27 @@ import pprint
 import numpy as np
 from train import parse_args 
 
+def write_to_file(config, file_path):
+    # Save configurations to a CSV file
+    print(f"Saving configurations to {file_path}")
+    if os.path.exists(file_path):
+        with open(file_path, 'a') as f:
+                f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
+                        f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
+                        f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
+                        f"{config.get('best_loss', 'N/A')},"
+                        f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
+    else:
+        # Create the file and write the header if it doesn't exist
+        with open(file_path, 'w') as f:
+            f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,best_loss,t_step,error\n")
+            f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
+                        f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
+                        f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
+                        f"{config.get('best_loss', 'N/A')},"
+                        f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
+
+
 if __name__ == '__main__': 
     args = parse_args()
 
@@ -63,7 +84,8 @@ if __name__ == '__main__':
     saves_configurations = []
 
     # Load existing configurations if available
-    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))    
+
     config_file = os.path.join(ROOT_PATH, "experiment", 'saves_configurations.csv')
     if os.path.exists(config_file):
         with open(config_file, 'r') as f:
@@ -110,42 +132,20 @@ if __name__ == '__main__':
             selected_params['validation_loss'] = losses[-1] if losses else None
             selected_params['t_step'] = t_step
             selected_params["best_loss"] = np.min(losses) if losses else None
-            saves_configurations.append(selected_params)
+            write_to_file(selected_params, config_file)
         except KeyboardInterrupt:
             print('Training interrupted')
             selected_params['error'] = "Training interrupted"
-            saves_configurations.append(selected_params)
+            write_to_file(selected_params, config_file)
+            continue
         except Exception as e:
             print('Error during training: ', e)
             selected_params['losses'] = None
             selected_params['t_step'] = None
             selected_params['error'] = str(e)
-            saves_configurations.append(selected_params)
+            write_to_file(selected_params, config_file)
             #raise SystemExit
-    
-    # Save the configurations to a file
-    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-    
-    #csv 
-    file_path = os.path.join(ROOT_PATH, "experiment", 'saves_configurations.csv')
 
-    # Save configurations to a CSV file
-    print(f"Saving configurations to {file_path}")
-    if os.path.exists(file_path):
-        with open(file_path, 'a') as f:
-            for config in saves_configurations:
-                f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
-                        f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
-                        f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
-                        f"{config.get('best_loss', 'N/A')},"
-                        f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
-    else:
-        # Create the file and write the header if it doesn't exist
-        with open(file_path, 'w') as f:
-            f.write("knn,batch_size,num_layers,dropout,learning_rate,regularization,mean_loss,std_loss,validation_loss,best_loss,t_step,error\n")
-            for config in saves_configurations:
-                f.write(f"{config['knn']},{config['batch_size']},{config['num_layers']},{config['dropout']},"
-                        f"{config['learning_rate']},{config['regularization']},{config.get('mean_loss', 'N/A')},"
-                        f"{config.get('std_loss', 'N/A')},{config.get('validation_loss', 'N/A')},"
-                        f"{config.get('best_loss', 'N/A')},"
-                        f"{config.get('t_step', 'N/A')},{config.get('error', 'N/A')}\n")
+
+
+    

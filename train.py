@@ -17,7 +17,7 @@ def parse_args():
     # optional arguments
     parser.add_argument('--test-indices', help='test idx ', type=str, default="1")
     parser.add_argument('--mask-type', help='mask type', type=str, default='locally_connected', choices=['locally_connected', 'exponential'])
-    parser.add_argument('--init-type', help='initialization type ', type=str, default='same', choices=['same', 'ones', 'random'])
+    parser.add_argument('--init-type', help='initialization type ', type=str, default='same', choices=['same'])
     parser.add_argument('--graph', help='index of graphs', type=int, default=0)
     parser.add_argument('--knn', help='expand of neighbourhood', type=int, default=2)
     parser.add_argument('--layers', help='number of layers', type=int, default=3)
@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument('--dropout', help='dropout probability', type=float, default=0.25)
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
     parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
-    parser.add_argument('--epochs', help='number of epochs', type=int, default=50)
+    parser.add_argument('--epochs', help='number of epochs', type=int, default=25)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-
+    parser.add_argument('--n_test', help='number of test for random search', type=int, default=1)
     try :
         args = parser.parse_args()
     except:

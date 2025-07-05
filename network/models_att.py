@@ -508,10 +508,6 @@ class cgcnn(base_model):
             else:
                 if self.init_type == "same":
                     initializer = L
-                elif self.init_type == "ones":
-                    initializer = tf.compat.v1.initializers.ones
-                elif self.init_type == "random":
-                    initializer = tf.initializers.random_uniform_initializer(0, 1)
                 else:
                     raise ValueError("Unknown init_type: {}".format(self.init_type)) 
                    
