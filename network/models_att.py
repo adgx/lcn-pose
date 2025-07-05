@@ -155,6 +155,7 @@ class base_model(object):
         losses = []
         indices = collections.deque()
         num_steps = int(self.num_epochs * train_data.shape[0] / self.batch_size) # Numero di step totali già moltiplicati per epoche
+        eval_frequency = num_steps // self.num_epochs 
         #epoch_steps = int(train_data.shape[0] / self.batch_size)
         print(f"Total steps to be done to complete all the epochs: {num_steps}")
         min_loss = 10000
@@ -178,7 +179,7 @@ class base_model(object):
             )
 
             # Periodical evaluation of the model.
-            if step % self.eval_frequency == 0 or step == num_steps:
+            if step % eval_frequency == 0:
                 epoch = step * self.batch_size / train_data.shape[0]
                 print(
                         "step {} / {} (epoch {:.2f} / {}):".format(
@@ -457,6 +458,7 @@ class cgcnn(base_model):
         eval_frequency=200,
         dir_name="",
         checkpoints="final",
+        is_training=True,
         knn=0 # not used
     ):
         super().__init__()
@@ -480,6 +482,7 @@ class cgcnn(base_model):
         self.checkpoints = checkpoints
         self.activation = tf.nn.leaky_relu
         self.in_F = in_F
+        self.is_training = is_training
 
         # Build the computational graph.
         self.build_graph(in_joints, self.in_F)
@@ -502,8 +505,6 @@ class cgcnn(base_model):
             assert L.shape == (self.in_joints, self.in_joints)
             if "exponential" in self.mask_type:
                 self.mask = tf.constant(get_exponential_matrix())
-            if "learnable" not in self.mask_type:
-                self.mask = tf.constant(L)
             else:
                 if self.init_type == "same":
                     initializer = L
@@ -540,15 +541,42 @@ class cgcnn(base_model):
         masked_weights = tf.reshape(masked_weights, [input_size, output_size])
         return masked_weights
 
+    @tf.function
+    def logical(x):
+        """Convert boolean to tf.bool"""
+        if isinstance(x, bool):
+            return tf.constant(x, dtype=tf.bool)
+        elif isinstance(x, tf.Tensor):
+            if x.dtype == tf.bool:
+                return x
+            else:
+                return tf.cast(x, dtype=tf.bool)
+        elif isinstance(x, np.ndarray):
+            if x.dtype == np.bool_:
+                return tf.constant(x, dtype=tf.bool)
+            else:
+                return tf.constant(x, dtype=tf.bool)
+        else:
+            raise TypeError("Unsupported type for logical conversion: {}".format(type(x)))
+    
     def batch_normalization_warp(self, y, training, name):
-        tf.compat.v1.disable_eager_execution() # Fix save model issue
+        """
+        Batch normalization wrapper for Keras layers.
+        Args:
+            y: input tensor to be normalized
+            training: boolean, whether the model is in training mode
+            name: name for the batch normalization layer
+        Returns:
+            y: normalized tensor
+        """
         keras_bn = tf.keras.layers.BatchNormalization(axis=-1, name=name)
 
         _, output_size = y.get_shape()
         output_size = int(output_size)
         out_F = int(output_size / self.in_joints)
         y = tf.reshape(y, [-1, self.in_joints, out_F])
-        y = keras_bn(y, training=False) #FIXED True
+        
+        y = keras_bn(y, training=training) 
         y = tf.reshape(y, [-1, output_size])
 
         #for item in keras_bn.updates:
@@ -608,7 +636,7 @@ class cgcnn(base_model):
             if self.batch_norm:
                 y = self.batch_normalization_warp(
                     y,
-                    training=self.ph_istraining,
+                    training=self.is_training,
                     name="batch_normalization1" + str(idx),
                 )
             y = self.activation(y)
@@ -635,7 +663,7 @@ class cgcnn(base_model):
             if self.batch_norm:
                 y = self.batch_normalization_warp(
                     y,
-                    training=self.ph_istraining,
+                    training=self.is_training,
                     name="batch_normalization2" + str(idx),
                 )
             y = self.activation(y)
@@ -670,7 +698,7 @@ class cgcnn(base_model):
 
             if self.batch_norm:
                 y3 = self.batch_normalization_warp(
-                    y3, training=self.ph_istraining, name="batch_normalization"
+                    y3, training=self.is_training, name="batch_normalization"
                 )
             y3 = self.activation(y3)
             y3 = tf.nn.dropout(y3, rate=data_dropout)

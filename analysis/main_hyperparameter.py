@@ -64,7 +64,15 @@ if __name__ == "__main__":
         fig.add_trace(go.Scatter(x=loss_json[:, 1], y=loss_json[:, 2], mode='lines', name='Training Loss', showlegend=False, legendgroup="t1"), row=i, col=j)
         fig.add_trace(go.Scatter(x=val_loss[:, 1], y=val_loss[:, 2], mode='lines', name='Validation Loss', showlegend=False, legendgroup="t4"), row=i, col=j)
         fig.add_trace(go.Scatter(x=[lowest_val_loss_epoch], y=[lowest_val_loss], mode='markers', name='Lowest Validation Loss', marker=dict(color='red', size=10), showlegend=False, legendgroup="t5"), row=i, col=j) 
-    
+
+        # Compute the difference between training and validation loss
+        loss_diff = val_loss[:, 2] - loss_json[:, 2]
+        # Print the minimum difference
+        min_loss_diff = np.min(loss_diff) 
+        min_loss_diff_epoch = np.argmin(loss_diff)
+        min_loss_diff_epoch = loss_json[min_loss_diff_epoch, 1]
+        print(f"Minimum loss difference: {min_loss_diff} at epoch {min_loss_diff_epoch}")
+
     fig.update_xaxes(title_text="Epoch")
     fig.update_yaxes(title_text="Loss")
     fig.update_layout(showlegend=True)

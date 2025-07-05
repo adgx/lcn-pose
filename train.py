@@ -15,26 +15,26 @@ def parse_args():
     parser = argparse.ArgumentParser(description='train')
 
     # optional arguments
-    parser.add_argument('--test-indices', help='test idx ', type=str)
-    parser.add_argument('--mask-type', help='mask type ', type=str)
-    parser.add_argument('--init-type', help='initialization type ', type=str, default='random', choices=['same', 'ones', 'random'])
+    parser.add_argument('--test-indices', help='test idx ', type=str, default="1")
+    parser.add_argument('--mask-type', help='mask type', type=str, default='locally_connected', choices=['locally_connected', 'exponential'])
+    parser.add_argument('--init-type', help='initialization type ', type=str, default='same', choices=['same', 'ones', 'random'])
     parser.add_argument('--graph', help='index of graphs', type=int, default=0)
-    parser.add_argument('--knn', help='expand of neighbourhood', type=int)
-    parser.add_argument('--layers', help='number of layers', type=int)
+    parser.add_argument('--knn', help='expand of neighbourhood', type=int, default=2)
+    parser.add_argument('--layers', help='number of layers', type=int, default=3)
     parser.add_argument('--in-joints', help='number of input joints', type=int, default=17)
     parser.add_argument('--out-joints', help='number of output joints', type=int, default=17)
-    parser.add_argument('--dropout', help='dropout probability', type=float)
+    parser.add_argument('--dropout', help='dropout probability', type=float, default=0.25)
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
     parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
-    parser.add_argument('--epochs', help='number of epochs', type=int, default=200)
+    parser.add_argument('--epochs', help='number of epochs', type=int, default=50)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
     parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=True)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=True)
     parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
-    parser.add_argument('--output_file', type=str, default=None, help='Output file where save the informations pf the process')
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
+    parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
 
@@ -46,62 +46,41 @@ def parse_args():
 
     return args
 
-"""
-- H36M: azioni, soggetti, camera -> 
-- Humansc3d: soggetti, camera -> 
-- MPII: attivita, soggetti, camera -> 
-
-- UNITO: soggetti, camera -> 
-"""
 def main():
     args = parse_args()
 
     #read the train and test passed with arguments
     datareader = data.DataReader()
-    gt_trainset_all = datareader.real_read(args.train_set, "train")
-    gt_testset_all = datareader.real_read(args.test_set, "test")
+    gt_trainset = datareader.real_read(args.train_set, "train")
+    gt_trainset = datareader.real_read(args.test_set, "test")
     
     #Make a subset
     if args.subset is not None:
-        gt_trainset = data.get_subset(gt_trainset_all, subset_size=args.subset, mode="camera")
-        gt_testset = data.get_subset(gt_testset_all, subset_size=args.subset, mode="camera")
+        gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
+        gt_testset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
     train_labels, test_labels = datareader.read_3d()
 
+    dataset_copy = gt_trainset.copy()
+    labelset_copy = gt_trainset.copy()
+
     if args.flip_data:
-        train_data_flip = data.flip_data(train_data)
-        train_labels_flip = data.flip_data(train_labels)
+        train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
+        train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
 
     if args.translate_data:
         translation_factor = args.translation_factor
         if translation_factor < 0:
             raise ValueError("Translation factor must be non-negative")
         translation = np.random.uniform(-translation_factor, translation_factor)
-        train_data_translate = data.translation_data(train_data, translation)
-        train_labels_translate = data.translation_data(train_labels, translation)
+        train_data = np.concatenate(train_data,  data.translation_data(dataset_copy, translation), axis=0)
+        train_labels = np.concatenate(train_labels, data.translation_data(labelset_copy, translation), axis=0)
 
     if args.rotation_data:
-        train_data_rotated = data.rotate_data(train_data)
-        train_labels_rotated = data.rotate_data(train_labels)
-    
-
-    if args.flip_data:
-        train_data = np.concatenate((train_data, train_data_flip), axis=0)
-        train_labels = np.concatenate((train_labels, train_labels_flip), axis=0)
-
-    if args.translate_data:
-        train_data = np.concatenate((train_data, train_data_translate), axis=0)
-        train_labels = np.concatenate((train_labels, train_labels_translate), axis=0)
-
-    if args.rotation_data:
-        train_data = np.concatenate((train_data, train_data_rotated), axis=0)
-        train_labels = np.concatenate((train_labels, train_labels_rotated), axis=0)
-
-    if args.output_file is not None:
-        if not os.path.exists(os.path.join(ROOT_PATH, 'output', args.output_file)):
-            os.makedirs(os.path.dirname(args.output_file))
+        train_data = np.concatenate((train_data, data.rotate_data(dataset_copy)), axis=0)
+        train_labels = np.concatenate((train_labels,  data.rotate_data(labelset_copy) ), axis=0)
 
     # params
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)

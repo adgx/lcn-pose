@@ -17,7 +17,7 @@ if __name__ == "__main__":
     
 
     # idx of the tensorboard summaries to plot
-    idx = 12
+    idx = 11
 
     # Single plot for a specific idx
     print(f"Processing dataset: {idx}")
@@ -34,6 +34,17 @@ if __name__ == "__main__":
        
     loss_json = read_csv(loss_csv)
     val_loss = read_csv(val_csv)
+
+    # Il numero di data è uguale al numero di steps
+    num_epochs = 100
+    num_steps = loss_json.shape[0] 
+    
+    # 
+    tmp = num_steps // num_epochs
+    #Take a value every tmp steps
+    loss_json = loss_json[::tmp, :]
+    val_loss = val_loss[::tmp, :]
+
 
     lowest_val_loss = np.min(val_loss[:, 2])
     lowest_val_loss_epoch = np.argmin(val_loss[:, 2])

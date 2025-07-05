@@ -173,7 +173,7 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
         return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
     
 
-def untranslation_data(data):
+def untranslation_data(data, translation_factor=2, number_actions=2):
     """
     Average original data and translated data
         data: [2N, 17*k] or [2N, 17, k]
@@ -185,21 +185,21 @@ def untranslation_data(data):
     
     return data
 
-#def unflip_data(data, number_actions=2):
-#    """
-#    Average original data and flipped data
-#        data: [2N, 17*3]
-#    Return
-#        result: [N, 17*3]
-#    """
-#    left_joints = [4, 5, 6, 11, 12, 13]
-#    right_joints = [1, 2, 3, 14, 15, 16]
-#
-#    data = data.copy().reshape((number_actions, -1, 17, 3))
-#    data[1, :, :, 0] *= -1  # flip x of all joints
-#    data[1, :, left_joints + right_joints] = data[1, :, right_joints + left_joints]
-#    data = data.reshape((-1, 17 * 3))
-#    return data
+def unflip_data(data, number_actions=2):
+    """
+    Average original data and flipped data
+        data: [2N, 17*3]
+    Return
+        result: [N, 17*3]
+    """
+    left_joints = [4, 5, 6, 11, 12, 13]
+    right_joints = [1, 2, 3, 14, 15, 16]
+
+    data = data.copy().reshape((number_actions, -1, 17, 3))
+    data[1, :, :, 0] *= -1  # flip x of all joints
+    data[1, :, left_joints + right_joints] = data[1, :, right_joints + left_joints]
+    data = data.reshape((-1, 17 * 3))
+    return data
 
 def unflip_data(data):
     """
@@ -234,7 +234,7 @@ def unflip_data(data):
 #    data = data.reshape((-1, 17 * 3))
 #    return data
 
-def undo(data, op_ord):
+def undo(data, translation_factor=2, number_actions=2):
     """
     Average original data, flipped data, rotated data and translated data
         data: [N*(nop+1), 17*3]
@@ -242,18 +242,13 @@ def undo(data, op_ord):
         result: [N, 17*3]
     """
     # Untranslation
-    #data = untranslation_data(data, translation_factor, number_actions)
+    data = untranslation_data(data, translation_factor, number_actions)
     
     # Unflip
-    #data = unflip_data(data, number_actions)
+    data = unflip_data(data, number_actions)
     
     # Average the results
-    data = data.copy().reshape(len(op_ord)+1, -1, 17, 3)
-    
-    for idx, undo_op in enumerate(op_ord):
-        data[idx+1] = undo_op(data[idx+1])
-
-    data = np.mean(data, axis=0)  # [N, 17, 3]
+    data = np.mean(data.reshape((number_actions, -1, 17 * 3)), axis=0)  # [N, 17*3]
     data = data.reshape((-1, 17 * 3))
     return data
 

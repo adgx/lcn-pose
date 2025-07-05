@@ -130,7 +130,7 @@ def get_params(is_training, gt_dataset):
     params['decay_type'] = 'exp'  # 'step', 'exp'
     params['decay_params'] = {'decay_steps': 32000, 'decay_rate':0.96}  # param for exponential decay optimizer
     params['decay_params'].update({'boundaries': [250000, 500000, 1000000, 1350000], 'lr_values': [1e-3, 7e-4, 4e-4, 2e-4, 1e-4]})  # param for step optimizer
-    params['eval_frequency'] = int(len(gt_dataset) / params['batch_size'])  # eval, summ & save after each epoch
+    #params['eval_frequency'] = int(len(gt_dataset) / params['batch_size'])  # eval, summ & save after each epoch
 
     params['F'] = 64
     """
@@ -154,5 +154,6 @@ def get_params(is_training, gt_dataset):
     params['dropout'] = 0.25 if is_training else 0  # drop prob
     params['learning_rate'] = 1e-3
     params['checkpoints'] = 'final'
+    params['is_training'] = is_training
 
     return params

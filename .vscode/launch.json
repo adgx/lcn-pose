@@ -24,13 +24,12 @@
             "console": "integratedTerminal",
             "args": [
                 "--subset",
-                "10000",
+                "1000",
                 "--test_set",
                 "humansc3d",
                 "--train_set",
                 "humansc3d",
-                "--test-indices",
-                "7"
+
             ]
         },
 
@@ -59,22 +58,13 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "mpii",
+                "humansc3d",
                 "--train_set",
-                "mpii",
-                //"humansc3d",
-                "--test-indices",
-                "6",
-                "--checkpoint",
+                "humansc3d",
+                "--checkpoints",
                 "best",
                 "--mask-type",
                 "locally_connected",
-                "--knn",
-                "3",
-                "--layers",
-                "3",
-                "--in-F",
-                "2"
             ]
         },
         {
