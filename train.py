@@ -28,6 +28,9 @@ def parse_args():
     parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
     parser.add_argument('--epochs', help='number of epochs', type=int, default=25)
     parser.add_argument('--batch_size', help='batch size', type=int, default=200)
+    parser.add_argument('--learning_rate', help='learning rate', type=float, default=0.001)
+    parser.add_argument('--regularization', help='regularization factor', type=float, default=0.0001)
+    
     
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)

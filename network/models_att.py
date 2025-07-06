@@ -12,7 +12,10 @@ import glob
 
 
 def get_exponential_matrix():
-    #make a graph of skeleton
+    """Generate an exponential matrix for the graph.
+    Returns:
+        np.ndarray: A matrix where each element is exp(1/2^dist[i][j]).
+    """
     edges = [(0, 1, 1),
             (0, 7, 1),
             (0, 4, 1),
@@ -536,24 +539,6 @@ class cgcnn(base_model):
         masked_weights = weights * mask
         masked_weights = tf.reshape(masked_weights, [input_size, output_size])
         return masked_weights
-
-    @tf.function
-    def logical(x):
-        """Convert boolean to tf.bool"""
-        if isinstance(x, bool):
-            return tf.constant(x, dtype=tf.bool)
-        elif isinstance(x, tf.Tensor):
-            if x.dtype == tf.bool:
-                return x
-            else:
-                return tf.cast(x, dtype=tf.bool)
-        elif isinstance(x, np.ndarray):
-            if x.dtype == np.bool_:
-                return tf.constant(x, dtype=tf.bool)
-            else:
-                return tf.constant(x, dtype=tf.bool)
-        else:
-            raise TypeError("Unsupported type for logical conversion: {}".format(type(x)))
     
     def batch_normalization_warp(self, y, training, name):
         """
@@ -565,6 +550,7 @@ class cgcnn(base_model):
         Returns:
             y: normalized tensor
         """
+        tf.compat.v1.disable_eager_execution()
         keras_bn = tf.keras.layers.BatchNormalization(axis=-1, name=name)
 
         _, output_size = y.get_shape()
