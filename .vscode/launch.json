@@ -58,15 +58,17 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "humansc3d",
+                "mpii",
                 "--train_set",
                 "humansc3d",
                 "--checkpoints",
                 "best",
                 "--mask-type",
                 "locally_connected",
+                "--channels",
+                "8",
                 "--test-indices",
-                "1"
+                "13"
             ]
         },
         {
@@ -77,9 +79,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "humansc3d",
+                "mpii",
                 "--train_set",
-                "humansc3d",
+                "mpii",
                 "--checkpoints",
                 "best",
                 "--mask-type",
@@ -87,7 +89,7 @@
                 "--test-indices",
                 "0",
                 "--channels",
-                "64",
+                "8",
                 "--subset", 
                 "1000", 
                 "--epoch",
@@ -103,9 +105,10 @@
             "args": [
                 "--filename",
                 //"humansc3d",
-                "mpii",
+                "humansc3d",
                 "--test-indices",
-                "6",
+                "17",
+                "--protocol2",
                 "--per-joint",
             ]
         },

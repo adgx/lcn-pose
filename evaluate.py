@@ -33,6 +33,9 @@ def _eval(test_name, dataitem_gt, commd):
         preds = pickle.load(f)['result']  # [N, 17, 3]
     preds = np.reshape(preds, (-1, 17, 3))
 
+    #Get only the first dataitem_gt.shape[0] elements from preds
+    if len(preds) > len(dataitem_gt):
+        preds = preds[:len(dataitem_gt)]
     assert len(preds) == len(dataitem_gt)
 
     results = []

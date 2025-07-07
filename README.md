@@ -24,7 +24,7 @@ A comprehensive implementation for training, evaluating, and visualizing 3D huma
 
 ## Project Overview
 
-This repository contains all the code required to train, evaluate, and visualize 3D human pose estimation models. The implementation is based on state-of-the-art deep learning approaches and supports multiple datasets and evaluation protocols.
+This repository contains all the code required to train, evaluate, and visualize 3D human pose estimation models. The implementation is based on state-of-the-art deep learning approaches and supports multiple datasets and evaluation protocols. The visualization is dedicated only to humansc3d
 
 ### Key Features
 
@@ -48,7 +48,7 @@ Already have the checkpoints? Clone → install → run the example commands bel
 
 ```bash
 # Clone and enter repository
-git clone <repo-url> && cd ml-pose-estimation
+git clone <repo-url> && cd lcn-pose
 
 # Create a fresh environment (recommended)
 python3.8.20 -m venv .venv && source .venv/bin/activate
@@ -320,13 +320,13 @@ ml-pose-estimation/
 
 The best performing models are available for download. These models have been trained on standard datasets and achieve state-of-the-art performance.
 
-**Download Link**: [Coming Soon]
+**Download Link**: <a href="https://drive.google.com/drive/folders/1uXE9XgH0LC0C9EASp3MJXs6atdANXJM7?usp=sharing"> Link </a>
 
 ### Experiment Tracking
 
 All experimental results and hyperparameter configurations are documented and can be accessed through the provided links above.
 
-**Excel Link**: [Coming Soon]
+**Excel Link**: <a href="https://drive.google.com/drive/folders/1uXE9XgH0LC0C9EASp3MJXs6atdANXJM7?usp=sharing"> Link </a>
 
 ---
 
@@ -335,14 +335,13 @@ All experimental results and hyperparameter configurations are documented and ca
 For questions, issues, or contributions, please:
 
 1. Open an issue on GitHub
-2. Contact the development team
-3. Check the documentation for common solutions
 
 ---
 
 ## Acknowledgements
 
-This repository is based on the original TensorFlow implementation released by the authors of the ICCV 2019 paper. We thank them for making their research publicly available and contributing to the open-source community.
+This repository is based on the original TensorFlow implementation released by the authors of the ICCV 2019 paper <a href="https://github.com/CHUNYUWANG/lcn-pose"> Link</a> <br>
+We thank them for making their research publicly available and contributing to the open-source community.
 
 ### References
 
@@ -363,8 +362,8 @@ If you use this code in your research, please cite:
 ```bibtex
 @misc{ml-pose-estimation-2025,
   title={3D Human Pose Estimation},
-  author={[Your Names]},
+  author={[Andrea Ongaro and Antonino di Gregorio]},
   year={2025},
-  howpublished={\url{https://github.com/your-repo/ml-pose-estimation}}
+  howpublished={\url{https://github.com/adgx/lcn-pose}}
 }
 ```

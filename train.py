@@ -18,24 +18,19 @@ def parse_args():
     parser.add_argument('--test-indices', help='test idx ', type=str, default="1")
     parser.add_argument('--mask-type', help='mask type', type=str, default='locally_connected', choices=['locally_connected', 'exponential'])
     parser.add_argument('--init-type', help='initialization type ', type=str, default='same', choices=['same'])
-    parser.add_argument('--graph', help='index of graphs', type=int, default=0)
     parser.add_argument('--knn', help='expand of neighbourhood', type=int, default=2)
     parser.add_argument('--layers', help='number of layers', type=int, default=3)
-    parser.add_argument('--in-joints', help='number of input joints', type=int, default=17)
-    parser.add_argument('--out-joints', help='number of output joints', type=int, default=17)
-    parser.add_argument('--dropout', help='dropout probability', type=float, default=0.25)
+    parser.add_argument('--dropout', help='dropout probability', type=float, default=0)
     parser.add_argument('--channels', help='number of channels', type=int, default=64)
     parser.add_argument('--subset', help='Make a subset from the dataset passed', type=int, default=None)
     parser.add_argument('--epochs', help='number of epochs', type=int, default=25)
     parser.add_argument('--batch_size', help='batch size', type=int, default=200)
     parser.add_argument('--learning_rate', help='learning rate', type=float, default=0.001)
-    parser.add_argument('--regularization', help='regularization factor', type=float, default=0.0001)
+    parser.add_argument('--regularization', help='regularization factor', type=float, default=None)
     
-    
-    parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
-    parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
-    parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=True)
-    parser.add_argument('--translate_data', help='train time translate', action='store_true', default=True)
+    parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
+    parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
+    parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
     parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
@@ -53,11 +48,15 @@ def parse_args():
 def main():
     args = parse_args()
 
+    # Write tensorFlow version
+    tools.write_tf_version(ROOT_PATH)
+
+
     #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
     gt_testset = datareader.real_read(args.test_set, "test")
-    
+
     #Make a subset
     if args.subset is not None:
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")

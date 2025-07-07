@@ -91,7 +91,7 @@ def main():
         op_ord['r'] = num_augmentations
 
     # params
-    params = params_help.get_params(is_training=False, gt_dataset=train_labels)
+    params = params_help.get_params(is_training=True, gt_dataset=train_labels)
     params_help.update_parameters(args, params)
     print(pprint.pformat(params))
 

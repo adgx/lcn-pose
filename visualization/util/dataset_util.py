@@ -159,24 +159,6 @@ def load_data_from_pickle(data_path):
     with open(data_path, 'rb') as f:
         return pickle.load(f)["result"]
 
-def load_data_from_picklev2(data_path):
-    import pickle
-    results = []
-    with open(data_path, 'rb') as f:
-        return pickle.load(f)
-
-def remove_wrong_joints(j2d, frame):
-    """
-    Remove wrong joints from the dataset.
-    Args:
-        None
-    Returns:
-        None
-    """
-
-            
-    
-    return j2d
 
 ## Used in visualization_lab_dataset.py
 def read_data(data_root, dataset_name, subset, subj_name, action_name, camera_name, subject="w_markers"):
