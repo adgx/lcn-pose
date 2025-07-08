@@ -48,10 +48,6 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # Write tensorFlow version
-    tools.write_tf_version(ROOT_PATH)
-
-
     #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
