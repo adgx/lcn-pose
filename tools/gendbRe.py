@@ -264,7 +264,6 @@ def find_dirs(dataset_root_dir, subset, subj_names):
     return dirs
 
 #the action is the ID of the selfcontact action that is show in the video for the dataset humansc3d
-
 def infer_meta_from_name(subj_video, action, cam_id):
     meta = {
         'subject': int(subj_video[1:3]),
