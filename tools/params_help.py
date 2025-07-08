@@ -37,18 +37,14 @@ def update_parameters(args, params):
         params['mask_type'] = args.mask_type
     if args.init_type:
         params['init_type'] = args.init_type
-    if args.in_F:
-        params['in_F'] = args.in_F
     if args.epochs:
         params['num_epochs'] = args.epochs
     if args.batch_size:
         params['batch_size'] = args.batch_size
-    if args.learning_rate:
+    if hasattr(args, "learning_rate"):
         params['learning_rate'] = args.learning_rate
-    if args.regularization:
+    if hasattr(args, "regularization"):
         params['regularization'] = args.regularization
-
-    print(params['dir_name'])
 
 
 def get_params(is_training, gt_dataset):

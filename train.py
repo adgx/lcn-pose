@@ -59,7 +59,7 @@ def main():
         gt_testset = data.get_subset(gt_testset, subset_size=args.subset, mode="camera")
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
-    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
+    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset)
     train_labels, test_labels = datareader.read_3d()
 
     dataset_copy = train_data.copy()

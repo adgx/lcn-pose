@@ -305,7 +305,7 @@ class DataReader(object):
             gt = pickle.load(f)
         return gt
 
-    def read_2d(self, gt_trainset, gt_testset, which="scale", read_confidence=True):
+    def read_2d(self, gt_trainset, gt_testset, which="scale"):
         if self.gt_trainset is None:
             self.gt_trainset = gt_trainset
         if self.gt_testset is None:
@@ -317,9 +317,6 @@ class DataReader(object):
             trainset[idx] = item["joint_3d_image"][:, :2]
         for idx, item in enumerate(self.gt_testset):
             testset[idx] = item["joint_3d_image"][:, :2]
-        if read_confidence:
-                train_confidence = np.ones((len(self.gt_trainset), 17, 1))  # [N, 17, 1]
-                test_confidence = np.ones((len(self.gt_testset), 17, 1))  # [N, 17, 1]
 
         # normalize
         if which == "scale":
@@ -357,11 +354,6 @@ class DataReader(object):
         else:
             assert 0, "not support normalize type %s" % which
 
-        if read_confidence:
-            trainset = np.concatenate(
-                (trainset, train_confidence), axis=2
-            )  # [N, 17, 3]
-            testset = np.concatenate((testset, test_confidence), axis=2)  # [N, 17, 3]
 
         # reshape
         trainset, testset = trainset.reshape((len(trainset), -1)), testset.reshape((len(testset), -1))
