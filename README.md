@@ -277,14 +277,14 @@ The notebook provides:
 ## Repository Structure
 
 ```ini
-ml-pose-estimation/
-├── analysis/                           # Core network components
+lcn-pose/
+├── analysis/                       # Core network components
 │   ├── data/
 │   └────  training/ 
 │   └────  validation/
 │   ├── main.py
 ├── datasets/                       # Dataset loaders and preprocessors
-│   ├── human3.6/                       # Human3.6M dataset
+│   ├── human3.6/                   # Human3.6M dataset
 │   ├── humansc3d/                  # HumanSC3D dataset
 │   └── mpii/                       # MPII dataset
 │   └── h36m_test.pkl
@@ -367,3 +367,7 @@ If you use this code in your research, please cite:
   howpublished={\url{https://github.com/adgx/lcn-pose}}
 }
 ```
+
+## Known bugs
+
+- A known issue prevents the model from being trained and inferred on different machines when using mismatched TensorFlow versions.
