@@ -51,10 +51,10 @@ def _eval(test_name, dataitem_gt, commd):
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
 
-        first_step = pred-gt
-        secnd_step = np.square(first_step)
-        third_step = np.sum(secnd_step, axis=1)
-        fourth_step = np.sqrt(third_step)
+        #first_step = pred-gt
+        #secnd_step = np.square(first_step)
+        #third_step = np.sum(secnd_step, axis=1)
+        #fourth_step = np.sqrt(third_step)
         # error_per_joint = np.sqrt(np.square(pred-gt).sum(axis=1))  # [17]
         error_per_joint = np.sqrt(np.square(pred-gt).sum(axis=1))  # [17]
         

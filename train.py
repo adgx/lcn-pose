@@ -1,8 +1,6 @@
-import pickle
-import tensorflow as tf
 import numpy as np
-from tools import tools, params_help, data
-from network import  models_att # models_attr2 as
+from tools import params_help, data
+from network import  models_att
 import os
 import argparse
 import pprint
@@ -53,10 +51,18 @@ def main():
     gt_trainset = datareader.real_read(args.train_set, "train")
     gt_testset = datareader.real_read(args.test_set, "test")
 
+    mode = ""
+    if args.train_set == "h36m":
+        mode = "action_camera_subject"
+    elif args.train_set == "humansc3d":
+        mode = "action_camera_subject"
+    elif args.train_set == "mpii":
+        mode = "camera"
+
     #Make a subset
     if args.subset is not None:
-        gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
-        gt_testset = data.get_subset(gt_testset, subset_size=args.subset, mode="camera")
+        gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode=mode)
+        gt_testset = data.get_subset(gt_testset, subset_size=args.subset, mode=mode)
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
     train_data, test_data = datareader.read_2d(gt_trainset, gt_testset)
