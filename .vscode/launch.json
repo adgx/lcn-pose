@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: For testing",
+            "name": "Python Debugger: make validation set form gen_val_set",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -21,6 +21,30 @@
             "args": [
                 "-t",
                 "-d=mpii"
+            ]
+        },
+        {
+            "name": "Python Debugger: make humansc3d validation set form gen_val_set",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "-g",
+                "-d=humansc3d"
+            ]
+        },
+        {
+            "name": "Python Debugger: gen pkl for humansc3d",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "-d=humansc3d",
+                "-t",
+                "-v"
+
             ]
         }
     ]

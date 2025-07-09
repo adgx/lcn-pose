@@ -33,8 +33,12 @@ def load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param):
     cams_data = {}
 
     for camera_view in camera_ids:
-        path_camera = os.path.join(path_cameras, camera_view, '001.json')   
-        with open(path_camera, 'r') as cam_json:
+        #get the camera file name
+        path_camera = os.path.join(path_cameras, camera_view)
+        file_name = os.listdir(path_camera)[0]
+        path_camera_file = os.path.join(path_camera, file_name)
+        
+        with open(path_camera_file, 'r') as cam_json:
             cams_data[camera_view] = json.load(cam_json)
     return cams_data
 
@@ -265,10 +269,16 @@ def find_dirs(dataset_root_dir, subset, subj_names):
 
 #the action is the ID of the selfcontact action that is show in the video for the dataset humansc3d
 def infer_meta_from_name(subj_video, action, cam_id):
+    dict_subact_act = {
+    i: (0 if i < 117 else 1 if i < 136 else 3)
+    for i in range(1, 173)
+    }
+    dict_subact_act[136] = 0
+
     meta = {
         'subject': int(subj_video[1:3]),
-        'action': int(action[:3]),
-        'subaction': int(0),
+        'action': int(dict_subact_act[int(action[:3])]),
+        'subaction': int(action[:3]),
         'camera': int(cam_id)
     }
     return meta
@@ -666,7 +676,7 @@ if __name__ == '__main__':
         images_dir = 'images'
         camera_param = 'camera_parameters'
         camera_ids = ['50591643', '58860488', '60457274', '65906101']
-        load_db = load_cams_data_humansc3d
+        load_db = load_db_humansc3d
     elif args.dataset == "mpii":
         dataset_name = "mpi_inf_3dhp"
         dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
@@ -758,9 +768,7 @@ if __name__ == '__main__':
                 if args.image and dataset_name == 'humansc3d':  
                     convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
     
-                #data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
-                #data = load_db_mpii(base_path, subj_video, cams)
-                data = load_db(base_path, subj_video, cams)
+                data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
                 db.extend(data)
                 video_count += 1
             dbs.append(db)
