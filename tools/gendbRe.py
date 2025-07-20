@@ -12,7 +12,7 @@ import mat73
 import sys
 
 from data_preparation import convert_humansc3d_mp4_to_image
-from gen_val_set import generate_validation_set
+from tools.gen_val_test_set import generate_validation_set
 def load_cams_data(dataset_root_dir, subset, subj_name, camera_param):
     dataset_name = os.path.basename(dataset_root_dir)
     cams_data = {}
