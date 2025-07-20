@@ -660,7 +660,7 @@ if __name__ == '__main__':
 
         exit()
         
-        
+        #ex: 4subject * 100000 *0.33 = 132000
 
     load_db = None
     #information to retrieve the dataset information
