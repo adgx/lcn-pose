@@ -43,7 +43,8 @@
             "args": [
                 "-d=humansc3d",
                 "-t",
-                "-v"
+                "-v",
+                "--test"
 
             ]
         },

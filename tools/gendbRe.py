@@ -12,7 +12,7 @@ import mat73
 import sys
 
 from data_preparation import convert_humansc3d_mp4_to_image
-from tools.gen_val_test_set import generate_validation_set
+from gen_val_test_set import generate_val_and_test_set
 def load_cams_data(dataset_root_dir, subset, subj_name, camera_param):
     dataset_name = os.path.basename(dataset_root_dir)
     cams_data = {}
@@ -701,7 +701,7 @@ if __name__ == '__main__':
     
     #generate the validation set 
     if args.gen and dataset_name == "humansc3d":
-        generate_validation_set(dataset_root_dir, subset_type, subj_name_train)
+        generate_val_and_test_set(dataset_root_dir, subset_type, subj_name_train)
     # loading cameras data
     # we assuming that camera parameters doesn't change in the time and keep the same between train and validation set
     cams = load_cams_data(dataset_root_dir, subset_type[0], subj_name_train[0], camera_param)
@@ -746,6 +746,7 @@ if __name__ == '__main__':
     
     train_dirs = []
     val_dirs = []
+    test_dirs = []
     #allow to find the train and validation set
     if args.train:
         train_dirs = find_dirs(dataset_root_dir, subset_type[0], subj_name_train)
