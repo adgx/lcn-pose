@@ -588,6 +588,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Script to generate the pkl format from the humansc3d")
     parser.add_argument("-t", "--train", action="store_true", help="Create the pkl for the training set")
     parser.add_argument("-v", "--validation", action="store_true", help="Create the pkl for the validation set")
+    parser.add_argument("--test", action="store_true", help="Create the pkl for the test set")
     parser.add_argument("-m", "--image", action="store_true", help="Convert dataset mp4 videos to images")
     parser.add_argument("-g", "--gen", action="store_true", help="Generate validation set from training set")
     parser.add_argument("-d", '--dataset', type=str, default="humansc3d", help='Filename of the dataset', choices=["mpii", "humansc3d"])
@@ -668,9 +669,10 @@ if __name__ == '__main__':
     if args.dataset == "humansc3d":
         dataset_name = args.dataset
         dataset_root_dir = os.path.join( '..', 'datasets', dataset_name)
-        subset_type = ['train', 'test']
+        subset_type = ['train', 'val', 'test']
         subj_name_train = ['s01', 's02', 's03', 's06']
         subj_name_val = ['s01_v', 's02_v', 's03_v', 's06_v']
+        subj_name_test = ['s01_t', 's02_t', 's03_t', 's06_t']
         joints_dir = 'joints3d_25'
         videos_dir = 'videos'
         images_dir = 'images'
@@ -751,14 +753,17 @@ if __name__ == '__main__':
     if args.validation:
         val_dirs = find_dirs(dataset_root_dir, subset_type[1], subj_name_val)
 
-    train_val_datasets = [train_dirs, val_dirs]
+    if args.test:
+        test_dirs = find_dirs(dataset_root_dir, subset_type[2], subj_name_test)
+
+    train_val_test_datasets = [train_dirs, val_dirs, test_dirs]
     dbs = []
     video_count = 0
     idx_subset_type = 0 
 
     if dataset_name == 'humansc3d':
 
-        for dataset in train_val_datasets:
+        for dataset in train_val_test_datasets:
             db = []
             for subj_video in dataset:
                 base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
@@ -768,18 +773,21 @@ if __name__ == '__main__':
                 if args.image and dataset_name == 'humansc3d':  
                     convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
     
-                data = load_db(base_path, subj_video, cams, joints_dir, images_dir )
+                data = load_db(base_path, subj_video, cams, joints_dir, images_dir)
                 db.extend(data)
                 video_count += 1
             dbs.append(db)
             idx_subset_type += 1
     
-        datasets = {'train': dbs[0], 'validation': dbs[1]}
+        datasets = {'train': dbs[0], 'val': dbs[1], 'test': dbs[2]}
     
         if args.train:
             with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
                 pickle.dump(datasets['train'], f)
         
         if args.validation:
+            with open(os.path.join(dataset_root_dir,f'{args.dataset}_val.pkl'), 'wb') as f:
+                pickle.dump(datasets['val'], f)
+        if args.test:
             with open(os.path.join(dataset_root_dir,f'{args.dataset}_test.pkl'), 'wb') as f:
-                pickle.dump(datasets['validation'], f)
+                pickle.dump(datasets['test'], f)
