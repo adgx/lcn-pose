@@ -1,12 +1,10 @@
-import tensorflow as tf
 import numpy as np
-from tools import tools, params_help, data
+from tools import params_help, data
 from network import  models_att # models_attr2 as
 import os
 import pprint
 import numpy as np
 from train import parse_args
-import argparse
 
 from multiple_trains import write_to_file
 
@@ -22,7 +20,7 @@ if __name__ == '__main__':
     gt_testset = data.get_subset(gt_testset_all, subset_size=args.subset, mode="camera")
 
     train_data, test_data, train_labels, test_labels = None, None, None, None
-    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset, read_confidence=True if args.in_F == 3 else False)
+    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset)
     train_labels, test_labels = datareader.read_3d()
 
     if args.flip_data:
@@ -66,6 +64,7 @@ if __name__ == '__main__':
         'dropout': [0.25, 0.35, 0.4],
         'learning_rate': [1e-3, 1e-4],
         'regularization': [5e-4, 5e-2, 5e-3],
+
     }
 
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)

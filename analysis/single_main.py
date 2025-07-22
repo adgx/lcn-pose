@@ -8,6 +8,25 @@ ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 TRAINING_PATH = os.path.join(ROOT_PATH, "data", "hyperparameter" , "training")
 VALIDATION_PATH = os.path.join(ROOT_PATH, "data", "hyperparameter" , "validation")
 
+def add_graphs(fig):
+    loss_csv = os.path.join(TRAINING_PATH, "test" + str(13) + "_summaries.csv")
+    if not os.path.exists(loss_csv):
+        raise FileNotFoundError(f"File {loss_csv} does not exist.")
+    val_csv = os.path.join(VALIDATION_PATH, "test" + str(13) + "_summaries.csv")
+    if not os.path.exists(val_csv):
+        raise FileNotFoundError(f"File {val_csv} does not exist.")
+        
+       
+    loss_json = read_csv(loss_csv)
+    val_loss = read_csv(val_csv)
+
+    fig.add_trace(go.Scatter(x=loss_json[:, 1], y=loss_json[:, 2], mode='lines', name='Training Loss', showlegend=False, legendgroup="t1"))
+    fig.add_trace(go.Scatter(x=val_loss[:, 1], y=val_loss[:, 2], mode='lines', name='Validation Loss', showlegend=False, legendgroup="t4"))
+    fig.add_trace(go.Scatter(x=[lowest_val_loss_epoch], y=[lowest_val_loss], mode='markers', name='Lowest Validation Loss', marker=dict(color='red', size=10), showlegend=False, legendgroup="t5")) 
+    
+
+    
+
 if __name__ == "__main__":
         
     def read_csv(file_path):
@@ -17,10 +36,12 @@ if __name__ == "__main__":
     
 
     # idx of the tensorboard summaries to plot
-    idx = 11
+    idx = 16
 
     # Single plot for a specific idx
     print(f"Processing dataset: {idx}")
+
+
 
     fig = go.Figure()
         
@@ -34,6 +55,17 @@ if __name__ == "__main__":
        
     loss_json = read_csv(loss_csv)
     val_loss = read_csv(val_csv)
+
+    # Compute the difference between the training and validation loss
+    diff_loss = val_loss[:, 2][:50] - loss_json[:, 2][:50]
+    # Print the difference
+    print(f"Difference between training and validation loss: {diff_loss}")
+
+    #Write the difference to a file
+    diff_loss_file = os.path.join(ROOT_PATH, "data", "hyperparameter", "diff_loss_" + str(idx) + ".txt")
+    with open(diff_loss_file, "w") as f:
+        for i in range(len(diff_loss)):
+            f.write(f"{i}, {diff_loss[i]}\n")
 
     # Il numero di data è uguale al numero di steps
     num_epochs = 100
@@ -58,6 +90,8 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=val_loss[:, 1], y=val_loss[:, 2], mode='lines', name='Validation Loss', showlegend=False, legendgroup="t4"))
     fig.add_trace(go.Scatter(x=[lowest_val_loss_epoch], y=[lowest_val_loss], mode='markers', name='Lowest Validation Loss', marker=dict(color='red', size=10), showlegend=False, legendgroup="t5")) 
     
+    # Get 
+    add_graphs(fig)
     fig.update_xaxes(title_text="Epoch")
     fig.update_yaxes(title_text="Loss")
     fig.update_layout(showlegend=True)

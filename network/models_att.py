@@ -359,10 +359,6 @@ class base_model(object):
                     decay_params["decay_rate"],
                     staircase=False,
                 )
-            elif decay_type == "step":
-                learning_rate = tf.compat.v1.train.piecewise_constant(
-                    global_step, decay_params["boundaries"], decay_params["lr_values"]
-                )
             else:
                 assert 0, "not implemented lr decay types!"
             tf.compat.v1.summary.scalar("learning_rate", learning_rate)
