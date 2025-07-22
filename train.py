@@ -26,7 +26,6 @@ def parse_args():
     parser.add_argument('--learning_rate', help='learning rate', type=float, default=0.001)
     parser.add_argument('--regularization', help='regularization factor', type=float, default=None)
     
-    parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
     parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
@@ -67,7 +66,7 @@ def main():
         gt_valset = data.get_subset(gt_valset, subset_size=args.subset, mode="camera")
 
     train_data, val_data, train_labels, val_labels = None, None, None, None
-    train_data, val_data = datareader.read_2d(gt_trainset, gt_valset, read_confidence=True if args.in_F == 3 else False)
+    train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
     train_labels, val_labels = datareader.read_3d()
 
     dataset_copy = train_data.copy()
