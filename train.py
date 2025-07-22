@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     parser.add_argument('--validation_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"])
     parser.add_argument('--n_test', help='number of test for random search', type=int, default=1)
     try :
         args = parser.parse_args()

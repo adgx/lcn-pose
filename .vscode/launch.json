@@ -27,6 +27,8 @@
                 "1000",
                 "--test_set",
                 "humansc3d",
+                "--validation_set",
+                "humansc3d",
                 "--train_set",
                 "humansc3d",
 
