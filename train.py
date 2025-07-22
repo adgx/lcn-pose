@@ -50,7 +50,7 @@ def main():
     #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
-    gt_valset = datareader.real_read(args.test_set, "val")
+    gt_valset = datareader.real_read(args.validation_set, "val")
 
     mode = ""
     if args.train_set == "h36m":
