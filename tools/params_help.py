@@ -65,7 +65,7 @@ def get_params(is_training, gt_dataset):
     params['F'] = 64
     params['mask_type'] = 'locally_connected'
     params['init_type'] = 'random'  # same, ones, random; only used when learnable
-    params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=3)
+    params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=1)
 
     params['in_joints'] = 17
     params['out_joints'] = 17
