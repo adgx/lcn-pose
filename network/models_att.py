@@ -458,7 +458,7 @@ class cgcnn(base_model):
         dir_name="",
         checkpoints="final",
         is_training=True,
-        knn=0 # not used
+        knn=1 # not used
     ):
         super().__init__()
 
@@ -482,6 +482,7 @@ class cgcnn(base_model):
         self.activation = tf.nn.leaky_relu
         self.in_F = in_F
         self.is_training = is_training
+        self.knn = knn
 
         # Build the computational graph.
         self.build_graph(in_joints, self.in_F)
