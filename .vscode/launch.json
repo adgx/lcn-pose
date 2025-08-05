@@ -23,8 +23,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--subset",
-                "1000",
+
                 "--test_set",
                 "humansc3d",
                 "--validation_set",
