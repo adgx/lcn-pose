@@ -66,7 +66,9 @@ def get_subset_by_camera(gt_dataset, subset_size=1000):
     # Randomly select items for each camera to create the subset until the subset size divided by the number of cameras is reached
     for item in gt_dataset:
         camera_name = item["cameraid"]
-        if len(subsets[camera_name]) < subset_size // len(camera_names):
+        #Generate a random number between 0 and 1
+        value = np.random.uniform(0, 1) 
+        if len(subsets[camera_name]) < subset_size // len(camera_names) and value:
             subsets[camera_name].append(item)
         
     # Combine the subsets into a single list
@@ -93,7 +95,8 @@ def get_subset_by_action(gt_dataset, subset_size=1000):
     # Randomly select items for each action to create the subset until the subset size divided by the number of actions is reached
     for item in gt_dataset:
         action_name = item["action"]
-        if len(subsets[action_name]) < subset_size // len(action_names):
+        value = np.random.uniform(0, 1) 
+        if len(subsets[action_name]) < subset_size // len(action_names) and value:
             subsets[action_name].append(item)
         
     # Combine the subsets into a single list
@@ -120,7 +123,8 @@ def get_subset_by_subject(gt_dataset, subset_size=1000):
     # Randomly select items for each subject to create the subset until the subset size divided by the number of subjects is reached
     for item in gt_dataset:
         subject_name = item["subject"]
-        if len(subsets[subject_name]) < subset_size // len(subject_names):
+        value = np.random.uniform(0, 1)
+        if len(subsets[subject_name]) < subset_size // len(subject_names) and value:
             subsets[subject_name].append(item)
         
     # Combine the subsets into a single list
@@ -171,7 +175,23 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
         
         # Otherwise, randomly select items from the combined subset to reach the requested size
         return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
-    
+    elif mode == "action_camera_subject":
+        # Get a subset of the dataset by action, camera, and subject
+        action_subset = get_subset_by_action(gt_dataset, subset_size)
+        camera_subset = get_subset_by_camera(gt_dataset, subset_size)
+        subject_subset = get_subset_by_subject(gt_dataset, subset_size)
+        
+        # Combine the three subsets
+        combined_subset = list(set(action_subset) & set(camera_subset) & set(subject_subset))
+        
+        # If the combined subset is smaller than the requested size, return it
+        if len(combined_subset) < subset_size:
+            return combined_subset
+        
+        # Otherwise, randomly select items from the combined subset to reach the requested size
+        return np.random.choice(combined_subset, size=subset_size, replace=False).tolist()
+
+
 
 def untranslation_data(data, translation_factor=2, number_actions=2):
     """
