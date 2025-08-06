@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument('--learning_rate', help='learning rate', type=float, default=0.001)
     parser.add_argument('--regularization', help='regularization factor', type=float, default=None)
     
+    parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
     parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
@@ -33,7 +34,8 @@ def parse_args():
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--validation_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"])
     parser.add_argument('--n_test', help='number of test for random search', type=int, default=1)
     try :
         args = parser.parse_args()
@@ -49,7 +51,7 @@ def main():
     #read the train and test passed with arguments
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
-    gt_testset = datareader.real_read(args.test_set, "test")
+    gt_valset = datareader.real_read(args.validation_set, "val")
 
     mode = ""
     if args.train_set == "h36m":
@@ -61,12 +63,12 @@ def main():
 
     #Make a subset
     if args.subset is not None:
-        gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode=mode)
-        gt_testset = data.get_subset(gt_testset, subset_size=args.subset, mode=mode)
+        gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
+        gt_valset = data.get_subset(gt_valset, subset_size=args.subset, mode="camera")
 
-    train_data, test_data, train_labels, test_labels = None, None, None, None
-    train_data, test_data = datareader.read_2d(gt_trainset, gt_testset)
-    train_labels, test_labels = datareader.read_3d()
+    train_data, val_data, train_labels, val_labels = None, None, None, None
+    train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
+    train_labels, val_labels = datareader.read_3d()
 
     dataset_copy = train_data.copy()
     labelset_copy = train_labels.copy()
@@ -94,7 +96,7 @@ def main():
 
     network = models_att.cgcnn(**params)
     try: 
-        losses, t_step = network.fit(train_data, train_labels, test_data, test_labels, args.output_file, starting_checkpoint=args.resume_from)
+        losses, t_step = network.fit(train_data, train_labels, val_data, val_labels, args.output_file, starting_checkpoint=args.resume_from)
         print(losses)
         print(t_step)
     

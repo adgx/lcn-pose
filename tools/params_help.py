@@ -24,6 +24,7 @@ def update_parameters(args, params):
     if args.test_indices:
         params['dir_name'] = 'test' + args.test_indices + '/'
     if args.knn:
+        params['knn'] = args.knn
         params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=args.knn)
     if args.layers is not None:
         params['num_layers'] = args.layers
@@ -39,6 +40,8 @@ def update_parameters(args, params):
         params['init_type'] = args.init_type
     if args.epochs:
         params['num_epochs'] = args.epochs
+    if args.batch_size:
+        params['batch_size'] = args.batch_size
     if args.batch_size:
         params['batch_size'] = args.batch_size
     if hasattr(args, "learning_rate"):
@@ -62,7 +65,7 @@ def get_params(is_training, gt_dataset):
     params['F'] = 64
     params['mask_type'] = 'locally_connected'
     params['init_type'] = 'random'  # same, ones, random; only used when learnable
-    params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=3)
+    params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=1)
 
     params['in_joints'] = 17
     params['out_joints'] = 17
@@ -77,5 +80,6 @@ def get_params(is_training, gt_dataset):
     params['learning_rate'] = 1e-3
     params['checkpoints'] = 'final'
     params['is_training'] = is_training
+    params['knn'] = 1
 
     return params

@@ -23,6 +23,7 @@ if __name__ == "__main__":
 
 
     #args = parse_args()
+    #check if there are the files for the analysis
     total = count_files_in_directory(TRAINING_PATH)
     if total == 0:
         raise FileNotFoundError(f"No files found in directory {TRAINING_PATH}.")
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     print(f"Total files found: {total}, Rows needed: {rows}")
     # Create subplots
     subplot_titles = [f"Test {i+1}" for i in range(total)]
+    #setting how the number of cols and row of the global plot
     fig = make_subplots(
        cols=2,
        rows=rows,
@@ -71,6 +73,7 @@ if __name__ == "__main__":
         min_loss_diff_epoch = loss_json[min_loss_diff_epoch, 1]
         print(f"Minimum loss difference: {min_loss_diff} at epoch {min_loss_diff_epoch}")
 
+    #named axis
     fig.update_xaxes(title_text="Epoch")
     fig.update_yaxes(title_text="Loss")
     fig.update_layout(showlegend=True)
