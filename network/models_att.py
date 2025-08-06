@@ -246,6 +246,9 @@ class base_model(object):
             with open(output_dir + "/validation_error.json", "w") as f:
                 f.write(json.dumps([validation_error], indent=4))
 
+        #Print the final training and validation errors
+        print("Final training error: ", training_error[-1])
+        print("Final validation error: ", validation_error[-1])
         return losses, t_step
 
     def build_graph(self, M_0, in_F):
