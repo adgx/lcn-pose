@@ -1,5 +1,7 @@
 import os
 import numpy as np 
+import plotly.io as pio
+pio.renderers.default = "browser"
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
@@ -42,10 +44,10 @@ if __name__ == "__main__":
     for idx, plot in enumerate(subplot_titles):
         print(f"Processing dataset: {idx}")
         
-        loss_csv = os.path.join(TRAINING_PATH, "test" + str(idx +2 ) + "_summaries.csv")
+        loss_csv = os.path.join(TRAINING_PATH, "test" + str(idx+1) + "_summaries.csv")
         if not os.path.exists(loss_csv):
             raise FileNotFoundError(f"File {loss_csv} does not exist.")
-        val_csv = os.path.join(VALIDATION_PATH, "test" + str(idx +2 ) + "_summaries.csv")
+        val_csv = os.path.join(VALIDATION_PATH, "test" + str(idx+1) + "_summaries.csv")
         if not os.path.exists(val_csv):
             raise FileNotFoundError(f"File {val_csv} does not exist.")
         
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     fig.update_xaxes(title_text="Epoch")
     fig.update_yaxes(title_text="Loss")
     fig.update_layout(showlegend=True)
-
+    
     fig.show()
 
     

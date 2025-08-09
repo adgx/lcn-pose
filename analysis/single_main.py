@@ -36,7 +36,7 @@ if __name__ == "__main__":
     
 
     # idx of the tensorboard summaries to plot
-    idx = 16
+    idx = 1
 
     # Single plot for a specific idx
     print(f"Processing dataset: {idx}")
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=[lowest_val_loss_epoch], y=[lowest_val_loss], mode='markers', name='Lowest Validation Loss', marker=dict(color='red', size=10), showlegend=False, legendgroup="t5")) 
     
     # Get 
-    add_graphs(fig)
+    #add_graphs(fig)
     fig.update_xaxes(title_text="Epoch")
     fig.update_yaxes(title_text="Loss")
     fig.update_layout(showlegend=True)

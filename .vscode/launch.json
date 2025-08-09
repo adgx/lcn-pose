@@ -33,7 +33,42 @@
 
             ]
         },
+        {
+            "name": "Python Debugger: Training custom",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
 
+                "--test_set",
+                "humansc3d",
+                "--validation_set",
+                "humansc3d",
+                "--train_set",
+                "humansc3d",
+                "--mask-type",
+                "locally_connected",
+                "--channels",
+                "8",
+                "--epoch",
+                "150", 
+                "--regularization",
+                "0.01",
+                "--dropout",
+                "0.3", 
+                "--learning_rate", 
+                "0.001", 
+                "--layers", 
+                "3", 
+                "--knn", 
+                "3",
+                "--batch_size", 
+                "256",
+                "--test-indices",
+                "12"
+            ]
+        },
         {
             "name": "Python Debugger: Random Search",
             "type": "debugpy",
