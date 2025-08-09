@@ -20,6 +20,75 @@ def get_neighbour_matrix_by_hand(neighbour_dict, knn=1):
     return neighbour_matrix
 
 
+def get_laplacian_matrix(neighbour_dict, data, normalized=True, rescale=True):
+    """
+    Data: [N, 17*3]
+    """
+    # select out nonredundent joint pair and calculate mean length of limb
+    data = np.reshape(data, (-1, 17, 3))
+    assert len(neighbour_dict) == 17
+    pair_list = []
+    for idx in range(len(neighbour_dict)):
+        for neighbour in neighbour_dict[idx]:
+            if (idx, neighbour) not in pair_list and (neighbour, idx) not in pair_list:
+               pair_list.append((idx, neighbour))
+    limb_length_list = []
+    for pair in pair_list:
+        limb = np.mean(np.sqrt(np.sum(np.square(data[:, pair[0], :] - data[:, pair[1], :]), axis=1)))
+        limb_length_list.append(limb)
+    limb_length_array = np.array(limb_length_list, dtype=np.float32)
+
+    # adjacency matrix
+    adjacency_matrix = np.zeros((17, 17), dtype=np.float32)
+    normed_length = np.exp(-np.square(limb_length_array/(np.mean(limb_length_array)+np.std(limb_length_array))))
+    for pair, length in zip(pair_list, normed_length):
+        adjacency_matrix[pair[0], pair[1]] = length
+    adjacency_matrix += adjacency_matrix.T
+    # No self-connections
+    for idx in range(len(adjacency_matrix)):
+        adjacency_matrix[idx, idx] = 0
+    # Non-directed graph.
+    assert np.abs(adjacency_matrix - adjacency_matrix.T).mean() < 1e-10
+
+    # Laplacian matrix
+    d = adjacency_matrix.sum(axis=0)
+    assert d.ndim == 1
+    if not normalized:
+        D = np.diag(d, 0)
+        L = D - adjacency_matrix
+    else:
+        d += np.spacing(np.array(0, adjacency_matrix.dtype))
+        d = 1 / np.sqrt(d)
+        D = np.diag(d, 0)
+        I = np.identity(d.size, dtype=adjacency_matrix.dtype)
+        L = I - D @ adjacency_matrix @ D
+
+    # rescale Laplacian
+    if rescale:
+        if normalized:
+            lmax = 2
+        else:
+            lmax = scipy.sparse.linalg.eigsh(
+                    L, k=1, which='LM', return_eigenvectors=False)[0]
+        I = np.identity(L.shape[0], dtype=L.dtype)
+        L /= lmax / 2
+        L -= I
+
+    return L
+
+def gen_neighbour_matrix_from_edges(edges, knn):
+    neighbour_matrix = np.zeros((17, 17), dtype=np.float32)
+    for idx in range(17):
+        neighbour_matrix[idx, idx] = 1
+    for pair in edges:
+        neighbour_matrix[pair[0], pair[1]] = 1
+    neighbour_matrix = neighbour_matrix + neighbour_matrix.T
+    if knn >= 2:
+        neighbour_matrix = np.linalg.matrix_power(neighbour_matrix, knn)
+
+    neighbour_matrix = np.array(neighbour_matrix!=0, dtype=np.float32)
+    return neighbour_matrix
+
 def update_parameters(args, params):
     if args.test_indices:
         params['dir_name'] = 'test' + args.test_indices + '/'
@@ -63,9 +132,28 @@ def get_params(is_training, gt_dataset):
     #params['eval_frequency'] = int(len(gt_dataset) / params['batch_size'])  # eval, summ & save after each epoch
 
     params['F'] = 64
+    #to try the locally connected learn mask maybe is refered to the use of S matrix with values that can also learn them form the 
+    # training
     params['mask_type'] = 'locally_connected'
     params['init_type'] = 'random'  # same, ones, random; only used when learnable
     params['neighbour_matrix'] = get_neighbour_matrix_by_hand(filter_hub.neighbour_dict_set[0], knn=1)
+
+    # import random
+    # random.seed(146)
+    # graph = generate_random_graph(17, 20)
+    # params['neighbour_matrix'] = gen_neighbour_matrix_from_edges(graph.edges, knn=2)
+
+    # # norm 1
+    # params['neighbour_matrix'] = params['neighbour_matrix'] / np.sum(params['neighbour_matrix'], axis=1, keepdims=True)
+    # # norm2
+    # degree_matrix = np.diag(1/np.sqrt(np.sum(params['neighbour_matrix'], axis=1)))
+    # params['neighbour_matrix'] = degree_matrix @ params['neighbour_matrix'] @ degree_matrix
+
+    # params['neighbour_matrix'] = get_laplacian_matrix(filter_hub.neighbour_dict_set[0], gt_dataset,
+    #     normalized=True, rescale=True)
+    # params['neighbour_matrix'] = np.ones((17, 17))
+
+    params['in_joints'] = 17
 
     params['in_joints'] = 17
     params['out_joints'] = 17
@@ -83,3 +171,11 @@ def get_params(is_training, gt_dataset):
     params['knn'] = 1
 
     return params
+
+if __name__ == '__main__':
+    import random
+    random.seed(146)
+    graph = generate_random_graph(17, 20)
+    neighbour_matrix = gen_neighbour_matrix_from_edges(graph.edges, knn=2)
+    print(graph.edges)
+    print(neighbour_matrix)

@@ -30,8 +30,8 @@ def _eval(test_name, dataitem_gt, commd):
     result_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'result.pkl')
 
     with open(result_path, 'rb') as f:
-        preds = pickle.load(f)['result']  # [N, 17, 3]
-    preds = np.reshape(preds, (-1, 17, 3))
+        preds = pickle.load(f)['result']  # [N, 17, 3] this oject is a dictionary with a key 'result' that has a values of pose for one video (?)
+    preds = np.reshape(preds, (-1, 17, 3)) #make the python vector a np vector
 
     #Get only the first dataitem_gt.shape[0] elements from preds
     if len(preds) > len(dataitem_gt):
@@ -46,7 +46,7 @@ def _eval(test_name, dataitem_gt, commd):
     for idx, pred in enumerate(preds):
         pred = tools.image_to_camera_frame(pose3d_image_frame=pred, box=dataitem_gt[idx]['box'],
             camera=dataitem_gt[idx]['camera_param'], rootIdx=0,
-            root_depth=dataitem_gt[idx]['root_depth'])
+            root_depth=dataitem_gt[idx]['root_depth'])#adjust the 3d pose predict evaluating the intrisic camera's parameters 
         gt = dataitem_gt[idx]['joint_3d_camera']
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
@@ -69,7 +69,8 @@ def _eval(test_name, dataitem_gt, commd):
         if idx % 10000 == 0:
             print('step:%d' % idx + '-' * 20)
             print(np.mean(error_per_joint))
-    results = np.array(results)  # [N ,17]
+    #calculate pck
+    results = np.array(results)  # [N ,17] error per joint for each frame
 
 
     final_results_pck = []
@@ -97,8 +98,8 @@ def _eval(test_name, dataitem_gt, commd):
 
         final_results_pck.append(np.mean(np.array(final_results_pck)))
     elif 'joint' in commd:
-        error = np.mean(results, axis=0)  # [17]
-        final_result = error.tolist() + [np.mean(error)]
+        error = np.mean(results, axis=0)  # [17] mean error for each joint evalutes all frames
+        final_result = error.tolist() + [np.mean(error)] # concatenate the mean error of all joints to the error list
     else:
         assert 0, 'not implemented commd'
     
@@ -173,8 +174,8 @@ if __name__ == '__main__':
     if args.per_joint:
         commd += '_joint'
     else:
-        commd += '_action'
-    if args.protocol2:
+        commd += '_action' #evaluating per azione
+    if args.protocol2: #protocol2 can have the true or false value
         commd += '_protocol2'
 
     print('=> commd:', commd)

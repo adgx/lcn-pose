@@ -4,7 +4,14 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "name": "Python Debugger: make validation set form gen_val_set",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
         {
             "name": "Python Debugger: Training Graph",
             "type": "debugpy",
@@ -179,6 +186,6 @@
                 "21",
                 "--per-joint",
             ]
-        },
+        }
     ]
 }

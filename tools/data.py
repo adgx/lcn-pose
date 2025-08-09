@@ -7,7 +7,6 @@ ROOT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 #GT_TEST_PATH = os.path.join(ROOT_PATH, "dataset/h36m_test.pkl")
 #GT_TRAIN_PATH = os.path.join(ROOT_PATH, "dataset/h36m_train.pkl")
 
-
 def flip_data(data):
     """
     horizontal flip
@@ -20,9 +19,7 @@ def flip_data(data):
 
     flipped_data = data.copy().reshape((len(data), 17, -1))
     flipped_data[:, :, 0] *= -1  # flip x of all joints
-    flipped_data[:, left_joints + right_joints] = flipped_data[
-        :, right_joints + left_joints
-    ]
+    flipped_data[:, left_joints + right_joints] = flipped_data[:, right_joints + left_joints]
     flipped_data = flipped_data.reshape(data.shape)
 
     #result = np.concatenate((data, flipped_data), axis=0)
@@ -337,6 +334,10 @@ class DataReader(object):
             trainset[idx] = item["joint_3d_image"][:, :2]
         for idx, item in enumerate(self.gt_testset):
             testset[idx] = item["joint_3d_image"][:, :2]
+        #what is the confidence?
+        if read_confidence:
+                train_confidence = np.ones((len(self.gt_trainset), 17, 1))  # [N, 17, 1]
+                test_confidence = np.ones((len(self.gt_testset), 17, 1))  # [N, 17, 1]
 
         # normalize
         if which == "scale":
@@ -374,6 +375,9 @@ class DataReader(object):
         else:
             assert 0, "not support normalize type %s" % which
 
+        if read_confidence:
+            trainset = np.concatenate((trainset, train_confidence), axis=2)  # [N, 17, 3]
+            testset = np.concatenate((testset, test_confidence), axis=2)  # [N, 17, 3]
 
         # reshape
         trainset, testset = trainset.reshape((len(trainset), -1)), testset.reshape((len(testset), -1))
@@ -387,8 +391,8 @@ class DataReader(object):
             self.gt_testset = self.real_read("test")
 
         # normalize
-        train_labels = np.empty((len(self.gt_trainset), 17, 3))
-        test_labels = np.empty((len(self.gt_testset), 17, 3))
+        train_labels = np.empty((len(self.gt_trainset), 17, 3)) #[limit, 17, 3]
+        test_labels = np.empty((len(self.gt_testset), 17, 3)) #[limit, 17, 3]
         if which == "scale":
             # map to [-1, 1]
             for idx, item in enumerate(self.gt_trainset):
@@ -403,6 +407,7 @@ class DataReader(object):
                     res_w, res_h = 2048, 2048
                 else:
                     assert 0, "%d data item has an invalid camera name" % idx
+                train_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [1, res_h / res_w]
                 train_labels[idx, :, :2] = item["joint_3d_image"][:, :2] / res_w * 2 - [1, res_h / res_w]
                 train_labels[idx, :, 2:] = item["joint_3d_image"][:, 2:] / res_w * 2
             for idx, item in enumerate(self.gt_testset):
@@ -423,9 +428,7 @@ class DataReader(object):
             assert 0, "not support normalize type %s" % which
 
         # reshape
-        train_labels, test_labels = train_labels.reshape(
-            (-1, 17 * 3)
-        ), test_labels.reshape((-1, 17 * 3))
+        train_labels, test_labels = train_labels.reshape((-1, 17 * 3)), test_labels.reshape((-1, 17 * 3)) #[limit, 51] -> [51]=[id_joint, x], [id_joint, y], [id_joint, z]
 
         return train_labels, test_labels
 

@@ -68,6 +68,8 @@ def main():
     num_augmentations = 0
     op_ord = {}
 
+    #default is false
+    #flip the joint coordinates and concatenate them with the passed data (augmentation)
     if args.flip_data:
         test_data = np.concatenate((test_data,  data.flip_data(dataset_copy)), axis=0)
         train_labels = np.concatenate((test_labels, data.flip_data(labelset_copy)), axis=0)
@@ -95,6 +97,7 @@ def main():
     params_help.update_parameters(args, params)
     print(pprint.pformat(params))
 
+    #note: ** unpacks the dictionary params, so pass al parameters to cgcnn obj
     network = models_att.cgcnn(**params)
     print("Start with predictions")
     predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
