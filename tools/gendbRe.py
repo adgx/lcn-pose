@@ -40,6 +40,7 @@ def load_cams_data_humansc3d(dataset_root_dir, subset, subj_name, camera_param):
         
         with open(path_camera_file, 'r') as cam_json:
             cams_data[camera_view] = json.load(cam_json)
+        cams_data[camera_view]['extrinsics']['T'][0] = [1e3*elm for elm in cams_data[camera_view]['extrinsics']['T'][0]]
     return cams_data
 
 
@@ -548,14 +549,17 @@ def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  roo
         annojointsfile = os.path.join(dataset_root_dir,  joints_dir, video_joint)
         with open(annojointsfile, 'r') as f:
             joints_data = json.load(f)
-        joints_3d_cam = np.array(joints_data['joints3d_25'])
-        numimgs = joints_3d_cam.shape[0]
-        joints_3d_cam = np.reshape(np.transpose(joints_3d_cam, (0, 1, 2)), (numimgs, -1, 3))
+        joints_3d_w = np.array(joints_data['joints3d_25'])
+        joints_3d_w *= 1e3 #meters to millimeters
+        numimgs = joints_3d_w.shape[0]
+        
 
         for camera_id in cams:
             meta = infer_meta_from_name(dset, video_joint, camera_id)
             cam = _retrieve_camera(cams, meta['subject'], meta['camera'])#handle multicamera pov
-
+            joints_3d_centered = joints_3d_w - cam['T']
+            joints_3d_cam = np.matmul(joints_3d_centered, np.array(cam['R']).T)
+            joints_3d_cam = np.reshape(np.transpose(joints_3d_cam, (0, 1, 2)), (numimgs, -1, 3))
             
             for i in range(numimgs):
                 image = os.path.join(dataset_root_dir, images_dir, camera_id, video_joint[:3], 'frame_'+str(i).zfill(4)+'.jpeg')

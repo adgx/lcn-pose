@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import os
 import cv2
 import matplotlib.pyplot as plt
 import json
@@ -171,6 +172,8 @@ def read_data(data_root, dataset_name, subset, subj_name, action_name, camera_na
     gpp_path = '%s/%s/%s/%s/gpp/%s.json' % (data_root, dataset_name, subset, subj_name, action_name)
     smplx_path = '%s/%s/%s/%s/smplx/%s.json' % (data_root, dataset_name, subset, subj_name, action_name)
 
+    current_dir = os.getcwd()
+    print(current_dir)
     cam_params = read_cam_params(cam_path)
 
     with open(j3d_path) as f:

@@ -49,11 +49,11 @@
             "args": [
 
                 "--test_set",
-                "humansc3d",
+                "h36m",
                 "--validation_set",
                 "humansc3d",
                 "--train_set",
-                "humansc3d",
+                "h36m",
                 "--mask-type",
                 "locally_connected",
                 "--channels",
