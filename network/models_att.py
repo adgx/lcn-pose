@@ -122,7 +122,7 @@ class base_model(object):
             sess.close()
 
         if labels is not None:
-            return predictions, loss * self.batch_size / size #why this formula?
+            return predictions, loss * self.batch_size / size
         else:
             return predictions
 

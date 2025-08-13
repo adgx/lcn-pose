@@ -43,10 +43,11 @@ def _eval(test_name, dataitem_gt, commd):
     best_frame_idx = 0
     error_best_frame = 1000000
     best_frame_gt = []
+    
     for idx, pred in enumerate(preds):
         pred = tools.image_to_camera_frame(pose3d_image_frame=pred, box=dataitem_gt[idx]['box'],
             camera=dataitem_gt[idx]['camera_param'], rootIdx=0,
-            root_depth=dataitem_gt[idx]['root_depth'])#adjust the 3d pose predict evaluating the intrisic camera's parameters 
+            root_depth=dataitem_gt[idx]['root_depth'])#from image space to camera space
         gt = dataitem_gt[idx]['joint_3d_camera']
         if 'protocol2' in commd:
             pred = tools.align_to_gt(pose=pred, pose_gt=gt)
@@ -64,6 +65,7 @@ def _eval(test_name, dataitem_gt, commd):
         if idx % 10000 == 0:
             print('step:%d' % idx + '-' * 20)
             print(np.mean(error_per_joint))
+    
     #calculate pck
     results = np.array(results)  # [N ,17] error per joint for each frame
     final_results_pck = []
