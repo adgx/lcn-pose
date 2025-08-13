@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
 
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
-    parser.add_argument('--test_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
+    parser.add_argument('--val_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
     
     try :
         args = parser.parse_args()
@@ -53,7 +53,7 @@ def main():
     
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
-    gt_testset = datareader.real_read(args.test_set, "test")
+    gt_testset = datareader.real_read(args.test_set, "val")
     #Make a subset
     if args.subset is not None:
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
