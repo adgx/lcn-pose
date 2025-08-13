@@ -53,7 +53,7 @@ def main():
     
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
-    gt_testset = datareader.real_read(args.test_set, "val")
+    gt_testset = datareader.real_read(args.val_set, "val")
     #Make a subset
     if args.subset is not None:
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
