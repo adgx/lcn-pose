@@ -284,7 +284,6 @@ class base_model(object):
         self.graph = tf.Graph()
         #setting the computational graph
         with self.graph.as_default():
-            tf.compat.v1.reset_default_graph()
             # Mask.
             self.initialize_mask()
 

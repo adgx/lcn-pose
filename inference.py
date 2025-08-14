@@ -93,6 +93,7 @@ def main():
         op_ord['r'] = num_augmentations
 
     # params
+    tf.compat.v1.reset_default_graph() 
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)
     params_help.update_parameters(args, params)
     print(pprint.pformat(params))
