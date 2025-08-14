@@ -284,7 +284,7 @@ class base_model(object):
         self.graph = tf.Graph()
         #setting the computational graph
         with self.graph.as_default():
-
+            tf.compat.v1.reset_default_graph()
             # Mask.
             self.initialize_mask()
 
@@ -472,7 +472,7 @@ class cgcnn(base_model):
     #set all parameters for the model
     def __init__(
         self,
-        F=64, #what is F?
+        F=64, 
         mask_type="locally_connected", #it can be locally_connected_learnable
         #we can try with different type of inizialization for hope a stroke of lucky for the lernable parameter for S matrix
         init_type="ones", #same: use L to init learnable part in mask
