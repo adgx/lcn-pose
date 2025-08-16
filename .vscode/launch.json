@@ -101,7 +101,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--test_set",
-                "mpii",
+                "humansc3d",
                 "--train_set",
                 "humansc3d",
                 "--checkpoints",
@@ -109,9 +109,23 @@
                 "--mask-type",
                 "locally_connected",
                 "--channels",
-                "8",
+                "16",
+                "--epoch",
+                "100", 
+                "--regularization",
+                "0.001",
+                "--dropout",
+                "0.25", 
+                "--learning_rate", 
+                "0.001", 
+                "--layers", 
+                "1", 
+                "--knn", 
+                "2",
+                "--batch_size", 
+                "256",
                 "--test-indices",
-                "13"
+                "4"
             ]
         },
         {

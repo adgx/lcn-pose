@@ -68,7 +68,6 @@ class base_model(object):
         self.regularizers = []
         self.checkpoints = "final"
         self.writer = None
-    #what are regularizers and writer?
     # High-level interface which runs the constructed computational graph.
     #inferece uses the test_data
     def predict(self, data, labels=None, sess=None):
@@ -700,7 +699,7 @@ class cgcnn(base_model):
     def _inference_lcn(self, x, data_dropout):
         #define the variables for the linear_model scope
         with tf.compat.v1.variable_scope("linear_model"):
-            #??
+
             mid_size = self.in_joints * self.F #[1088=17*64]
 
             # === First layer===
