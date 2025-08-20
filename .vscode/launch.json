@@ -129,6 +129,41 @@
             ]
         },
         {
+            "name": "Python Debugger: Inference 6",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--test_set",
+                "humansc3d",
+                "--train_set",
+                "humansc3d",
+                "--checkpoints",
+                "best",
+                "--mask-type",
+                "locally_connected",
+                "--channels",
+                "32",
+                "--epoch",
+                "100", 
+                "--regularization",
+                "0",
+                "--dropout",
+                "0.3", 
+                "--learning_rate", 
+                "0.001", 
+                "--layers", 
+                "3", 
+                "--knn", 
+                "1",
+                "--batch_size", 
+                "512",
+                "--test-indices",
+                "6"
+            ]
+        },
+        {
             "name": "Python Debugger: Inference test 0",
             "type": "debugpy",
             "request": "launch",
@@ -161,10 +196,9 @@
             "console": "integratedTerminal",
             "args": [
                 "--filename",
-                //"humansc3d",
                 "humansc3d",
                 "--test-indices",
-                "17",
+                "6",
                 "--protocol2",
                 "--per-joint",
             ]
