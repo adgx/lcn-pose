@@ -110,10 +110,10 @@ def main():
     if args.flip_data or args.rotation_data or args.translate_data:
         predictions = data.undo(predictions, op_ord, number_actions=num_augmentations, translation=translation)
     result = datareader.denormalize(predictions)
-    DBG = 1
-    
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
     f = open(save_path, 'wb')
+    
+    DBG = 1
     if DBG:
         pickle.dump(result, f)
         f.close()
