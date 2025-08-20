@@ -434,7 +434,7 @@ class DataReader(object):
     def denormalize(self, data, which="scale", ):
         DBG = 1
         if DBG:
-            res = {}
+            res = []
 
         if self.gt_testset is None:
             self.gt_testset = self.real_read("test")
@@ -459,11 +459,13 @@ class DataReader(object):
                 data[idx, :, 2:] = data[idx, :, 2:] * res_w / 2
 
                 if DBG:
-                    res['cameraid'] = item['cameraid']
-                    res['videoid'] = item['videoid']
-                    res['subject'] = item['subject']
-                    res['action'] = item['action']
-                    res['result'] = data[idx]
+                    res_item = {}
+                    res_item['cameraid'] = item['cameraid']
+                    res_item['videoid'] = item['videoid']
+                    res_item['subject'] = item['subject']
+                    res_item['action'] = item['action']
+                    res_item['result'] = data[idx]
+                    res.append(res_item)
 
 
         else:

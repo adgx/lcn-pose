@@ -28,9 +28,15 @@ def parse_args():
 
 def _eval(test_name, dataitem_gt, commd, range_action):
     result_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'result.pkl')
+    DBG = 1
 
-    with open(result_path, 'rb') as f:
-        preds = pickle.load(f)['result']  # [N, 17, 3] this oject is a dictionary with a key 'result' that has a values of pose for one video (?)
+    if DBG:
+        with open(result_path, 'rb') as f:
+            preds_dir = pickle.load(f)
+            preds = [res_item['result'] for res_item in preds_dir] 
+    else:    
+        with open(result_path, 'rb') as f:
+            preds = pickle.load(f)['result']  # [N, 17, 3] this oject is a dictionary with a key 'result' that has a values of pose for one video (?)
     preds = np.reshape(preds, (-1, 17, 3)) #make the python vector a np vector
 
     #Get only the first dataitem_gt.shape[0] elements from preds
