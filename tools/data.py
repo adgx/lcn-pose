@@ -431,7 +431,11 @@ class DataReader(object):
 
         return train_labels, test_labels
 
-    def denormalize(self, data, which="scale"):
+    def denormalize(self, data, which="scale", ):
+        DBG = 1
+        if DBG:
+            res = {}
+
         if self.gt_testset is None:
             self.gt_testset = self.real_read("test")
 
@@ -453,8 +457,20 @@ class DataReader(object):
 
                 data[idx, :, :2] = (data[idx, :, :2] + [1, res_h / res_w]) * res_w / 2
                 data[idx, :, 2:] = data[idx, :, 2:] * res_w / 2
+
+                if DBG:
+                    res['cameraid'] = item['cameraid']
+                    res['videoid'] = item['videoid']
+                    res['subject'] = item['subject']
+                    res['action'] = item['action']
+                    res['result'] = data[idx]
+
+
         else:
             assert 0
+        
+        if DBG:
+            return res
         return data
 
 

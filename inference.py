@@ -94,8 +94,7 @@ def main():
         num_augmentations += 1
         op_ord['r'] = num_augmentations
 
-    # params
-    tf.compat.v1.reset_default_graph() 
+    # params 
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)
     params_help.update_parameters(args, params)
     print(pprint.pformat(params))
@@ -111,11 +110,16 @@ def main():
     if args.flip_data or args.rotation_data or args.translate_data:
         predictions = data.undo(predictions, op_ord, number_actions=num_augmentations, translation=translation)
     result = datareader.denormalize(predictions)
-
+    DBG = 1
+    
     save_path = os.path.join(ROOT_PATH, 'experiment', params['dir_name'], 'result.pkl')
     f = open(save_path, 'wb')
-    pickle.dump({'result': result}, f)
-    f.close()
+    if DBG:
+        pickle.dump(result, f)
+        f.close()
+    else:
+        pickle.dump({'result': result}, f)
+        f.close()
 
 if __name__ == '__main__':
     main()
