@@ -293,6 +293,8 @@ lcn-pose/
 │   └── humansc3d_train.pkl
 │   └── mpii_test.pkl
 │   └── mpii_train.pkl
+├── kaggle/
+│   └── vision-new-humansc3d.ipynb  # Kaggle notebook for HumanSC3D dataset
 ├── network/                        
 │   └── models_att.py               # Model architecture definitions
 ├── visualization/
@@ -326,7 +328,7 @@ The best performing models are available for download. These models have been tr
 
 All experimental results and hyperparameter configurations are documented and can be accessed through the provided links above.
 
-**Excel Link**: <a href="https://drive.google.com/drive/folders/1uXE9XgH0LC0C9EASp3MJXs6atdANXJM7?usp=sharing"> Link </a>
+**Excel Link**: <a href="https://docs.google.com/spreadsheets/d/1YvOBqqgsxj42iTGI5lbwB29Rlkeug1TNO-nnIUZDJOY/edit?usp=share_link"> Link </a>
 
 ---
 
@@ -371,3 +373,4 @@ If you use this code in your research, please cite:
 ## Known bugs
 
 - A known issue prevents the model from being trained and inferred on different machines when using mismatched TensorFlow versions.
+- Running all the inference part after the training will delete tensorboard from the current test analyzed 
