@@ -7,7 +7,7 @@ import argparse
 import time
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-THRESHOLD = 0.1  # mm
+THRESHOLD = 100  # mm
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
 
@@ -26,7 +26,7 @@ def parse_args():
     return args
 
 
-def _eval(test_name, dataitem_gt, commd):
+def _eval(test_name, dataitem_gt, commd, range_action):
     result_path = os.path.join(ROOT_PATH, 'experiment', test_name, 'result.pkl')
 
     with open(result_path, 'rb') as f:
@@ -69,16 +69,17 @@ def _eval(test_name, dataitem_gt, commd):
     #calculate pck
     results = np.array(results)  # [N ,17] error per joint for each frame
     final_results_pck = []
-
-    print(len(np.array(results[results < THRESHOLD])) / (len(results) * results.shape[1]) * 100)
     if 'action' in commd:
         final_result = []
         action_index_dict = {}
-        for i in range(2, 17):
+        
+        for i in range_action:
             action_index_dict[i] = []
+        
         for idx, dataitem in enumerate(dataitem_gt):
             action_index_dict[dataitem['action']].append(idx)
-        for i in range(2, 17):
+        
+        for i in range_action:
             final_result.append(np.mean(results[action_index_dict[i]])) # media degli errori dell'azione
             
             arr = np.array(results[action_index_dict[i]])
@@ -95,6 +96,8 @@ def _eval(test_name, dataitem_gt, commd):
     elif 'joint' in commd:
         error = np.mean(results, axis=0)  # [17] mean error for each joint evalutes all frames
         final_result = error.tolist() + [np.mean(error)] # concatenate the mean error of all joints to the error list
+
+        final_results_pck.append((len(results[results < THRESHOLD]) / (len(results) * results.shape[1])) * 100)
     else:
         assert 0, 'not implemented commd'
     
@@ -110,15 +113,21 @@ def eval(commd, test_indices, pkl=""):
     with open(DATAITEM_GT_PATH, 'rb') as f:
         dataitem_gt = pickle.load(f)
 
+    range_action = []
+    set_data = set()
+    for item in dataitem_gt:
+        set_data.add(item["action"])
+    range_action = list(set_data)
+
     # eval each trial
     for i in test_indices:
         test_name = 'test%d' % i
-        err_dict[test_name], final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt = _eval(test_name, dataitem_gt, commd)
+        err_dict[test_name], final_results_pck, best_frame, best_frame_idx, error_best_frame, best_frame_gt = _eval(test_name, dataitem_gt, commd, range_action)
 
         # log each trial respectively
         table = prettytable.PrettyTable()
         if 'action' in commd:
-            table.field_names = ['test_name'] + [i for i in range(2, 17)] + ['avg']
+            table.field_names = ['test_name'] + [i for i in range_action] + ['avg']
         elif 'joint' in commd:
             table.field_names = ['test_name'] + [i for i in range(0, 17)] + ['avg']
         else:
@@ -132,11 +141,13 @@ def eval(commd, test_indices, pkl=""):
         f = open(log_path, 'w')
         print(table, file=f)
         f.close()
+        print("Printing PCK Table")
+        print(table)
 
     # print summary table to the screen
     summary_table = prettytable.PrettyTable()
     if 'action' in commd:
-        summary_table.field_names = ['test_name'] + [i for i in range(2, 17)] + ['avg']
+        summary_table.field_names = ['test_name'] + [i for i in range_action] + ['avg']
     elif 'joint' in commd:
         summary_table.field_names = ['test_name'] + [i for i in range(0, 17)] + ['avg']
     else:
@@ -144,7 +155,10 @@ def eval(commd, test_indices, pkl=""):
 
     for k, v in err_dict.items():
         summary_table.add_row([k] + ['%.2f' % d for d in v])
-    print(summary_table)
+
+    if 'action' not in commd:
+        print("Printing MPJPE Table")
+        print(summary_table)
 
     # save best frame
     best_frame_path = os.path.join(ROOT_PATH, 'experiment', "test"+ str(i), 'best_frame_predicted_{}_{}.pkl'.format(commd, time_str))
