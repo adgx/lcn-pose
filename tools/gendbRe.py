@@ -270,7 +270,7 @@ def find_dirs(dataset_root_dir, subset, subj_names):
 #the action is the ID of the selfcontact action that is show in the video for the dataset humansc3d
 def infer_meta_from_name(subj_video, action, cam_id):
     dict_subact_act = {
-    i: (0 if i < 117 else 1 if i < 136 else 3)
+    i: (0 if i < 117 else 1 if i < 136 else 2)
     for i in range(1, 173)
     }
     dict_subact_act[136] = 0
