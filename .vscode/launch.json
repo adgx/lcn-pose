@@ -129,7 +129,7 @@
             ]
         },
         {
-            "name": "Python Debugger: Inference 6",
+            "name": "Python Debugger: Inference 1",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -144,7 +144,7 @@
                 "--mask-type",
                 "locally_connected",
                 "--channels",
-                "32",
+                "16",
                 "--epoch",
                 "100", 
                 "--regularization",
@@ -160,7 +160,7 @@
                 "--batch_size", 
                 "512",
                 "--test-indices",
-                "6"
+                "1"
             ]
         },
         {
@@ -198,8 +198,8 @@
                 "--filename",
                 "humansc3d",
                 "--test-indices",
-                "6",
-                "--protocol2",
+                "1",
+                //"--protocol2",
                 "--per-joint",
             ]
         },
