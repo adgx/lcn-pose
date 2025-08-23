@@ -407,7 +407,7 @@ class DataReader(object):
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488" or camera_name == "50591643" or camera_name == "65906101":
-                    res_w, res_h = 900, 900
+                    res_w, res_h = 1000, 1000
                 elif camera_name.find("cam_") != -1:
                     res_w, res_h = 2048, 2048
                 elif int(camera_name) >= 0:
@@ -455,7 +455,7 @@ class DataReader(object):
                 if camera_name == "54138969" or camera_name == "60457274":
                     res_w, res_h = 1000, 1002
                 elif camera_name == "55011271" or camera_name == "58860488"  or camera_name == "50591643" or camera_name == "65906101":
-                    res_w, res_h = 900, 900
+                    res_w, res_h = 1000, 1000
                 elif camera_name.find("cam_") != -1:
                     res_w, res_h = 2048, 2048
                 elif int(camera_name) >= 0:
