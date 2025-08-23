@@ -31,9 +31,9 @@ def parse_args():
     parser.add_argument('--learning_rate', help='learning rate', type=float, default=0.001)
 
     parser.add_argument('--in-F', help='feature channels of input data', type=int, default=2, choices=[2, 3])
-    parser.add_argument('--flip-data', help='train time flip', action='store_true', default=True)
-    parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=True)
-    parser.add_argument('--translate_data', help='train time translate', action='store_true', default=True)
+    parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
+    parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
+    parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
     parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
 
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
@@ -78,6 +78,12 @@ def main():
         num_augmentations += 1
         op_ord['f'] = num_augmentations
 
+    if args.rotation_data:
+        test_data = np.concatenate((test_data, data.rotate_data(dataset_copy)), axis=0)
+        train_labels = np.concatenate((test_labels,  data.rotate_data(labelset_copy) ), axis=0)
+        num_augmentations += 1
+        op_ord['r'] = num_augmentations
+
     if args.translate_data:
         translation_factor = args.translation_factor
         if translation_factor < 0:
@@ -87,12 +93,6 @@ def main():
         train_labels = np.concatenate((test_labels, data.translation_data(labelset_copy, translation)), axis=0)
         num_augmentations += 1
         op_ord['t'] = num_augmentations
-
-    if args.rotation_data:
-        test_data = np.concatenate((test_data, data.rotate_data(dataset_copy)), axis=0)
-        train_labels = np.concatenate((test_labels,  data.rotate_data(labelset_copy) ), axis=0)
-        num_augmentations += 1
-        op_ord['r'] = num_augmentations
 
     # params 
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)
