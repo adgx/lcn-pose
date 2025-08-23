@@ -26,7 +26,7 @@ def flip_data(data):
 
     return flipped_data
 
-def translation_data(data, translation_factor=2):
+def translation_data(data, translation_factor=0.5):
     """
     Translate data of a given factor
         data: [N, 17*k] or [N, 17, k] -> k can be 2 or 3 in our case
@@ -38,8 +38,14 @@ def translation_data(data, translation_factor=2):
     The data is reshaped to ensure it has the correct dimensions.
     """
     data_copied = data.copy().reshape((len(data), 17, -1))
-    data_copied += translation_factor
-    return data_copied.reshape(data.shape) #TODO: fix this to return the correct shape
+    translation = np.random.uniform(-translation_factor, translation_factor)
+    for data_item in data_copied:
+        for i in range(len(data_item)):
+            data_item[i, 0] += translation
+            data_item[i, 1] += translation
+            if data_copied.shape[2] == 3:
+                data_item[i, 2] += translation
+    return data_copied.reshape(data.shape)
 
 def get_subset_by_camera(gt_dataset, subset_size=1000):
     """
