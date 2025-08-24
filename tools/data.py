@@ -26,7 +26,7 @@ def flip_data(data):
 
     return flipped_data
 
-def translation_data(data, translation_factor=2):
+def translation_data(data, translation_factor=0.5):
     """
     Translate data of a given factor
         data: [N, 17*k] or [N, 17, k] -> k can be 2 or 3 in our case
@@ -38,8 +38,13 @@ def translation_data(data, translation_factor=2):
     The data is reshaped to ensure it has the correct dimensions.
     """
     data_copied = data.copy().reshape((len(data), 17, -1))
-    data_copied += translation_factor
-    return data_copied.reshape(data.shape) #TODO: fix this to return the correct shape
+    for data_item in data_copied:
+        for i in range(len(data_item)):
+            data_item[i, 0] += translation_factor
+            data_item[i, 1] += translation_factor
+            if data_copied.shape[2] == 3:
+                data_item[i, 2] += translation_factor
+    return data_copied.reshape(data.shape)
 
 def get_subset_by_camera(gt_dataset, subset_size=1000):
     """
@@ -190,17 +195,20 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
 
 
 
-def untranslation_data(data, translation_factor=2, number_actions=2):
+def untranslation_data(data, translation_factor=2):
     """
     Average original data and translated data
         data: [2N, 17*k] or [2N, 17, k]
     Return
         result: [N, 17*k] or [N, 17, k]
     """
-    data = data.copy().reshape( -1, 17, 3)
-    data[:, :, 0] *= -1
-    
-    return data
+    data_copied = data.copy().reshape((-1, 17, 3))
+    for data_item in data_copied:
+        for i in range(len(data_item)):
+            data_item[i, 0] -= translation_factor
+            data_item[i, 1] -= translation_factor
+            data_item[i, 2] -= translation_factor
+    return data_copied.reshape(data.shape)
 
 def unflip_data(data, number_actions=2):
     """
@@ -251,7 +259,7 @@ def unflip_data(data):
 #    data = data.reshape((-1, 17 * 3))
 #    return data
 
-def undo(data, op_ord, number_actions=2, angle = 180, translation=2):
+def undo(data, op_ord, number_actions=2, angle = 180, translation=0.5):
     """
     Average original data, flipped data, rotated data and translated data
         data: [N*(nop+1), 17*3]
@@ -266,7 +274,7 @@ def undo(data, op_ord, number_actions=2, angle = 180, translation=2):
     if 'r' in op_ord:
         data[op_ord['r']] = rotate_data(data[op_ord['r']], angle)
     if 't' in op_ord:
-        data[op_ord['t']+1] = untranslation_data(data[op_ord['t']+1], translation)
+        data[op_ord['t']] = untranslation_data(data[op_ord['t']], translation)
 
     data = np.mean(data, axis=0)  # [N, 17, 3]
     data = data.reshape((-1, 17 * 3))
