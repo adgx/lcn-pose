@@ -250,6 +250,20 @@
             ]
         },
         {
+            "name": "Python Debugger: gen pkl for MPII",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "-d=mpii",
+                "-t",
+                "-v",
+                "--test"
+
+            ]
+        },
+        {
             "name": "Python Debugger: Compose different datasets: h36m, humansc3d, MPII ",
             "type": "debugpy",
             "request": "launch",
