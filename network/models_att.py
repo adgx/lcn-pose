@@ -60,6 +60,10 @@ def get_exponential_matrix():
 
     print(exp_mat)
 
+    #Convert to float32
+
+    exp_mat = exp_mat.astype(np.float32)
+
     return exp_mat
 
 class base_model(object):
@@ -352,7 +356,7 @@ class base_model(object):
                 # mse_loss = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(logits - labels), axis=2)))
             loss = loss + mse_loss
 
-            if self.regularization != 0:
+            if self.regularization != 0 and self.regularization is not None:
                 with tf.compat.v1.name_scope("reg_loss"):
                     reg_loss = self.regularization * tf.add_n(self.regularizers)
                 loss += reg_loss
