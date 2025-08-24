@@ -541,15 +541,13 @@ class cgcnn(base_model):
             assert self.neighbour_matrix is not None
             L = self.neighbour_matrix.T #[17, 17] transpose matrix
             assert L.shape == (self.in_joints, self.in_joints)
-            if "exponential" in self.mask_type:
-                self.mask = tf.constant(get_exponential_matrix())
+
+            if self.init_type == "same":
+                initializer = L
             else:
-                if self.init_type == "same":
-                    initializer = L
-                else:
-                    raise ValueError("Unknown init_type: {}".format(self.init_type)) 
-                   
-                var_mask = tf.compat.v1.get_variable(
+                raise ValueError("Unknown init_type: {}".format(self.init_type))
+
+            var_mask = tf.compat.v1.get_variable(
                     name="mask",
                     shape=(
                         [self.in_joints, self.out_joints]
@@ -561,10 +559,12 @@ class cgcnn(base_model):
                 )
                 #applay the softmax to the matrix, for have the probability
                 #what is the relationship between the in_join and out_join?
-                var_mask = tf.nn.softmax(var_mask, axis=0)
-                # self.mask = var_mask
-                self.mask = var_mask * tf.constant(L != 0, dtype=tf.float32)
-
+            var_mask = tf.nn.softmax(var_mask, axis=0)
+            # self.mask = var_mask
+            self.mask = var_mask * tf.constant(L != 0, dtype=tf.float32)
+            
+        if "exponential" in self.mask_type:
+            self.mask = tf.constant(get_exponential_matrix())
     def mask_weights(self, weights):
         input_size, output_size = weights.get_shape() #[34, 1088]
         input_size, output_size = int(input_size), int(output_size)
