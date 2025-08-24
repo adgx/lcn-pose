@@ -195,7 +195,7 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
 
 
 
-def untranslation_data(data, translation_factor=2):
+def untranslation_data(data, translation_factor=0.5):
     """
     Average original data and translated data
         data: [2N, 17*k] or [2N, 17, k]
