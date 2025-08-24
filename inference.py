@@ -89,7 +89,7 @@ def main():
         if translation_factor < 0:
             raise ValueError("Translation factor must be non-negative")
         translation = np.random.uniform(-translation_factor, translation_factor)
-        test_data = np.concatenate((test_data,  data.translation_data(dataset_copy, translation)), axis=0)
+        test_data = np.concatenate((test_data,  data.translation_data(dataset_copy, translation)), axis=0) 
         train_labels = np.concatenate((test_labels, data.translation_data(labelset_copy, translation)), axis=0)
         num_augmentations += 1
         op_ord['t'] = num_augmentations
@@ -105,7 +105,6 @@ def main():
     predictions = network.predict(data=test_data, sess=None)  # [N, 17*3]
     print("Predictions done")
     result = {}
-
     
     if args.flip_data or args.rotation_data or args.translate_data:
         predictions = data.undo(predictions, op_ord, number_actions=num_augmentations, translation=translation)

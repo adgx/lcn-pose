@@ -344,6 +344,22 @@ def _infer_box(pose3d, camera, rootIdx):
                          camera['cy']).flatten()
     return np.array([tl2d[0], tl2d[1], br2d[0], br2d[1]])
 
+def _infer_box_mpii(pose3d, camera, rootIdx):
+    root_joint = pose3d[rootIdx, :]
+    tl_joint = root_joint.copy()
+    tl_joint[:2] -= 2500.0
+    br_joint = root_joint.copy()
+    br_joint[:2] += 2500.0
+    tl_joint = np.reshape(tl_joint, (1, 3))
+    br_joint = np.reshape(br_joint, (1, 3))
+
+    tl2d = _weak_project(tl_joint, camera['fx'], camera['fy'], camera['cx'],
+                         camera['cy']).flatten()
+
+    br2d = _weak_project(br_joint, camera['fx'], camera['fy'], camera['cx'],
+                         camera['cy']).flatten()
+    return np.array([tl2d[0], tl2d[1], br2d[0], br2d[1]])
+
 def _weak_project(pose3d, fx, fy, cx, cy):
     pose2d = pose3d[:, :2] / pose3d[:, 2:3]
     pose2d[:, 0] *= fx
@@ -362,6 +378,15 @@ def camera_to_image_frame(pose3d, box, camera, rootIdx):
     pose3d_image_frame[:, 2] = pose3d_depth
     return pose3d_image_frame
 
+def camera_to_image_frame_mpii(pose3d, box, camera, rootIdx):
+    rectangle_3d_size = 5000.0
+    ratio = (box[2] - box[0] + 1) / rectangle_3d_size
+    pose3d_image_frame = np.zeros_like(pose3d)
+    pose3d_image_frame[:, :2] = _weak_project(
+        pose3d.copy(), camera['fx'], camera['fy'], camera['cx'], camera['cy'])
+    pose3d_depth = ratio * (pose3d[:, 2] - pose3d[rootIdx, 2])
+    pose3d_image_frame[:, 2] = pose3d_depth
+    return pose3d_image_frame
 
 def load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam, rootIdx = 0):
     meta = infer_meta_from_name_mpii(dset, seq_video_anno, camera_id)
@@ -372,12 +397,12 @@ def load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d
     for i in range(numimgs):
         image = os.path.join(dataset_root_dir, str(camera_id), str(meta['action']), 'frame_'+str(i).zfill(4)+'.jpeg')
         joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
-        box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
-        joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
+        box = _infer_box_mpii(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
+        joint_3d_image = camera_to_image_frame_mpii(joint_3d_cam, box, cam, rootIdx)
         center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
-        scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
+        scale = ((box[2] - box[0]) / 500.0, (box[3] - box[1]) / 500.0)
         dataitem = {
-            'videoid': '0',
+            'videoid': dset+'_'+seq_video_anno,
             'cameraid': meta['camera'],
             'camera_param': cam,
             'imageid': i,
@@ -412,6 +437,7 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
     
     trainingset = []
     testset = []
+    validationset = []
     
     for seq_video_anno in seq_video_dirs:
         print(f'load {dset} {seq_video_anno}')
@@ -421,39 +447,30 @@ def load_db_mpii(dataset_root_dir, dset, cams, rootIdx=0):
             print(f"{annofile}: file does not exist")
             
         anno = sio.loadmat(annofile)
+        joints_cams = anno['annot3']
         #anno = mat73.loadmat(annofile)
-        array_joint = anno['univ_annot3'][0][0]
-        #edit array of joints positions
-        print(f'Formatting joints data ')
-        #get the Traslation vector and rotation matrix of the cam 0
-        joints_3d_cam = []
-        R_t = np.array(cams['0']['extrinsics']['R']).transpose()
-        T = np.array(cams['0']['extrinsics']['T'])
-        T = T.reshape(-1, 1)
-        T_matrix = np.tile(T, (1, 17))
-        for frame_joints_pos in array_joint:
-            frame_joints_pos_flat = frame_joints_pos.flatten()
-            reshaped_joints_pos = frame_joints_pos_flat.reshape(3, -1, order='F')
-            relevant_joints_pos = reshaped_joints_pos[:, [4, 23, 24, 25, 18, 19, 20, 3, 5, 6, 7, 9, 10, 11, 14, 15, 16]]
-            joints_pos_w = np.matmul(R_t, (relevant_joints_pos - T_matrix)).transpose()
-            joints_3d_cam.append(joints_pos_w)
-        joints_3d_cam = np.array(joints_3d_cam)
-        numimgs = joints_3d_cam.shape[0]
-        print('Formatting done')
+        for idx, joints_3d_cam in enumerate(joints_cams):
+            joints_3d_cam = joints_3d_cam[0] 
+            joints_3d_cam = np.reshape(joints_3d_cam, (joints_3d_cam.shape[0], 28, 3))
+            joints_3d_cam = joints_3d_cam[:, [4, 23, 24, 25, 18, 19, 20, 3, 5, 6, 7, 9, 10, 11, 14, 15, 16], :]
+            numimgs = joints_3d_cam.shape[0]
+            print('Formatting done')
         
         
 
-        #used for the traing set
-        if args.train:
-            for camera_id in camera_ids[:4]: #-3
-                trainingset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam))
-        #used for the validation set
-        if args.validation is True:
-            for  camera_id in camera_ids[-3:]:
-                testset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_id, numimgs, joints_3d_cam))
+            #used for the traing set
+            if args.train:
+                if idx <= 7: 
+                    trainingset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_ids[idx], numimgs, joints_3d_cam))
+            #used for the validation set
+            if args.validation is True:
+                if idx > 7 and idx < 11:
+                    validationset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_ids[idx], numimgs, joints_3d_cam))
+            if args.test is True:
+                if idx >= 11 and idx <= 13:
+                    testset.extend(load_dataitem_mpii(dset, seq_video_anno, cams, camera_ids[idx], numimgs, joints_3d_cam))
 
-
-    return trainingset, testset
+    return trainingset, validationset, testset
 
 
 
@@ -511,10 +528,10 @@ def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
     for i in range(num_frames):
         image = os.path.join(dataset_root_dir, dset, images_dir, 'img_'+str(i).zfill(6)+'.jpeg')
         joint_3d_cam = joints_3d_cam[i, :17, :]#obtain the all joints position for the frame
-        box = _infer_box(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
-        joint_3d_image = camera_to_image_frame(joint_3d_cam, box, cam, rootIdx)
+        box = _infer_box_mpii(joint_3d_cam, cam, rootIdx)#obtain info about bounding box
+        joint_3d_image = camera_to_image_frame_mpii(joint_3d_cam, box, cam, rootIdx)
         center = (0.5 * (box[0] + box[2]), 0.5 * (box[1] + box[3])) 
-        scale = ((box[2] - box[0]) / 200.0, (box[3] - box[1]) / 200.0)
+        scale = ((box[2] - box[0]) / 500.0, (box[3] - box[1]) / 500.0)
         dataitem = {
             'videoid': '0',
             'cameraid': meta['camera'],
@@ -708,7 +725,7 @@ if __name__ == '__main__':
     
     if args.dataset == 'mpii':
 
-        mpii_dbs = [[], []]
+        mpii_dbs = [[], [], []]
 
         base_dir = osp.join(dataset_root_dir, subset_type[0])
         
@@ -719,29 +736,34 @@ if __name__ == '__main__':
                 continue
                 
             #loading data from training set and pushes the last three point view into the validation set  
-            trainingset, testset = load_db_mpii(base_dir, subj, cams, rootIdx=0)
+            trainingset, validationset, testset = load_db_mpii(base_dir, subj, cams, rootIdx=0)
             mpii_dbs[0].extend(trainingset) 
-            mpii_dbs[1].extend(testset)
-
-        #loading the mpii validation set
-        if args.validation:
-            cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
-            
-            for subj in subj_name_val:
-                if not osp.isdir(osp.join(dataset_root_dir, subset_type[1],subj)):
-                    print(f'subject: {subj} not found')
-                    continue
-                data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
-                mpii_dbs[1].extend(data)
-            
+            mpii_dbs[1].extend(validationset)
+            mpii_dbs[2].extend(testset)
+#
+        ##loading the mpii validation set
+        #if args.validation:
+        #    cams_test = load_cams_datatest_mpii(dataset_root_dir, subset_type[1])
+        #    
+        #    for subj in subj_name_val:
+        #        if not osp.isdir(osp.join(dataset_root_dir, subset_type[1],subj)):
+        #            print(f'subject: {subj} not found')
+        #            continue
+        #        data = load_db_test_mpii(dataset_root_dir, subj, cams_test, images_test_dir, rootIdx=0)
+        #        mpii_dbs[1].extend(data)
+        #    
         #generate the traing set
         if args.train:
             with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
                 pickle.dump(mpii_dbs[0], f)
         #generate the validation set
         if args.validation:
-            with open(os.path.join(dataset_root_dir, f'{args.dataset}_test.pkl'), 'wb') as f:
+            with open(os.path.join(dataset_root_dir, f'{args.dataset}_val.pkl'), 'wb') as f:
                 pickle.dump(mpii_dbs[1], f)
+        #generate the test set
+        if args.test:
+            with open(os.path.join(dataset_root_dir, f'{args.dataset}_test.pkl'), 'wb') as f:
+                pickle.dump(mpii_dbs[2], f)
         exit()
     
     train_dirs = []

@@ -164,6 +164,44 @@
             ]
         },
         {
+            "name": "Python Debugger: Inference 1 data augmentation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--test_set",
+                "humansc3d",
+                "--train_set",
+                "humansc3d",
+                "--checkpoints",
+                "best",
+                "--mask-type",
+                "locally_connected",
+                "--channels",
+                "16",
+                "--epoch",
+                "100", 
+                "--regularization",
+                "0",
+                "--dropout",
+                "0.3", 
+                "--learning_rate", 
+                "0.001", 
+                "--layers", 
+                "3", 
+                "--knn", 
+                "1",
+                "--batch_size", 
+                "512",
+                "--test-indices",
+                "1",
+                "--flip-data",
+                "--rotation-data",
+                "--translate_data"
+            ]
+        },
+        {
             "name": "Python Debugger: Inference test 0",
             "type": "debugpy",
             "request": "launch",
@@ -243,6 +281,20 @@
             "console": "integratedTerminal",
             "args": [
                 "-d=humansc3d",
+                "-t",
+                "-v",
+                "--test"
+
+            ]
+        },
+        {
+            "name": "Python Debugger: gen pkl for MPII",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "-d=mpii",
                 "-t",
                 "-v",
                 "--test"

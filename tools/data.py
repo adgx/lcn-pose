@@ -22,8 +22,6 @@ def flip_data(data):
     flipped_data[:, left_joints + right_joints] = flipped_data[:, right_joints + left_joints]
     flipped_data = flipped_data.reshape(data.shape)
 
-    #result = np.concatenate((data, flipped_data), axis=0)
-
     return flipped_data
 
 def translation_data(data, translation_factor=0.5):
@@ -195,7 +193,7 @@ def get_subset(gt_dataset, subset_size=1000, mode="camera"):
 
 
 
-def untranslation_data(data, translation_factor=2):
+def untranslation_data(data, translation_factor=0.5):
     """
     Average original data and translated data
         data: [2N, 17*k] or [2N, 17, k]
@@ -266,7 +264,6 @@ def undo(data, op_ord, number_actions=2, angle = 180, translation=0.5):
     Return
         result: [N, 17*3]
     """
-    # Untranslation
     data = data.copy().reshape(number_actions+1, -1, 17, 3)
     
     if 'f' in op_ord:
@@ -308,11 +305,9 @@ def rotate_data(data, angle = 180):
             jointsPoint = jointsPoint @ Rz.T[:2, :2]
 
         jointsPoint[:, :2] += pivot
-
         rotated_data[idx] = jointsPoint
 
     rotated_data = rotated_data.reshape(data.shape)
-    #result = np.concatenate((data, rotated_data), axis=0)
     
     return rotated_data 
 
