@@ -54,10 +54,12 @@ def get_exponential_matrix():
                 if dist[i, j] > dist[i, k] + dist[k, j]:
                     dist[i, j] = dist[i, k] + dist[k, j]
 
+    print("Distances matrix:")
     print(dist)
 
-    exp_mat = np.exp(1/2**(dist)) 
-
+    #exp_mat = np.exp(1/(2**(dist)))
+    exp_mat = 1 / (2 ** dist)
+    print("exp_mat:")
     print(exp_mat)
 
     #Convert to float32
