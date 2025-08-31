@@ -36,12 +36,21 @@ def translation_data(data, translation_factor=0.5):
     The data is reshaped to ensure it has the correct dimensions.
     """
     data_copied = data.copy().reshape((len(data), 17, -1))
-    for data_item in data_copied:
-        for i in range(len(data_item)):
-            data_item[i, 0] += translation_factor
-            data_item[i, 1] += translation_factor
-            if data_copied.shape[2] == 3:
-                data_item[i, 2] += translation_factor
+    
+    if isinstance(translation_factor, np.ndarray):
+        for idx, data_item in enumerate(data_copied):
+            for i in range(len(data_item)):
+                data_item[i, 0] += translation_factor[idx]
+                #data_item[i, 1] += translation_factor
+                if data_copied.shape[2] == 3:
+                    data_item[i, 2] += translation_factor[idx]
+    else:
+        for data_item in data_copied:
+            for i in range(len(data_item)):
+                data_item[i, 0] += translation_factor
+                #data_item[i, 1] += translation_factor
+                if data_copied.shape[2] == 3:
+                    data_item[i, 2] += translation_factor
     return data_copied.reshape(data.shape)
 
 def get_subset_by_camera(gt_dataset, subset_size=1000):
@@ -284,28 +293,52 @@ def rotate_data(data, angle = 180):
     #rotation angle in radians
     theta = np.radians(angle)
     #rotation matrix for z-axis
-    Rz = np.array([
-        [np.cos(theta), -np.sin(theta), 0],
-        [np.sin(theta),  np.cos(theta), 0],
-        [0,              0,             1]
-    ])
-
-    rotated_data = data.copy().reshape((len(data), 17, -1))
+    ##Rz = np.array([
+    ##    [np.cos(theta), -np.sin(theta), 0],
+    ##    [np.sin(theta),  np.cos(theta), 0],
+    ##    [0,              0,             1]
+    ##])
     
-    #rotation
-    for idx, jointsPoint in enumerate(rotated_data):
-        pivot = jointsPoint[0,:2].copy()
-        jointsPoint[:, :2] -= pivot
-        
-        #case [x, y, confidence], [x, y, z]
-        if rotated_data.shape[2] == 3:
-            jointsPoint =  jointsPoint @ Rz.T
-        #case [x, y]
-        else:
-            jointsPoint = jointsPoint @ Rz.T[:2, :2]
+    rotated_data = data.copy().reshape((len(data), 17, -1))
 
-        jointsPoint[:, :2] += pivot
-        rotated_data[idx] = jointsPoint
+    if isinstance(angle, np.ndarray):
+        #rotation
+        for idx, jointsPoint in enumerate(rotated_data):
+
+            Ry = np.array([
+            [np.cos(theta[idx]),  0, np.sin(theta[idx])],
+            [0,              1, 0],
+            [-np.sin(theta[idx]), 0, np.cos(theta[idx])]
+            ])
+
+            pivot = jointsPoint[0,:3].copy()
+            jointsPoint[:, :3] -= pivot
+
+            #case [x, y, confidence], [x, y, z]
+            if rotated_data.shape[2] == 3:
+                jointsPoint[:, :3] =  jointsPoint[:, :3] @ Ry.T
+            else:
+                raise ValueError("Y-axis rotation requires at least 3D coordinates (x,y,z)")
+            jointsPoint[:, :3] += pivot
+            rotated_data[idx] = jointsPoint
+    else:
+        Ry = np.array([
+        [np.cos(theta),  0, np.sin(theta)],
+        [0,              1, 0],
+        [-np.sin(theta), 0, np.cos(theta)]
+        ])
+        #rotation
+        for idx, jointsPoint in enumerate(rotated_data):
+
+            pivot = jointsPoint[0,:3].copy()
+            jointsPoint[:, :3] -= pivot
+
+            #case [x, y, confidence], [x, y, z]
+            if rotated_data.shape[2] == 3:
+                jointsPoint[:, :3] =  jointsPoint[:, :3] @ Ry.T
+
+            jointsPoint[:, :3] += pivot
+            rotated_data[idx] = jointsPoint
 
     rotated_data = rotated_data.reshape(data.shape)
     

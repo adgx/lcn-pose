@@ -8,7 +8,7 @@ import numpy as np
 
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-DBG = 1
+DBG = 0
 
 def parse_args():
     parser = argparse.ArgumentParser(description='train')
@@ -31,7 +31,8 @@ def parse_args():
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
     parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
-    parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation data augmentation")
+    parser.add_argument("--translation_factor", type=float, default=200.0, help="Factor for translation in millimeters data augmentation")
+    parser.add_argument("--rotation_factor", type=float, default=60, help="Factor for rotation in degrees data augmentation")
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
     parser.add_argument('--train_set', type=str, default=None, help='Filename of the dataset', choices=["h36m", "humansc3d", "mpii"],required=True)
@@ -54,16 +55,6 @@ def main():
     gt_trainset = datareader.real_read(args.train_set, "train")
     gt_valset = datareader.real_read(args.validation_set, "val")
 
-    #debug stuff
-    if DBG:
-        joint_3d_camera = gt_trainset[0]['joint_3d_camera']
-        cam = gt_trainset[0]['camera_param']
-        R = np.array(cam['R'])
-        T = np.array(cam['T'])
-        joint_3d_w = np.matmul(joint_3d_camera, R.T) + T.T
-
-
-
     mode = ""
     if args.train_set == "h36m":
         mode = "action_camera_subject"
@@ -77,28 +68,28 @@ def main():
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
         gt_valset = data.get_subset(gt_valset, subset_size=args.subset, mode="camera")
 
-    train_data, val_data, train_labels, val_labels = None, None, None, None
-    train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
-    train_labels, val_labels = datareader.read_3d()
-
-    dataset_copy = train_data.copy()
-    labelset_copy = train_labels.copy()
+        dataset_copy = gt_trainset.copy()
 
     if args.flip_data:
-        train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
-        train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
+        gt_trainset = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
 
     if args.translate_data:
         translation_factor = args.translation_factor
         if translation_factor < 0:
             raise ValueError("Translation factor must be non-negative")
-        translation = np.random.uniform(-translation_factor, translation_factor)
-        train_data = np.concatenate((train_data,  data.translation_data(dataset_copy, translation)), axis=0)
-        train_labels = np.concatenate((train_labels, data.translation_data(labelset_copy, translation)), axis=0)
+        translation = np.random.uniform(-translation_factor, translation_factor, dataset_copy.shape[0])
+        gt_trainset = np.concatenate((train_data,  data.translation_data(dataset_copy, translation)), axis=0)
 
     if args.rotation_data:
-        train_data = np.concatenate((train_data, data.rotate_data(dataset_copy)), axis=0)
-        train_labels = np.concatenate((train_labels,  data.rotate_data(labelset_copy) ), axis=0)
+        rotation_factor = args.rotation_factor
+        if rotation_factor < 0:
+            raise ValueError("Rotation factor must be non-negative")
+        rotations = np.random.uniform(-rotation_factor, rotation_factor, dataset_copy.shape[0])
+        gt_trainset = np.concatenate((train_data, data.rotate_data(dataset_copy, rotations)), axis=0)
+
+    train_data, val_data, train_labels, val_labels = None, None, None, None
+    train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
+    train_labels, val_labels = datareader.read_3d()
 
     # params
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)
