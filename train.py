@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument('--flip-data', help='train time flip', action='store_true', default=False)
     parser.add_argument('--rotation-data', help='train time rotation', action='store_true', default=False)
     parser.add_argument('--translate_data', help='train time translate', action='store_true', default=False)
-    parser.add_argument("--translation_factor", type=float, default=200.0, help="Factor for translation in millimeters data augmentation")
+    parser.add_argument("--translation_factor", type=float, default=0.1, help="Factor for translation in millimeters data augmentation")
     parser.add_argument("--rotation_factor", type=float, default=60, help="Factor for rotation in degrees data augmentation")
     parser.add_argument('--resume_from', type=str, default=None, help='Checkpoint path to resume training from')
     parser.add_argument('--output_file', type=str, default=None, help='Output file to save the model')
