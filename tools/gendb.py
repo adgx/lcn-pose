@@ -51,7 +51,7 @@ def load_db(dataset_root_dir, dset, vid, cams, rootIdx=0):
     joints_3d_cam = np.reshape(np.transpose(anno['Y3d_mono']), (numimgs, -1, 3))#joints position for the whole video
     meta = infer_meta_from_name(dset) #obtain info about subset from name dir
     cam = _retrieve_camera(cams, meta['subject'], meta['camera']) #obtain info about camera
-
+    
     dataset = []
     for i in range(numimgs):
         image = 's_{:02}_act_{:02}_subact_{:02}_ca_{:02}_{:06}.jpg'.format(

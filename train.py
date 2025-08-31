@@ -8,6 +8,7 @@ import numpy as np
 
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+DBG = 1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='train')
@@ -52,6 +53,16 @@ def main():
     datareader = data.DataReader()
     gt_trainset = datareader.real_read(args.train_set, "train")
     gt_valset = datareader.real_read(args.validation_set, "val")
+
+    #debug stuff
+    if DBG:
+        joint_3d_camera = gt_trainset[0]['joint_3d_camera']
+        cam = gt_trainset[0]['camera_param']
+        R = np.array(cam['R'])
+        T = np.array(cam['T'])
+        joint_3d_w = np.matmul(joint_3d_camera, R.T) + T.T
+
+
 
     mode = ""
     if args.train_set == "h36m":
