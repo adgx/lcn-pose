@@ -571,6 +571,7 @@ class cgcnn(base_model):
             
         if "exponential" in self.mask_type:
             self.mask = tf.constant(get_exponential_matrix())
+            
     def mask_weights(self, weights):
         input_size, output_size = weights.get_shape() #[34, 1088]
         input_size, output_size = int(input_size), int(output_size)
