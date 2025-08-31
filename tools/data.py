@@ -43,7 +43,7 @@ def translation_data(data, translation_factor=0.5):
                 data_item[i, 0] += translation_factor[idx]
                 #data_item[i, 1] += translation_factor
                 if data_copied.shape[2] == 3:
-                    data_item[i, 2] += translation_factor[i]
+                    data_item[i, 2] += translation_factor[idx]
     else:
         for data_item in data_copied:
             for i in range(len(data_item)):
