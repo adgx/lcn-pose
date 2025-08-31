@@ -80,7 +80,7 @@ def main():
         train_labels = np.concatenate((train_labels,  train_labels_flipped), axis=0)
         train_labels_flipped = train_labels_flipped.reshape(-1, 17, 3)
         train_data_flipped = train_labels_flipped[:, :, 2]
-        train_data = np.concatenate((train_data_flipped.reshape(-1, 34)), axis=0)
+        train_data = np.concatenate((train_data, train_data_flipped.reshape(-1, 34)), axis=0)
 
     if args.translate_data:
         translation_factor = args.translation_factor
@@ -91,7 +91,7 @@ def main():
         train_labels = np.concatenate((train_labels, train_labels_translated), axis=0)
         train_labels_translated = train_labels_translated.reshape(-1, 17, 3)
         train_data_translated = train_labels_translated[:, :, 2]
-        train_data = np.concatenate((train_data_translated.reshape(-1, 34)), axis=0)
+        train_data = np.concatenate((train_data, train_data_translated.reshape(-1, 34)), axis=0)
 
     if args.rotation_data:
         rotation_factor = args.rotation_factor
@@ -102,7 +102,7 @@ def main():
         train_labels = np.concatenate((train_labels, train_labels_rotated), axis=0)
         train_labels_rotated = train_labels_rotated.reshape(-1, 17, 3)
         train_data_rotated = train_labels_rotated[:, :, 2]
-        train_data = np.concatenate((train_data_rotated.reshape(-1, 34)), axis=0)
+        train_data = np.concatenate((train_data, train_data_rotated.reshape(-1, 34)), axis=0)
 
 
     # params
