@@ -68,7 +68,7 @@ def main():
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
         gt_valset = data.get_subset(gt_valset, subset_size=args.subset, mode="camera")
 
-        dataset_copy = gt_trainset.copy()
+    dataset_copy = gt_trainset.copy()
 
     if args.flip_data:
         gt_trainset = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)

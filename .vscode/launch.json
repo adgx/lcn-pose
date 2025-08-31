@@ -73,7 +73,10 @@
                 "--batch_size", 
                 "256",
                 "--test-indices",
-                "12"
+                "12",
+                "--flip-data",
+                "--rotation-data",
+                "--translate_data"
             ]
         },
         {
