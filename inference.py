@@ -84,6 +84,7 @@ def main():
         num_augmentations += 1
         op_ord['r'] = num_augmentations
 
+    translation = None
     if args.translate_data:
         translation_factor = args.translation_factor
         if translation_factor < 0:
