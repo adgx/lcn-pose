@@ -165,15 +165,16 @@ class base_model(object):
             shutil.rmtree(self._get_path("checkpoints"), ignore_errors=True)
             os.makedirs(self._get_path("checkpoints"))
         else:
-            #Get the parent directory of the checkpoint
-            #In this way is condsider always model-5.index (this make sense?)
-            match = re.search(r'model-(\d+)', starting_checkpoint + "/model-5.index")
-            if starting_checkpoint and tf.io.gfile.exists(starting_checkpoint + "/model-5.index"):
+            #Search a file in the directory
+            for file in os.listdir(starting_checkpoint):
+                #Search for index extension file
+                match = re.search(r'model-(\d+)', file)
                 if match:
                     starting_step = int(match.group(1))
-                    print(f"Resuming from step {starting_step}")
-                    print(f"Restoring from checkpoint: {starting_checkpoint}")
-                    self.op_saver.restore(sess, tf.train.latest_checkpoint(starting_checkpoint))
+                    if  tf.io.gfile.exists(starting_checkpoint + "/model-{}.index".format(starting_step)):
+                        print(f"Resuming from step {starting_step}")
+                        print(f"Restoring from checkpoint: {starting_checkpoint}")
+                        self.op_saver.restore(sess, tf.train.latest_checkpoint(starting_checkpoint))
 
         #compute a step
         sess.run(self.op_init)
