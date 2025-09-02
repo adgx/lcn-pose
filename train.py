@@ -8,7 +8,7 @@ import numpy as np
 
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-
+DBG = 1
 def parse_args():
     parser = argparse.ArgumentParser(description='train')
 
@@ -54,6 +54,13 @@ def main():
     gt_trainset = datareader.real_read(args.train_set, "train")
     gt_valset = datareader.real_read(args.validation_set, "val")
 
+    if DBG:
+        if args.rotation_data:
+            gt_rotated = datareader.real_read(args.train_set, "train_rotated")
+            gt_trainset.append(gt_rotated)
+        if args.translate_data:
+            gt_translated = datareader.real_read(args.train_set, "train_translation")
+            gt_trainset.append(gt_translated)
     mode = ""
     if args.train_set == "h36m":
         mode = "action_camera_subject"
@@ -61,7 +68,7 @@ def main():
         mode = "action_camera_subject"
     elif args.train_set == "mpii":
         mode = "camera"
-
+    
     #Make a subset
     if args.subset is not None:
         gt_trainset = data.get_subset(gt_trainset, subset_size=args.subset, mode="camera")
@@ -71,28 +78,29 @@ def main():
     train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
     train_labels, val_labels = datareader.read_3d()
 
-    dataset_copy = train_data.copy()
-    labelset_copy = train_labels.copy()
+    if DBG == 0:
+        dataset_copy = train_data.copy()
+        labelset_copy = train_labels.copy()
 
-    if args.flip_data:
-        train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
-        train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
+        if args.flip_data:
+            train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
+            train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
 
-    if args.translate_data:
-        translation_factor = args.translation_factor
-        if translation_factor < 0:
-            raise ValueError("Translation factor must be non-negative")
-        translation = np.random.uniform(-translation_factor, translation_factor)
-        train_data = np.concatenate((train_data,  data.translation_data(dataset_copy, translation)), axis=0)
-        train_labels = np.concatenate((train_labels, data.translation_data(labelset_copy, translation)), axis=0)
+        if args.translate_data:
+            translation_factor = args.translation_factor
+            if translation_factor < 0:
+                raise ValueError("Translation factor must be non-negative")
+            translation = np.random.uniform(-translation_factor, translation_factor)
+            train_data = np.concatenate((train_data,  data.translation_data(dataset_copy, translation)), axis=0)
+            train_labels = np.concatenate((train_labels, data.translation_data(labelset_copy, translation)), axis=0)
 
-    if args.rotation_data:
-        rotation_factor = args.rotation_factor
-        if rotation_factor < 0:
-            raise ValueError("Rotation factor must be non-negative")
-        rotation = np.random.uniform(-rotation_factor, rotation_factor)
-        train_data = np.concatenate((train_data, data.rotate_data(dataset_copy, rotation)), axis=0)
-        train_labels = np.concatenate((train_labels,  data.rotate_data(labelset_copy) ), axis=0)
+        if args.rotation_data:
+            rotation_factor = args.rotation_factor
+            if rotation_factor < 0:
+                raise ValueError("Rotation factor must be non-negative")
+            rotation = np.random.uniform(-rotation_factor, rotation_factor)
+            train_data = np.concatenate((train_data, data.rotate_data(dataset_copy, rotation)), axis=0)
+            train_labels = np.concatenate((train_labels,  data.rotate_data(labelset_copy) ), axis=0)
 
     # params
     params = params_help.get_params(is_training=True, gt_dataset=train_labels)
