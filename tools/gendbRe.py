@@ -10,6 +10,7 @@ import re
 import math
 import mat73
 import sys
+from tools import data
 
 from data_preparation import convert_humansc3d_mp4_to_image
 from gen_val_test_set import generate_val_and_test_set
@@ -556,7 +557,7 @@ def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
     
 
 #cams it is a np array
-def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rootIdx=0):
+def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rotation = False, translate = False, rootIdx=0):
     
     videos_joints = os.listdir(os.path.join(dataset_root_dir, joints_dir))
     dataset = []
@@ -570,6 +571,16 @@ def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  roo
         joints_3d_w *= 1e3 #meters to millimeters
         numimgs = joints_3d_w.shape[0]
         
+        if translate:
+            translation_offset = np.array([ 100, -100, 150, -150, 200, -200])
+            val = np.random.choice(translation_offset)
+            joints_3d_w[:, :, :2] += val
+            
+        if rotation:
+            translation_offset = np.array([ 60, -60, 30, -30, 15, -15])
+            val = np.random.choice(translation_offset)
+            joints_3d_w = joints_3d_w[:, :17, :3]
+            joints_3d_w = data.rotate_data()        
 
         for camera_id in cams:
             meta = infer_meta_from_name(dset, video_joint, camera_id)
@@ -610,6 +621,9 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--train", action="store_true", help="Create the pkl for the training set")
     parser.add_argument("-v", "--validation", action="store_true", help="Create the pkl for the validation set")
     parser.add_argument("--test", action="store_true", help="Create the pkl for the test set")
+    parser.add_argument("--augmentation_only", action="store_true", help="Do only the augmentatio")
+    parser.add_argument("--rotation", action="store_true", help="Create the pkl data augmented set")
+    parser.add_argument("--translation", action="store_true", help="Create the pkl data augmented set")
     parser.add_argument("-m", "--image", action="store_true", help="Convert dataset mp4 videos to images")
     parser.add_argument("-g", "--gen", action="store_true", help="Generate validation set from training set")
     parser.add_argument("-d", '--dataset', type=str, default="humansc3d", help='Filename of the dataset', choices=["mpii", "humansc3d"])
@@ -789,24 +803,62 @@ if __name__ == '__main__':
     idx_subset_type = 0 
 
     if dataset_name == 'humansc3d':
+        if not args.augmentation_only:
+            for dataset in train_val_test_datasets:
+                db = []
+                for subj_video in dataset:
+                    base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+                    if np.mod(video_count, 1) == 0:
+                        print('Process {}: {}'.format(video_count, subj_video))
 
-        for dataset in train_val_test_datasets:
-            db = []
-            for subj_video in dataset:
-                base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
-                if np.mod(video_count, 1) == 0:
-                    print('Process {}: {}'.format(video_count, subj_video))
-    
-                if args.image and dataset_name == 'humansc3d':  
-                    convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
-    
-                data = load_db(base_path, subj_video, cams, joints_dir, images_dir)
-                db.extend(data)
-                video_count += 1
-            dbs.append(db)
-            idx_subset_type += 1
-    
-        datasets = {'train': dbs[0], 'val': dbs[1], 'test': dbs[2]}
+                    if args.image and dataset_name == 'humansc3d':  
+                        convert_humansc3d_mp4_to_image(base_path,  videos_dir, images_dir, camera_ids)
+
+                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir)
+                    db.extend(d)
+                    video_count += 1
+                dbs.append(db)
+                idx_subset_type += 1
+
+            datasets = {'train': dbs[0], 'val': dbs[1], 'test': dbs[2]}
+        #Data augmentation
+        if args.rotation or args.translation:
+            print("Data Augmentation")
+            
+            if args.rotation:
+                db = []
+                video_count = 0
+                for subject_video in train_dirs:
+                    base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+
+                    if np.mod(video_count, 1) == 0:
+                        print('Process {}: {}'.format(video_count, subj_video))
+
+                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir, True, False, 0)
+                    db.extend(d)
+                    video_count += 1
+
+                with open(os.path.join(dataset_root_dir,f'{args.dataset}_train_rotated.pkl'), 'wb') as f:
+                    pickle.dump(db,  f)
+
+            if args.translation:
+                db = []
+                video_count = 0
+                for subject_video in train_dirs:
+                    base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+
+                    if np.mod(video_count, 1) == 0:
+                        print('Process {}: {}'.format(video_count, subj_video))
+
+                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir)
+                    db.extend(d)
+                    video_count += 1
+                
+                with open(os.path.join(dataset_root_dir,f'{args.dataset}_train_translation.pkl'), 'wb') as f:
+                    pickle.dump(db, f)
+
+
+
     
         if args.train:
             with open(os.path.join(dataset_root_dir,f'{args.dataset}_train.pkl'), 'wb') as f:
