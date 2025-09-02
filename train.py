@@ -57,10 +57,10 @@ def main():
     if DBG:
         if args.rotation_data:
             gt_rotated = datareader.real_read(args.train_set, "train_rotated")
-            gt_trainset.append(gt_rotated)
+            gt_trainset.extend(gt_rotated)
         if args.translate_data:
             gt_translated = datareader.real_read(args.train_set, "train_translation")
-            gt_trainset.append(gt_translated)
+            gt_trainset.extend(gt_translated)
     mode = ""
     if args.train_set == "h36m":
         mode = "action_camera_subject"
