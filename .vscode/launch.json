@@ -291,6 +291,22 @@
             ]
         },
         {
+            "name": "Python Debugger: gen pkl for humansc3d augmentated",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "-d=humansc3d",
+                "-t",
+                "-v",
+                "--test",
+                "--augmentation_only",
+                "--rotation",
+                "--translation"
+            ]
+        },
+        {
             "name": "Python Debugger: gen pkl for MPII",
             "type": "debugpy",
             "request": "launch",

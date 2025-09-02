@@ -10,7 +10,7 @@ import re
 import math
 import mat73
 import sys
-from tools import data
+import data
 
 from data_preparation import convert_humansc3d_mp4_to_image
 from gen_val_test_set import generate_val_and_test_set
@@ -557,9 +557,11 @@ def load_db_test_mpii(dataset_root_dir, dset, cams, images_dir, rootIdx=0):
     
 
 #cams it is a np array
-def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rotation = False, translate = False, rootIdx=0):
+def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rotation = False, translate = False, val_list = None, rootIdx=0):
     
     videos_joints = os.listdir(os.path.join(dataset_root_dir, joints_dir))
+    if val_list is not None:
+        val = val_list.pop(0)
     dataset = []
     
     for video_joint in videos_joints:
@@ -572,15 +574,11 @@ def load_db_humansc3d(dataset_root_dir, dset, cams, joints_dir, images_dir,  rot
         numimgs = joints_3d_w.shape[0]
         
         if translate:
-            translation_offset = np.array([ 100, -100, 150, -150, 200, -200])
-            val = np.random.choice(translation_offset)
             joints_3d_w[:, :, :2] += val
             
         if rotation:
-            translation_offset = np.array([ 60, -60, 30, -30, 15, -15])
-            val = np.random.choice(translation_offset)
             joints_3d_w = joints_3d_w[:, :17, :3]
-            joints_3d_w = data.rotate_data()        
+            joints_3d_w = data.rotate_data(joints_3d_w, val)        
 
         for camera_id in cams:
             meta = infer_meta_from_name(dset, video_joint, camera_id)
@@ -828,13 +826,14 @@ if __name__ == '__main__':
             if args.rotation:
                 db = []
                 video_count = 0
-                for subject_video in train_dirs:
-                    base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+                rotation_offset = [ 60, -60, 30, -30]
+                for subj_video in train_dirs:
+                    base_path = os.path.join(dataset_root_dir, subset_type[0], subj_video)
 
                     if np.mod(video_count, 1) == 0:
                         print('Process {}: {}'.format(video_count, subj_video))
 
-                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir, True, False, 0)
+                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir, True, False, rotation_offset)
                     db.extend(d)
                     video_count += 1
 
@@ -844,18 +843,22 @@ if __name__ == '__main__':
             if args.translation:
                 db = []
                 video_count = 0
-                for subject_video in train_dirs:
-                    base_path = os.path.join(dataset_root_dir, subset_type[idx_subset_type], subj_video)
+                translation_offset = [ 100, -100, 150, -150]
+                for subj_video in train_dirs:
+                    base_path = os.path.join(dataset_root_dir, subset_type[0], subj_video)
 
                     if np.mod(video_count, 1) == 0:
                         print('Process {}: {}'.format(video_count, subj_video))
 
-                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir)
+                    d = load_db_humansc3d(base_path, subj_video, cams, joints_dir, images_dir, False, True, translation_offset)
                     db.extend(d)
                     video_count += 1
                 
                 with open(os.path.join(dataset_root_dir,f'{args.dataset}_train_translation.pkl'), 'wb') as f:
                     pickle.dump(db, f)
+            
+            if args.augmentation_only:
+                exit(0)
 
 
 
