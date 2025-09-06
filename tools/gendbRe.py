@@ -826,7 +826,7 @@ if __name__ == '__main__':
             if args.rotation:
                 db = []
                 video_count = 0
-                rotation_offset = [ 60, -60, 30, -30]
+                rotation_offset = [ 10, -10, 5, -5]
                 for subj_video in train_dirs:
                     base_path = os.path.join(dataset_root_dir, subset_type[0], subj_video)
 

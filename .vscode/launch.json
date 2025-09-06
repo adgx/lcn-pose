@@ -303,7 +303,6 @@
                 "--test",
                 "--augmentation_only",
                 "--rotation",
-                "--translation"
             ]
         },
         {

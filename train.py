@@ -78,14 +78,15 @@ def main():
     train_data, val_data = datareader.read_2d(gt_trainset, gt_valset)
     train_labels, val_labels = datareader.read_3d()
 
+    
+    dataset_copy = train_data.copy()
+    labelset_copy = train_labels.copy()
+
+    if args.flip_data:
+        train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
+        train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
+    
     if DBG == 0:
-        dataset_copy = train_data.copy()
-        labelset_copy = train_labels.copy()
-
-        if args.flip_data:
-            train_data = np.concatenate((train_data,  data.flip_data(dataset_copy)), axis=0)
-            train_labels = np.concatenate((train_labels, data.flip_data(labelset_copy)), axis=0)
-
         if args.translate_data:
             translation_factor = args.translation_factor
             if translation_factor < 0:
