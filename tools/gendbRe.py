@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import random
 import scipy.io as sio
 import json 
 import numpy as np
@@ -659,37 +660,84 @@ if __name__ == '__main__':
         dataset_mpii_path = os.path.join(datasets_dir, 'mpi_inf_3dhp', 'mpii_train.pkl')
         if not os.path.exists(dataset_mpii_path):
             print(f"{dataset_mpii_path}: not exist")
+            exit()
 
+        dataset_composed = []
         #open h3.6m
         with open(dataset_h36m_path, 'rb') as h36m_pkl:
             dataset_h36m = pickle.load(h36m_pkl)
 
+        #the action on dataSet go from 2 to 16
+        #define the dict for collect the action by the action index 
+        act_h36m = {}
+        for item in dataset_h36m:
+            if (item['subject'], item['action']) not in act_h36m:
+                act_h36m[(item['subject'], item['action'])] = []
+            if item['videoid'] not in act_h36m[(item['subject'], item['action'])]:
+                act_h36m[(item['subject'], item['action'])].append(item['videoid'])
+
+        # take the 33% of the dataset h36m based on action and videoid
+        for key in act_h36m:
+            num_vid = math.floor(len(act_h36m[key])*0.33) + 1
+            random.shuffle(act_h36m[key])
+            idx_vids = act_h36m[key][:num_vid]
+            dataset_composed.extend([sample for sample in dataset_h36m if sample['videoid'] in idx_vids and sample['subject'] == key[0]]) 
         #open humansc3d
         with open(dataset_humansc3d_path, 'rb') as humansc3d_pkl:
             dataset_humansc3d = pickle.load(humansc3d_pkl)
+         
+        #define the dict for collect the action by the action index 
+        act_humansc3d = {}
+        for item in dataset_humansc3d:
+            if (item['subject'], item['action']) not in act_humansc3d:
+                act_humansc3d[(item['subject'], item['action'])] = []
+            if item['videoid'] not in act_humansc3d[(item['subject'], item['action'])]:
+                act_humansc3d[(item['subject'], item['action'])].append(item['videoid'])
+
+        # take the 33% of the dataset humansc3d based on action and videoid
+        for key in act_humansc3d:
+            num_vid = math.floor(len(act_humansc3d[key])*0.33) + 1
+            random.shuffle(act_humansc3d[key])
+            idx_vids = act_humansc3d[key][:num_vid]
+            dataset_composed.extend([sample for sample in dataset_humansc3d if sample['videoid'] in idx_vids and sample['subject'] == key[0]]) 
 
         #open mpii
         with open(dataset_mpii_path, 'rb') as mpii_pkl:
             dataset_mpii = pickle.load(mpii_pkl)
-        #determinate the min number of samples
-        num_mpii_samples = len(dataset_mpii)
-        num_humansc3d_samples = len(dataset_humansc3d)
-        num_h36m_samples = len(dataset_h36m)
-        min_samples = min([num_h36m_samples, num_humansc3d_samples, num_mpii_samples])
+        #subdivide by subject and camera
+        subj_mpii = {}
+        for item in dataset_mpii:
+            if (item['cameraid'], item['subject']) not in subj_mpii:
+                subj_mpii[(item['cameraid'], item['subject'])] = []
+            subj_mpii[(item['cameraid'], item['subject'])].append(item)
+
         
-        percentage = 0.33
+        # take the 33% of the dataset mpii based on subject and camera
+        for key in subj_mpii:
+            num_sample = math.floor(len(subj_mpii[key])*0.33) + 1
+            random.shuffle(subj_mpii[key])
+            samples = subj_mpii[key][:num_sample]
+            dataset_composed.extend(samples)
+        #determinate the min number of samples
+        
+        #num_mpii_samples = len(dataset_mpii)
+        #num_humansc3d_samples = len(dataset_humansc3d)
+        #num_h36m_samples = len(dataset_h36m)
+        #min_samples = min([num_h36m_samples, num_humansc3d_samples, num_mpii_samples])
+        
+        #percentage = 0.33
 
-        num_sample = math.ceil(percentage*min_samples)
+        #num_sample = math.ceil(percentage*min_samples)
 
-        dataset_composed = []
-        dataset_composed.extend(dataset_h36m[:num_sample])
-        dataset_composed.extend(dataset_humansc3d[:num_sample])
-        dataset_composed.extend(dataset_mpii[:num_sample])
+        #dataset_composed = []
+        #dataset_composed.extend(dataset_h36m[:num_sample])
+        #dataset_composed.extend(dataset_humansc3d[:num_sample])
+        #dataset_composed.extend(dataset_mpii[:num_sample])
 
         dataset_composed_path = os.path.join(datasets_dir, 'dataset_composed')
         if not os.path.exists(dataset_composed_path):
             os.makedirs(dataset_composed_path)
-        with open(os.path.join(dataset_composed_path, f'db_composed.pkl'), 'wb') as f:
+        with open(os.path.join(dataset_composed_path, f'composed_train.pkl'), 'wb') as f:
                 pickle.dump(dataset_composed, f)
 
         exit()
