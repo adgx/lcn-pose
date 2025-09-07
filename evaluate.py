@@ -147,8 +147,9 @@ def eval(commd, test_indices, pkl=""):
         f = open(log_path, 'w')
         print(table, file=f)
         f.close()
-        print("Printing PCK Table")
-        print(table)
+        if 'action' in commd:
+            print("Printing PCK Table")
+            print(table)
 
     # print summary table to the screen
     summary_table = prettytable.PrettyTable()

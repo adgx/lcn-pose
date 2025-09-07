@@ -38,7 +38,7 @@ This repository contains all the code required to train, evaluate, and visualize
 ### Project Details
 
 - **Course**: Machine Learning for Vision and Multimedia
-- **Date**: July 17, 2025
+- **Date**: Semptember 16, 2025
 
 ---
 
@@ -131,12 +131,11 @@ Train models using the `train.py` script with various configuration options.
 ```bash
 python train.py \
   --train_set h36m \
-  --test_set h36m \
+  --validation_set h36m \
   --test-indices 3 \
   --mask-type locally_connected \
   --knn 3 \
   --layers 3 \
-  --in-F 2
 ```
 
 ### Common Training Flags
@@ -148,15 +147,12 @@ python train.py \
 | `--translate_data` | Enable translation augmentation | False |
 | `--epochs` | Number of training epochs | 200 |
 | `--resume_from` | Resume training from existing checkpoint | None |
-| `--output_file` | Training log output file | None |
 
 ### Advanced Configuration
 
 For hyperparameter tuning and ablation studies:
 
-- `--mask-type`: Choose from `locally_connected`, `fully_connected`, or `dilated`
-- `--init-type`: Initialization strategy - `same`, `ones`, or `random` (default)
-- `--graph`: Graph topology index (integer)
+- `--mask-type`: `locally_connected` || `exponential`
 
 ### Example Training Commands
 
@@ -169,7 +165,6 @@ python train.py \
   --mask-type locally_connected \
   --knn 3 \
   --layers 3 \
-  --in-F 2 \
   --flip-data \
   --rotation-data \
   --translate_data \
@@ -230,7 +225,6 @@ python inference.py \
   --mask-type locally_connected \
   --knn 3 \
   --layers 3 \
-  --in-F 2 \
   --checkpoints best            # "best" or "final"
 ```
 
@@ -248,7 +242,7 @@ python inference.py \
   --layers 3 \
   --in-F 2 \
   --checkpoints best \
-  --augmentation f r t          # f=flip, r=rotation, t=translate
+  
 ```
 
 ---
@@ -268,9 +262,6 @@ jupyter notebook visualise_human_prediction.ipynb
 The notebook provides:
 
 - 3D pose visualization
-- Comparison between ground truth and predictions
-- Error analysis per joint
-- Interactive 3D plotting capabilities
 
 ---
 
@@ -293,8 +284,9 @@ lcn-pose/
 │   └── humansc3d_train.pkl
 │   └── mpii_test.pkl
 │   └── mpii_train.pkl
+│   └── mpii_val.pkl
 ├── kaggle/
-│   └── vision-new-humansc3d.ipynb  # Kaggle notebook for HumanSC3D dataset
+│   └──   # Kaggle notebooks for different datasets
 ├── network/                        
 │   └── models_att.py               # Model architecture definitions
 ├── visualization/
@@ -328,7 +320,11 @@ The best performing models are available for download. These models have been tr
 
 All experimental results and hyperparameter configurations are documented and can be accessed through the provided links above.
 
-**Excel Link**: <a href="https://docs.google.com/spreadsheets/d/1YvOBqqgsxj42iTGI5lbwB29Rlkeug1TNO-nnIUZDJOY/edit?usp=share_link"> Link </a>
+__Excel Link__: <a href="https://docs.google.com/spreadsheets/d/1YvOBqqgsxj42iTGI5lbwB29Rlkeug1TNO-nnIUZDJOY/edit?usp=share_link"> Link </a>
+
+### Related Documents
+
+All the folders <a href="https://drive.google.com/drive/folders/1MIr9K_3bz23MQ93Qshopmer1dV2PPbw_?usp=share_link"> Link
 
 ---
 
@@ -347,11 +343,21 @@ We thank them for making their research publicly available and contributing to t
 
 ### References
 
-- Original paper: [Paper Title] (ICCV 2019)
+- Original paper: 
+    - Optimizing Network Structure for 3D Human Pose Estimation 
+    - Locally Connected Network for Monocular 3D Human Pose Estimation
 - Dataset providers: Human3.6M, HumanSC3D, MPII
 - TensorFlow community for framework support
 
 ---
+
+## Self Assessment
+
+Here it is the self assessment document <a href="https://docs.google.com/document/d/1IhUNYljLrTguJibIMFrB0scXMGIptR3u/edit?usp=sharing&ouid=111408646065516573537&rtpof=true&sd=true">Link<a> <br>
+
+## Link Slides
+
+<a href="https://www.canva.com/design/DAGiwWCsfd8/4b3oL7m07S4F63RH8743-w/edit?utm_content=DAGiwWCsfd8&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton">Canva Link</a>
 
 ## License
 
@@ -373,4 +379,4 @@ If you use this code in your research, please cite:
 ## Known bugs
 
 - A known issue prevents the model from being trained and inferred on different machines when using mismatched TensorFlow versions.
-- Running all the inference part after the training will delete tensorboard from the current test analyzed 
+- Running all the inference part after the training will delete tensorboard from the current test analyzed
