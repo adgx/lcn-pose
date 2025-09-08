@@ -346,7 +346,10 @@ We thank them for making their research publicly available and contributing to t
 - Original paper: 
     - Optimizing Network Structure for 3D Human Pose Estimation 
     - Locally Connected Network for Monocular 3D Human Pose Estimation
-- Dataset providers: Human3.6M, HumanSC3D, MPII
+- Dataset providers:
+    - Human3.6M - Not a public dataset 
+    - HumanSC3D  <a href="https://sc3d.imar.ro/humansc3d"> Link </a> <br>
+    - MPII <a href="https://vcai.mpi-inf.mpg.de/3dhp-dataset/"> Link </a> <br>
 - TensorFlow community for framework support
 
 ---
@@ -379,4 +382,4 @@ If you use this code in your research, please cite:
 ## Known bugs
 
 - A known issue prevents the model from being trained and inferred on different machines when using mismatched TensorFlow versions.
-- Running all the inference part after the training will delete tensorboard from the current test analyzed
+- Running the inference part after the training will delete time series and other informations from the tensorboard of the current test 
