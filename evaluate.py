@@ -7,7 +7,7 @@ import argparse
 import time
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-THRESHOLD = 100  # mm
+THRESHOLD = 50  # mm
 def parse_args():
     parser = argparse.ArgumentParser(description='evaluate')
 

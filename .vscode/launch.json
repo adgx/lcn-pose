@@ -360,5 +360,40 @@
                 "12"
             ]
         },
+        {
+            "name": "Python Debugger: Training custom MPII",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--validation_set",
+                "mpii",
+                "--train_set",
+                "mpii",
+                "--test_set",
+                "mpii",
+                "--mask-type",
+                "locally_connected",
+                "--channels",
+                "8",
+                "--epoch",
+                "150", 
+                "--regularization",
+                "0.01",
+                "--dropout",
+                "0.3", 
+                "--learning_rate", 
+                "0.001", 
+                "--layers", 
+                "3", 
+                "--knn", 
+                "3",
+                "--batch_size", 
+                "256",
+                "--test-indices",
+                "12"
+            ]
+        },
     ]
 }
