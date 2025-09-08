@@ -6,8 +6,8 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-TRAINING_PATH = os.path.join(ROOT_PATH, "data", "hyperparameter" , "training")
-VALIDATION_PATH = os.path.join(ROOT_PATH, "data", "hyperparameter" , "validation")
+TRAINING_PATH = os.path.join(ROOT_PATH, "data", "test14" , "training")
+VALIDATION_PATH = os.path.join(ROOT_PATH, "data", "test14" , "validation")
 
 if __name__ == "__main__":
     
@@ -22,8 +22,6 @@ if __name__ == "__main__":
             raise FileNotFoundError(f"File {file_path} does not exist.")
         return np.genfromtxt(file_path, delimiter=',', skip_header=1)
     
-
-
     #args = parse_args()
     #check if there are the files for the analysis
     total = count_files_in_directory(TRAINING_PATH)
@@ -43,11 +41,11 @@ if __name__ == "__main__":
 
     for idx, plot in enumerate(subplot_titles):
         print(f"Processing dataset: {idx}")
-        
-        loss_csv = os.path.join(TRAINING_PATH, "test" + str(idx+1) + "_summaries.csv")
+
+        loss_csv = os.path.join(TRAINING_PATH, "test" + str(idx + 1) + "_summaries.csv")
         if not os.path.exists(loss_csv):
             raise FileNotFoundError(f"File {loss_csv} does not exist.")
-        val_csv = os.path.join(VALIDATION_PATH, "test" + str(idx+1) + "_summaries.csv")
+        val_csv = os.path.join(VALIDATION_PATH, "test" + str(idx + 1) + "_summaries.csv")
         if not os.path.exists(val_csv):
             raise FileNotFoundError(f"File {val_csv} does not exist.")
         
@@ -73,7 +71,9 @@ if __name__ == "__main__":
         min_loss_diff = np.min(loss_diff) 
         min_loss_diff_epoch = np.argmin(loss_diff)
         min_loss_diff_epoch = loss_json[min_loss_diff_epoch, 1]
+        print(f"LATEST value validation: {(val_loss[:, 2][-1])} - LATEST value training: {loss_json[:, 2][-1]} = {loss_diff[-1]} at epoch {loss_json[-1, 1]}")
         print(f"Minimum loss difference: {min_loss_diff} at epoch {min_loss_diff_epoch}")
+        print("--------------------------------------------------")
 
     #named axis
     fig.update_xaxes(title_text="Epoch")
